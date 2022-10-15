@@ -1,0 +1,195 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>repository.local package &#8212; PyFrame 0.0.1 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="repository package" href="repository.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="repository-local-package">
+<h1>repository.local package<a class="headerlink" href="#repository-local-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-repository.local">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-repository.local" title="Permalink to this headline">¶</a></h2>
+<p>…</p>
+<dl class="class">
+<dt id="repository.local.File">
+<em class="property">class </em><code class="descclassname">repository.local.</code><code class="descname">File</code><span class="sig-paren">(</span><em>uuid</em>, <em>rep</em>, <em>index=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/repository/local/file.html#File"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#repository.local.File" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">repository.file.File</span></code></p>
+<p>File within a local repository.</p>
+<p>For images the following properties are read out from EXIF tag if available:
+width, height, rotation, creation_date, description, rating, tags.</p>
+<dl class="docutils">
+<dt>Properties:</dt>
+<dd><p class="first">uuid (str): Relative path to the root directory of the local repository.
+rep (repository.Repository): Repository containing the file.
+type (int): Type of the file. Determined based on the extension of the</p>
+<blockquote>
+<div>file. The following values may be returned:
+TYPE_UNKNOWN: Unknown file type (default)
+TYPE_IMAGE: Image file
+TYPE_VIDEO: Video file</div></blockquote>
+<p>width (int): Width of the file content in pixels. Default is 0.
+height (int): Height of the file content in pixels. Default is 0.
+rotation (int): Clock-wise rotation of the content in degrees. The only</p>
+<blockquote>
+<div>values allowed are 0, 90, 180 and 270. Default is 0.</div></blockquote>
+<dl class="docutils">
+<dt>orientation (int): Orientation of the content considering rotation. The</dt>
+<dd>following values may be returned:
+ORIENTATION_LANDSCAPE: Content wider than high (default)
+ORIENTATION_PORTRAIT: Content heigher than wide</dd>
+<dt>creation_date (DateTime): Creation date of the file content. Creation</dt>
+<dd>date of file used as fallback.</dd>
+<dt>description (str): Description of the file content. Default is empty</dt>
+<dd>string.</dd>
+</dl>
+<p>rating (int): Rating of the file content. Default is 0.
+tags (set of str): User defined tags on the file. Not to be confounded</p>
+<blockquote class="last">
+<div>with EXIF tags in image files. Default is empty list.</div></blockquote>
+</dd>
+</dl>
+<dl class="attribute">
+<dt id="repository.local.File.EXT_IMAGE">
+<code class="descname">EXT_IMAGE</code><em class="property"> = ('*.jpg', '*.jpeg')</em><a class="headerlink" href="#repository.local.File.EXT_IMAGE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="repository.local.File.EXT_VIDEO">
+<code class="descname">EXT_VIDEO</code><em class="property"> = ('*.mp4', '*.mv4')</em><a class="headerlink" href="#repository.local.File.EXT_VIDEO" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="repository.local.FileIterator">
+<em class="property">class </em><code class="descclassname">repository.local.</code><code class="descname">FileIterator</code><span class="sig-paren">(</span><em>rep</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/repository/local/repository.html#FileIterator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#repository.local.FileIterator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">repository.repository.FileIterator</span></code></p>
+<p>Iterator which can be used to traverse through files in a repository with local file base.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="repository.local.Repository">
+<em class="property">class </em><code class="descclassname">repository.local.</code><code class="descname">Repository</code><span class="sig-paren">(</span><em>uuid</em>, <em>root</em>, <em>index=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/repository/local/repository.html#Repository"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#repository.local.Repository" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">repository.repository.Repository</span></code></p>
+<p>Repository with local file base.</p>
+<dl class="method">
+<dt id="repository.local.Repository.file_by_uuid">
+<code class="descname">file_by_uuid</code><span class="sig-paren">(</span><em>uuid</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/repository/local/repository.html#Repository.file_by_uuid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#repository.local.Repository.file_by_uuid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a file within the repository by its UUID.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>uuid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – UUID of the file.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body">InvalidUuirError</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="repository.local.Repository.root">
+<code class="descname">root</code><a class="headerlink" href="#repository.local.Repository.root" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return root directory of the repository.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Root directory of repository.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  <li><a href="modules.html">pyframe</a><ul>
+  <li><a href="repository.html">repository package</a><ul>
+      <li>Previous: <a href="repository.html" title="previous chapter">repository package</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Bernd Kalbfuss.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.7</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+      |
+      <a href="_sources/repository.local.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

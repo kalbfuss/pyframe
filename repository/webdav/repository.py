@@ -1,0 +1,140 @@
+"""..."""
+
+
+import logging
+import os
+import os.path
+import repository
+import tempfile
+
+from repository.webdav import RepositoryFile
+from webdav3.client import Client
+
+
+class Repository(repository.Repository):
+    """Repository with WebDav file base."""
+
+    def __init__(self, uuid, config, index=None):
+        """Initialize repository with WebDav file base.
+
+        :param uuid: UUID of the repository.
+        :type name: str
+        :param index: Optional file meta data index. Default is None.
+        :type index: repository.Index
+        :param config: Dictionary with repository Configuration
+        :type config: dict
+        :raises: InvalidUuidError
+        """
+        # Call constructor of parent class.
+        repository.Repository.__init__(self, uuid, index)
+
+        # Basic initialization.
+        self._url = config['url']
+        self._root = config['root']
+        self._user = config['user']
+        self._password = config['password']
+
+        # Create temporary directory for file caching.
+        self._cache_dir = tempfile.TemporaryDirectory(dir=config['cache'], prefix=f"{uuid}-")
+
+        # Open WebDav client session.
+        options = {
+         'webdav_hostname': self._url,
+         'webdav_login':    self._user,
+         'webdav_password': self._password
+        }
+        self._client = Client(options)
+
+    @property
+    def cache_dir(self):
+        """Return path to cache directory for temporary storage of files.
+
+        :return: Path to cache directory.
+        :rtype: str
+        """
+        return self._cache_dir.name
+
+    @property
+    def client(self):
+        """Return WebDav client session of the repository.
+
+        :return: WebDav client session.
+        :rtype: webdav3.client.Client
+        """
+        return self._client
+
+    @property
+    def root(self):
+        """Return WebDav root directory of the repository.
+
+        :return: WebDav root directory.
+        :rtype: str
+        """
+        return self._root
+
+    def __iter__(self):
+        """Provide iterator which allows to traverse through all files in the repository."""
+        return FileIterator(self)
+
+    def file_by_uuid(self, uuid):
+        """Return a file within the repository by its UUID.
+
+        :param uuid: UUID of the file.
+        :type uuid: str
+        :return: File with matching UUID.
+        :rtype: repository.RepositoryFile
+        :raises: InvalidUuirError
+        """
+        return RepositoryFile(uuid, self, self._index)
+
+
+class FileIterator(repository.FileIterator):
+    """Iterator which can be used to traverse through files in a webdav repository."""
+
+    def __init__(self, rep):
+        """Initialize file iterator.
+
+        :param root: Webdav repository.
+        :type root: repository.webdav.repository
+        """
+        # Basic initialization.
+        self._rep = rep
+        self._dir_list = []
+
+        # Create iterator for list of root directory.
+        self._file_list = rep.client.list(rep.root, get_info=True)
+        self._iterator = iter(self._file_list)
+
+    def __next__(self):
+        """Provide the next file.
+
+        :returns: Next file in the repository.
+        :rtype: repository.webdav.RepositoryFile
+        :raises: StopIteration
+        """
+        try:
+            # Retrieve the next directory entry.
+            entry = self._iterator.__next__()
+            logging.info(f"Current entry {entry}")
+            # Continue to retrieve entries if not a file.
+            while entry['isdir']:
+                # Save all sub-directories for later.
+                self._dir_list.append(entry['path'])
+                entry = self._iterator.__next__()
+                logging.info(f"Current entry {entry}")
+
+            # Construct relative path to root directory of the repository.
+            uuid = entry['path']
+            logging.info(f"Creating webdav repository file {uuid}.")
+            # Return the next file.
+            return RepositoryFile(uuid, self._rep, index=self._rep.index)
+
+        except StopIteration:
+            if len(self._dir_list) > 0:
+                # Start all over with last subdirectory in the list
+                self._file_list = self._rep.client.list(self._dir_list.pop(), get_info=True)
+                self._iterator = iter(self._file_list)
+                return self.__next__()
+            else:
+                # Raise exception to indicate end of iteration otherwise
+                raise StopIteration

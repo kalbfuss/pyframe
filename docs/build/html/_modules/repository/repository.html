@@ -1,0 +1,210 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>repository.repository &#8212; PyFrame 0.0.1 documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for repository.repository</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;...&quot;&quot;&quot;</span>
+
+
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="kn">from</span> <span class="nn">abc</span> <span class="k">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+
+
+<div class="viewcode-block" id="InvalidUuidError"><a class="viewcode-back" href="../../repository.html#repository.repository.InvalidUuidError">[docs]</a><span class="k">class</span> <span class="nc">InvalidUuidError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Invalid universal unique identifier (UUID) error.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">uuid</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">uuid</span> <span class="o">=</span> <span class="n">uuid</span></div>
+
+
+<div class="viewcode-block" id="Repository"><a class="viewcode-back" href="../../repository.html#repository.repository.Repository">[docs]</a><span class="k">class</span> <span class="nc">Repository</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Repository of files.</span>
+
+<span class="sd">    Abstract base class providing basic functionality common to all Repository</span>
+<span class="sd">    subclasses.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Maximum length of uuid</span>
+    <span class="n">MAX_LEN_UUID</span> <span class="o">=</span> <span class="mi">36</span>
+    <span class="c1"># Dictionary of all repositories by uuid</span>
+    <span class="n">__repositories_by_uuid</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uuid</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialize the repository.</span>
+
+<span class="sd">        :param uuid: UUID of the repository.</span>
+<span class="sd">        :type uuid: str</span>
+<span class="sd">        :param index: Optional file meta data index. Default is None.</span>
+<span class="sd">        :type index: repository.Index</span>
+<span class="sd">        :raises: InvalidUuidError</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Test uuid for validity</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">uuid</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">Repository</span><span class="o">.</span><span class="n">MAX_LEN_UUID</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">InvalidUuidError</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;UUID for repository too long. Maximum of </span><span class="si">{Repository.MAX_LEN_UUID}</span><span class="s2"> characters allowed.&quot;</span><span class="p">,</span> <span class="n">uuid</span><span class="p">)</span>
+        <span class="c1"># Warn if uuid already in use, but do not throw execption</span>
+        <span class="k">if</span> <span class="n">uuid</span> <span class="ow">in</span> <span class="n">Repository</span><span class="o">.</span><span class="n">__repositories_by_uuid</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;UUID for repository &#39;</span><span class="si">{uuid}</span><span class="s2">&#39; is already in use.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Add self to dictionary of repositories</span>
+        <span class="n">Repository</span><span class="o">.</span><span class="n">__repositories_by_uuid</span><span class="p">[</span><span class="n">uuid</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="c1"># Initialize properties</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_uuid</span> <span class="o">=</span> <span class="n">uuid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_index</span> <span class="o">=</span> <span class="n">index</span>
+
+    <span class="k">def</span> <span class="nf">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Delete the repository.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">uuid</span> <span class="ow">in</span> <span class="n">Repository</span><span class="o">.</span><span class="n">__repositories_by_uuid</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">Repository</span><span class="o">.</span><span class="n">__repositories_by_uuid</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">uuid</span><span class="p">]</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Provide iterator which allows to traverse through all files in the repository.</span>
+
+<span class="sd">        :return: File iterator.</span>
+<span class="sd">        :return type: repository.FileIterator</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+<div class="viewcode-block" id="Repository.by_uuid"><a class="viewcode-back" href="../../repository.html#repository.repository.Repository.by_uuid">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">by_uuid</span><span class="p">(</span><span class="n">uuid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return an existing repository instance by its UUID.</span>
+
+<span class="sd">        :param uuid: UUID of the repository.</span>
+<span class="sd">        :type uuid: str</span>
+<span class="sd">        :raises: InvalidUuidError</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">uuid</span> <span class="ow">in</span> <span class="n">Repository</span><span class="o">.</span><span class="n">__repositories_by_uuid</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Repository</span><span class="o">.</span><span class="n">__repositories_by_uuid</span><span class="p">[</span><span class="n">uuid</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">InvalidUuidError</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;There is no repository with UUID &#39;</span><span class="si">{uuid}</span><span class="s2">&#39;&quot;</span><span class="p">,</span> <span class="n">uuid</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Repository.file_by_uuid"><a class="viewcode-back" href="../../repository.html#repository.repository.Repository.file_by_uuid">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">file_by_uuid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uuid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a file within the repository by its UUID.</span>
+
+<span class="sd">        :param uuid: UUID of the file.</span>
+<span class="sd">        :type uuid: str</span>
+<span class="sd">        :raises: InvalidUuirError</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return meta data index of the repository.</span>
+
+<span class="sd">        :return: Meta data index of the repository. May return None if no index</span>
+<span class="sd">            was specified.</span>
+<span class="sd">        :rtype: repository.Index</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_index</span>
+
+    <span class="nd">@index</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set meta data index of the repository.</span>
+
+<span class="sd">        :param index: Meta data index of the repository.</span>
+<span class="sd">        :type index: repository.Index</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_index</span> <span class="o">=</span> <span class="n">index</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">uuid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return UUID of the repository.</span>
+
+<span class="sd">        :return: UUID of repository.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_uuid</span></div>
+
+
+<div class="viewcode-block" id="FileIterator"><a class="viewcode-back" href="../../repository.html#repository.repository.FileIterator">[docs]</a><span class="k">class</span> <span class="nc">FileIterator</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Iterator which can be used to traverse through files in a repository.&quot;&quot;&quot;</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Provide the next file.</span>
+
+<span class="sd">        :returns: Next file in the repository.</span>
+<span class="sd">        :rtype: repository.File</span>
+<span class="sd">        :raises: StopIteration</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Bernd Kalbfuss.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.7</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

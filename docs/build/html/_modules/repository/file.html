@@ -1,0 +1,282 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>repository.file &#8212; PyFrame 0.0.1 documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for repository.file</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;...&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">abc</span> <span class="k">import</span> <span class="n">ABC</span>
+
+
+<div class="viewcode-block" id="File"><a class="viewcode-back" href="../../repository.html#repository.file.File">[docs]</a><span class="k">class</span> <span class="nc">File</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;File within a repository.</span>
+
+<span class="sd">    Abstract base class providing basic functionality common to all File</span>
+<span class="sd">    subclasses.</span>
+
+<span class="sd">    Properties:</span>
+<span class="sd">        uuid (str): Universally unique identifier (UUID) of the file. Typically</span>
+<span class="sd">            the full path of the file within the repository.</span>
+<span class="sd">        rep (repository.Repository): Repository containing the file.</span>
+<span class="sd">        name (str): Name of the file. Default is None.</span>
+<span class="sd">        index (repository.Index): Optional file meta data index. Default is</span>
+<span class="sd">            None.</span>
+<span class="sd">        type (int): Type of the file. Default is None. If set the following</span>
+<span class="sd">            values may be returend:</span>
+<span class="sd">            TYPE_UNKNOWN: Unknown file type</span>
+<span class="sd">            TYPE_IMAGE: Image file</span>
+<span class="sd">            TYPE_VIDEO: Video file</span>
+<span class="sd">        width (int): Width of the file content in pixels. Default is None.</span>
+<span class="sd">        height (int): Height of the file content in pixels. Default is None.</span>
+<span class="sd">        rotation (int): Clock-wise rotation of the content in degrees. Default</span>
+<span class="sd">            is None. If set the following values may be returned: 0, 90, 180</span>
+<span class="sd">            or 270.</span>
+<span class="sd">        orientation (int): Orientation of the content considering rotation.</span>
+<span class="sd">            Default is None. If set the following values may be returned:</span>
+<span class="sd">            ORIENTATION_LANDSCAPE: Content wider than high (default)</span>
+<span class="sd">            ORIENTATION_PORTRAIT: Content heigher than wide</span>
+<span class="sd">        creation_date (DateTime): Creation date of file content. Default is</span>
+<span class="sd">            None.</span>
+<span class="sd">        description (str): Description of the file content. Default is None.</span>
+<span class="sd">        rating (int): Rating of the file content. Default is None.</span>
+<span class="sd">        tags (set of str): User defined tags on the file. Not to be confounded</span>
+<span class="sd">            with EXIF tags in image files. Default is None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># File type definitions</span>
+    <span class="n">TYPE_UNKNOWN</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">TYPE_IMAGE</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">TYPE_VIDEO</span> <span class="o">=</span> <span class="mi">2</span>
+
+    <span class="c1"># Orientation definitions</span>
+    <span class="n">ORIENTATION_LANDSCAPE</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">ORIENTATION_PORTRAIT</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uuid</span><span class="p">,</span> <span class="n">rep</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialize file instance.</span>
+
+<span class="sd">        :param uuid: UUID of the file.</span>
+<span class="sd">        :type uuid: str</span>
+<span class="sd">        :param rep: Repository containing file</span>
+<span class="sd">        _type rep: repository.Repository</span>
+<span class="sd">        :param index: Optional file meta data index. Default is None.</span>
+<span class="sd">        :type index: repository.Index</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Some basic initialization.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_uuid</span> <span class="o">=</span> <span class="n">uuid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rep</span> <span class="o">=</span> <span class="n">rep</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_index</span> <span class="o">=</span> <span class="n">index</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_type</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_width</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_height</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rotation</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_orientation</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_creation_date</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_description</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rating</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tags</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Provide string representation of file instance.</span>
+
+<span class="sd">        :return: String representation</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">f</span><span class="s2">&quot;File=(uuid=&#39;</span><span class="si">{self.uuid}</span><span class="s2">&#39;, rep=0x{id(self.rep):x}, name=</span><span class="si">{self.name}</span><span class="s2">, type=</span><span class="si">{self.type}</span><span class="s2">, width=</span><span class="si">{self.width}</span><span class="s2">, height=</span><span class="si">{self.height}</span><span class="s2">, rotation=</span><span class="si">{self.rotation}</span><span class="s2">, orientation=</span><span class="si">{self.orientation}</span><span class="s2">, creation_date=&#39;</span><span class="si">{self.creation_date}</span><span class="s2">&#39;, description=&#39;</span><span class="si">{self.description}</span><span class="s2">&#39;, rating=</span><span class="si">{self.rating}</span><span class="s2">, tags=</span><span class="si">{self.tags}</span><span class="s2">)&quot;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">uuid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return UUID of the file.</span>
+
+<span class="sd">        :return: Universally unique identifier (UUID) of the file. Typically</span>
+<span class="sd">            the full path of the file within the repository.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_uuid</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">rep</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return repository containing the file.</span>
+
+<span class="sd">        :return: Repository containing the file.</span>
+<span class="sd">        :rtype: repository.Repository</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rep</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return name of the file.</span>
+
+<span class="sd">        :return: Name of the file.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return type of the file.</span>
+
+<span class="sd">        :return: Type of the file. The following values may be returend:</span>
+<span class="sd">            TYPE_UNKNOWN: Unknown file type</span>
+<span class="sd">            TYPE_IMAGE: Image file</span>
+<span class="sd">            TYPE_VIDEO: Video file</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">width</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return width of the file content.</span>
+
+<span class="sd">        :return: Width of the file content in pixels.</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_width</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">height</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return height of the file content.</span>
+
+<span class="sd">        :return: Height of file content in pixels.</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_height</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">rotation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return rotation of the file content.</span>
+
+<span class="sd">        :return: Clock-wise rotation of the content in degrees. Typical</span>
+<span class="sd">            values are 0, 90, 180 and 270.</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rotation</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">orientation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return orientation of the file content.</span>
+
+<span class="sd">        :return: Orientation of the content considering rotation. The</span>
+<span class="sd">            following values may be returned:</span>
+<span class="sd">            ORIENTATION_LANDSCAPE: Content wider than high (default)</span>
+<span class="sd">            ORIENTATION_PORTRAIT: Content heigher than wide.</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_orientation</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">creation_date</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return creation date of the file content.</span>
+
+<span class="sd">        :return: Creation date of the file content. Note that this is not</span>
+<span class="sd">            necessarily the creation date of the file.</span>
+<span class="sd">        :rtype: DateTime</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_creation_date</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">description</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return description of the file content.</span>
+
+<span class="sd">        :return: Description of the file content.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_description</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">rating</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return rating of the file content.</span>
+
+<span class="sd">        :return: Rating of the file content. Typically a star rating with values</span>
+<span class="sd">            from 1 to 5.</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rating</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">tags</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return tags on the file.</span>
+
+<span class="sd">        :return: Tags on the file.</span>
+<span class="sd">        :rtype: set of str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tags</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Bernd Kalbfuss.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.7</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
