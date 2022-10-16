@@ -121,16 +121,6 @@ class RepositoryFile(ABC):
     EXT_IMAGE = ("*.jpg", "*.jpeg", "*.png")
     EXT_VIDEO = ("*.mp4", "*.mv4")
 
-    def _type_from_extension(self):
-        """Determine file type based on file extension."""
-        fname = self._uuid.upper()
-        for pattern in RepositoryFile.EXT_IMAGE:
-            if fnmatch.fnmatch(fname, pattern.upper()):
-                self._type = RepositoryFile.TYPE_IMAGE
-        for pattern in RepositoryFile.EXT_VIDEO:
-            if fnmatch.fnmatch(fname, pattern.upper()):
-                self._type = RepositoryFile.TYPE_VIDEO
-
     def _extract_image_meta_data(self, path):
         """Extract image meta data from file content.
 
@@ -226,6 +216,16 @@ class RepositoryFile(ABC):
         logging.debug(f"\trotation: {self._rotation}")
         logging.debug(f"\tcreation_date: {self._creation_date}")
 
+    def _type_from_extension(self):
+        """Determine file type based on file extension."""
+        fname = self._uuid.upper()
+        for pattern in RepositoryFile.EXT_IMAGE:
+            if fnmatch.fnmatch(fname, pattern.upper()):
+                self._type = RepositoryFile.TYPE_IMAGE
+        for pattern in RepositoryFile.EXT_VIDEO:
+            if fnmatch.fnmatch(fname, pattern.upper()):
+                self._type = RepositoryFile.TYPE_VIDEO
+
     @property
     def uuid(self):
         """Return UUID of the file.
@@ -256,7 +256,7 @@ class RepositoryFile(ABC):
 
     @property
     def source(self):
-        """Return the source of a file (e.g. full path or URL).
+        """Return the source of the file (e.g. full path or URL).
 
         :return: Source of the file.
         :rtype: str
@@ -352,13 +352,3 @@ class RepositoryFile(ABC):
         :rtype: set of str
         """
         return self._tags
-
-    @abstractmethod
-    def source(self):
-        """Return the source of the file within the repository (e.g. full path or
-        URL).
-
-        :return: Source of file.
-        :rtype: str
-        """
-        pass

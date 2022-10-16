@@ -120,7 +120,7 @@ class Index:
             logging.info(f"Opening file index database '{dbname}'")
             # Determine whether we want verbose SQL debugging information.
             echo_flag = False
-            if logging.getLogger().getEffectiveLevel() <= logging.DEBUG:
+            if logging.getLogger("sqlalchemy").getEffectiveLevel() <= logging.DEBUG:
                 echo_flag = True
             # Create sqlite database engine
             self._engine = create_engine(f"sqlite:///{dbname}", echo=echo_flag)

@@ -26,7 +26,7 @@ class Repository(repository.Repository):
         :raises: InvalidUuidError
         """
         # Call constructor of parent class.
-        repository.Repository.__init__(self, uuid, index)
+        repository.Repository.__init__(self, uuid, config, index)
 
         # Basic initialization.
         self._url = config['url']
@@ -44,6 +44,28 @@ class Repository(repository.Repository):
          'webdav_password': self._password
         }
         self._client = Client(options)
+
+    def _check_config(self, config):
+        """Check the configuration for the repository from the configuration
+        file.
+
+        :param config:
+        :type config: dict
+        :raises: InvalidConfigurationError
+        """
+        # Extract defined parameters (keys).
+        keys = set(config.keys())
+        # Define allowed and required parameters (keys).
+        required_keys = {"url", "user", "password"}
+        allowed_keys = {"type", "url", "root", "user", "password", "enabled"}
+
+        # Raise exception if minimum required parameters have not been defined.
+        if not required_keys.issubset(keys):
+            raise InvalidConfigurationError(f"Configuration for repository '{self.uuid}' is incomplete.", config)
+        else:
+            # Warn if additional, unused parameters have been defined.
+            if not keys.issubset(allowed_keys):
+                logging.warn(f"Configuration for repository '{self.uuid}' contains additional, unused parameters.")
 
     @property
     def cache_dir(self):

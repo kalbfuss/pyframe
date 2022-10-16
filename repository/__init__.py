@@ -14,5 +14,5 @@ License: t.b.d.
 """
 
 from . file import RepositoryFile
-from . repository import Repository, FileIterator, InvalidUuidError
+from . repository import Repository, FileIterator, InvalidUuidError, InvalidConfigurationError
 from . index import Index, MetaData

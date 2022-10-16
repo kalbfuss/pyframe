@@ -14,6 +14,14 @@ class InvalidUuidError(Exception):
         self.uuid = uuid
 
 
+class InvalidConfigurationError(Exception):
+    """Invalid configuration error."""
+
+    def __init__(self, msg, config=None):
+        super().__init__(msg)
+        self.config = config
+
+
 class Repository(ABC):
     """Repository of files.
 
@@ -26,27 +34,33 @@ class Repository(ABC):
     # Dictionary of all repositories by uuid
     _repositories = dict()
 
-    def __init__(self, uuid, index=None):
+    def __init__(self, uuid, config, index=None):
         """Initialize the repository.
 
         :param uuid: UUID of the repository.
         :type uuid: str
+        :param config: Repository configuration from the configuration file.
+        :type config: dict
         :param index: Optional file meta data index. Default is None.
         :type index: repository.Index
         :raises: InvalidUuidError
         """
-        # Test uuid for validity
+        # Basic intialization.
+        self._uuid = uuid
+        self._index = index
+
+        # Check the configuration for errors.
+        self._check_config(config)
+
+        # Test uuid for validity.
         if len(uuid) >= Repository.MAX_LEN_UUID:
             raise InvalidUuidError(f"UUID for repository too long. Maximum of {Repository.MAX_LEN_UUID} characters allowed.", uuid)
-        # Warn if uuid already in use, but do not throw execption
+        # Warn if uuid already in use, but do not throw execption.
         if uuid in Repository._repositories:
             logging.warn(f"UUID for repository '{uuid}' is already in use.")
 
-        # Add self to dictionary of repositories
+        # Add self to dictionary of repositories.
         Repository._repositories[uuid] = self
-        # Initialize properties
-        self._uuid = uuid
-        self._index = index
 
     def __del__(self):
         """Delete the repository."""
@@ -59,6 +73,18 @@ class Repository(ABC):
 
         :return: File iterator.
         :return type: repository.FileIterator
+        """
+        pass
+
+    @abstractmethod
+    def _check_config(self, config):
+        """Check the configuration for the repository from the configuration
+        file. This method is abstract and needs to be implemented by child
+        classes.
+
+        :param config:
+        :type config: dict
+        :raises: InvalidConfigurationError
         """
         pass
 
@@ -84,11 +110,11 @@ class Repository(ABC):
         InvalidUuidError if the repository does not contain a file with the
         specified UUID.
 
-        :param uuid: UUID of the file.
-        :type uuid: str
-        :return: File with matching UUID.
-        :rtype: repository.RepositoryFile
-        :raises: InvalidUuidError
+        : param uuid: UUID of the file.
+        : type uuid: str
+        : return: File with matching UUID.
+        : rtype: repository.RepositoryFile
+        : raises: InvalidUuidError
         """
         pass
 
@@ -115,8 +141,8 @@ class Repository(ABC):
     def uuid(self):
         """Return UUID of the repository.
 
-        : return: UUID of repository.
-        : rtype: str
+        :return: UUID of repository.
+        :rtype: str
         """
         return self._uuid
 
@@ -128,8 +154,8 @@ class FileIterator:
     def __next__(self):
         """Provide the next file.
 
-        : returns: Next file in the repository.
-        : rtype: repository.RepositoryFile
-        : raises: StopIteration
+        :returns: Next file in the repository.
+        :rtype: repository.RepositoryFile
+        :raises: StopIteration
         """
         pass

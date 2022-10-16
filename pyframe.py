@@ -7,7 +7,7 @@ import repository.webdav
 import yaml
 
 from repository import Index
-from repository import Repository
+from repository import Repository, InvalidConfigurationError, InvalidUuidError
 from slideshow import Slideshow
 
 from kivy.app import App
@@ -30,6 +30,8 @@ class MainApp(App):
         logging.basicConfig(level=logging.DEBUG)
         # Set log level of kivy logger.
         Logger.setLevel(LOG_LEVELS["debug"])
+        # Reduce logging by SQLAlchemy to errors.
+        logging.getLogger("sqlalchemy").setLevel(logging.ERROR)
 
         # Load configuration from yaml file.
         with open('./config.yaml', 'r') as config_file:
@@ -54,49 +56,25 @@ class MainApp(App):
             if rep_config.get('enabled') == False:
                 Logger.info(f"Configuration: Skipping repository '{uuid}' as it has been disabled.")
                 continue
-            # Create repository of the specified type and build index.
-            if rep_config.get('type') == "local":
+            try:
+                # Create repository of the specified type and build index.
+                if rep_config.get('type') == "local":
+                    Logger.info(f"Creating local repository '{uuid}' and building index.")
+                    rep = repository.local.Repository(uuid, rep_config, index=index)
+                    index.build(rep, rebuild=True)
 
-                # Extract defined parameters (keys).
-                keys = set(rep_config.keys())
-                # Define allowed and required parameters (keys).
-                required_keys = {"root"}
-                allowed_keys = {"type", "root", "enabled"}
-
-                # Report error if minimum required parameters have not been defined.
-                if not required_keys.issubset(keys):
-                    Logger.error(f"Configuration: Skipping repository '{uuid}' as its configuration is incomplete.")
-                else:
-                    # Warn if additional, unused parameters have been defined.
-                    if not keys.issubset(allowed_keys):
-                        Logger.warn(f"Configuration: Configuration of repository '{uuid}' contains additional, unused parameters.")
-
-                    Logger.debug(f"Configuration: Creating repository '{uuid}' and building index.")
-                    rep = repository.local.Repository(uuid, rep_config['root'], index=index)
-#                    index.build(rep, rebuild=True)
-                    index.build(rep, rebuild=False)
-
-            if rep_config.get('type') == "webdav":
-
-                # Extract defined parameters (keys).
-                keys = set(rep_config.keys())
-                # Define allowed and required parameters (keys).
-                required_keys = {"url", "user", "password"}
-                allowed_keys = {"type", "url", "root", "user", "password", "enabled"}
-
-                # Report error if minimum required parameters have not been defined.
-                if not required_keys.issubset(keys):
-                    Logger.error(f"Configuration: Skipping repository '{uuid}' as its configuration is incomplete.")
-                else:
-                    # Warn if additional, unused parameters have been defined.
-                    if not keys.issubset(allowed_keys):
-                        Logger.warn(f"Configuration: Configuration of repository '{uuid}' contains additional, unused parameters.")
-
-                    Logger.debug(f"Configuration: Creating repository '{uuid}' and building index.")
+                if rep_config.get('type') == "webdav":
+                    Logger.info(f"Configuration: Creating WebDav repository '{uuid}' and building index.")
                     rep_config['cache'] = config['cache']
                     rep = repository.webdav.Repository(uuid, rep_config, index=index)
-#                    index.build(rep, rebuild=True)
                     index.build(rep, rebuild=False)
+
+            # Catch any invalid configuration errors
+            except InvalidConfigurationError:
+                Logger.error(f"Skipping repository '{uuid}' as its configuraiton is invalid.")
+            # Catch any invalid UUIR errors
+            except InvalidUuidError:
+                Logger.error(f"Skipping repository '{uuid}' as its UUID is invalid.")
 
         # Exit application if no valid repositories have been defined.
         if len(Repository._repositories.items()) == 0:

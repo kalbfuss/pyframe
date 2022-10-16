@@ -58,6 +58,18 @@ class RepositoryFile(repository.RepositoryFile):
                 self._download()
                 self._extract_video_meta_data(self._path)
 
+    def __del__(self):
+        """Delete the file."""
+        # Close and delete cache file if exists to prevent clean up errors.
+        if self._cache_file is not None:
+            try:
+                self._cache_file.close()
+            except FileNotFoundError:
+                # Ignore any file not found errors, which can occur if the
+                # cache directory and its content are deleted before the
+                # temporary file.
+                pass
+
     def _download(self):
         """Download file from WebDav repository to local cache file."""
         if self._cache_file is None:
