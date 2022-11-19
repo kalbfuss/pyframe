@@ -1,23 +1,16 @@
 """..."""
 
+import exifread
 import ffmpeg
 import fnmatch
 import logging
-import pyexiv2
 
-from abc import ABC, abstractmethod
+
 from datetime import datetime
+from iptcinfo3 import IPTCInfo
 
 
-class InvalidFileError(Exception):
-    """Invalid file error."""
-
-    def __init__(self, msg, uuid=None):
-        super().__init__(msg)
-        self.file = file
-
-
-class RepositoryFile(ABC):
+class RepositoryFile:
     """File within a repository.
 
     Abstract base class providing basic functionality common to all File
@@ -124,25 +117,36 @@ class RepositoryFile(ABC):
     def _extract_image_meta_data(self, path):
         """Extract image meta data from file content.
 
-        Uses the pyexiv2 library to extract image meta data from the image
-        file and stores meta data in corresponding object properties.
+        Uses the exifread library to extract EXIF meta data and IPTCInfo3
+        library to extract IPTC meta data from the image file. Meta data is
+        stored in the corresponding object properties.
+
+        Note the star rating tag is not yet supported by exifread and therefore
+        always remains at the default.
         """
-        # Extract all meta data from image file
-        data = pyexiv2.metadata.ImageMetadata(path)
-        data.read()
 
-        # Try to obtain image dimensions from meta data
-        self._width = data.dimensions[0]
-        self._height = data.dimensions[1]
+        # Open image file for reading (binary mode)
+        file = open(path, 'rb')
+        # Return Exif tags
+        tags = exifread.process_file(file)
 
-        # Try to obtain rotation from meta data
-        orientation = data.get_orientation()
-        if orientation == 8:
-            self._rotation = 90
-        elif orientation == 3:
-            self._rotation = 180
-        elif orientation == 6:
-            self._rotation = 270
+        # Obtain width from meta data if available
+        if "EXIF ExifImageWidth" in tags:
+            self._width = tags["EXIF ExifImageWidth"].values[0]
+
+        # Obtain height from meta data if available
+        if "EXIF ExifImageLength" in tags:
+            self._height = tags["EXIF ExifImageLength"].values[0]
+
+        # Obtain rotation from meta data if available
+        if "Image Orientation" in tags:
+            orientation = tags["Image Orientation"].values[0]
+            if orientation == 8:
+                self._rotation = 90
+            elif orientation == 3:
+                self._rotation = 180
+            elif orientation == 6:
+                self._rotation = 270
 
         # Derive orientation from dimensions and rotation.
         if (self._width < self._height and (self.rotation == 0 or self.rotation == 180)) or (self._width > self._height and (self.rotation == 90 or self.rotation == 270)):
@@ -150,23 +154,26 @@ class RepositoryFile(ABC):
         else:
             self._orientation = RepositoryFile.ORIENTATION_LANDSCAPE
 
-        # Try to obtain image comment from meta data
-        self._description = data.comment
-        # Or from image description EXIF tag if availabe
-        if self._description == "" and "Exif.Image.ImageDescription" in data.exif_keys:
-            self._description = data["Exif.Image.ImageDescription"].value
+        # Etract image description if available
+        if "Image ImageDescription" in tags:
+            self._description = tags["Image ImageDescription"].values
 
-        # Extract creation date from EXIF tag if available
-        if "Exif.Photo.DateTimeOriginal" in data.exif_keys:
-            self._creation_date = data["Exif.Photo.DateTimeOriginal"].value
+        # Extract creation date if available
+        if "EXIF DateTimeOriginal" in tags:
+            try:
+                creation_date = tags["EXIF DateTimeOriginal"].values
+                self._creation_date = datetime.strptime(creation_date, "%Y:%m:%d %H:%M:%S")
+            except ValueError:
+                logging.error(f"Invalid creation time format {creation_date}")
 
-        # Extract rating from EXIF tag if available
-        if "Exif.Image.Rating" in data.exif_keys:
-            self._rating = data["Exif.Image.Rating"].value
+        # Extract rating if available
+        # Tag is currently not supported by exifread
+#        if "Image Rating" in data.exif_keys:
+#            self._rating = data["Image Rating"].value
 
-        # Extract image tags (keywords) from IPTC tag if available
-        if "Iptc.Application2.Keywords" in data.iptc_keys:
-            self._tags = data["Iptc.Application2.Keywords"].value
+        # Extract image tags(keywords) from IPTC tag if available
+        info = IPTCInfo(path)
+        self._tags = info["keywords"]
 
     def _extract_video_meta_data(self, path):
         """Extract video meta data from file content.
@@ -175,7 +182,7 @@ class RepositoryFile(ABC):
         video file and stores meta data in corresponding object properties.
         """
         data = ffmpeg.probe(path)['streams'][0]
-        logging.info(data)
+        logging.debug(data)
 
         # Try to obtain image dimensions from meta data.
         if data.get('width') != None:
@@ -202,12 +209,12 @@ class RepositoryFile(ABC):
             self._orientation = RepositoryFile.ORIENTATION_LANDSCAPE
 
         # Try to extract creation time from meta data.
-        creation_time = data['tags'].get('creation_time')
-        if creation_time is not None:
+        creation_date = data['tags'].get('creation_time')
+        if creation_date is not None:
             try:
-                self._creation_date = datetime.strptime(creation_time, "%Y-%m-%dT%H:%M:%S.%fZ")
+                self._creation_date = datetime.strptime(creation_date, "%Y-%m-%dT%H:%M:%S.%fZ")
             except ValueError:
-                logging.info(f"Invalid creation time format {creation_time}")
+                logging.error(f"Invalid creation time format {creation_date}")
 
         # Log debug information
 #        logging.debug(f"\twidth: {self._width}")
@@ -222,9 +229,11 @@ class RepositoryFile(ABC):
         for pattern in RepositoryFile.EXT_IMAGE:
             if fnmatch.fnmatch(fname, pattern.upper()):
                 self._type = RepositoryFile.TYPE_IMAGE
+                return
         for pattern in RepositoryFile.EXT_VIDEO:
             if fnmatch.fnmatch(fname, pattern.upper()):
                 self._type = RepositoryFile.TYPE_VIDEO
+                return
 
     @property
     def uuid(self):

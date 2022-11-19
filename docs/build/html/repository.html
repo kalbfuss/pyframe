@@ -1,26 +1,18 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
     <title>repository package &#8212; PyFrame 0.0.1 documentation</title>
-    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '0.0.1',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="repository.local package" href="repository.local.html" />
@@ -28,616 +20,41 @@
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
+  
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
-  </head>
-  <body>
+  </head><body>
   
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
+          
+
           <div class="body" role="main">
             
-  <div class="section" id="repository-package">
+  <section id="repository-package">
 <h1>repository package<a class="headerlink" href="#repository-package" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="subpackages">
+<section id="subpackages">
 <h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="repository.local.html">repository.local package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="repository.local.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="repository.local.html#module-repository.local">Module contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="repository.local.html#module-contents">Module contents</a></li>
 </ul>
 </li>
 </ul>
 </div>
-</div>
-<div class="section" id="module-repository">
-<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-repository" title="Permalink to this headline">¶</a></h2>
-<p>Collection of classes to access and index file repositories.</p>
-<p>Provides interface definitions for classes <a class="reference internal" href="#repository.Repository" title="repository.Repository"><code class="xref py py-class docutils literal"><span class="pre">repository.Repository</span></code></a> and <a class="reference internal" href="#repository.File" title="repository.File"><code class="xref py py-class docutils literal"><span class="pre">repository.File</span></code></a>. Actual implementations are provided by sub-packages.</p>
-<dl class="docutils">
-<dt>The following implementations, i.e. sub-packages, are currently available:</dt>
-<dd><ul class="first last simple">
-<li>local: Files are stored on a local file system.</li>
-</ul>
-</dd>
-</dl>
-<p>The <a class="reference internal" href="#repository.Index" title="repository.Index"><code class="xref py py-class docutils literal"><span class="pre">repository.Index</span></code></a> class provides functionality to index file meta
-data for the purpose of caching, filtering and sorting.</p>
-<dl class="class">
-<dt id="repository.File">
-<em class="property">class </em><code class="descclassname">repository.</code><code class="descname">File</code><span class="sig-paren">(</span><em>uuid</em>, <em>rep</em>, <em>index=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/repository/file.html#File"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#repository.File" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">abc.ABC</span></code></a></p>
-<p>File within a repository.</p>
-<p>Abstract base class providing basic functionality common to all File
-subclasses.</p>
-<dl class="docutils">
-<dt>Properties:</dt>
-<dd><dl class="first docutils">
-<dt>uuid (str): Universally unique identifier (UUID) of the file. Typically</dt>
-<dd>the full path of the file within the repository.</dd>
-</dl>
-<p>rep (repository.Repository): Repository containing the file.
-name (str): Name of the file. Default is None.
-index (repository.Index): Optional file meta data index. Default is</p>
-<blockquote>
-<div>None.</div></blockquote>
-<dl class="docutils">
-<dt>type (int): Type of the file. Default is None. If set the following</dt>
-<dd>values may be returend:
-TYPE_UNKNOWN: Unknown file type
-TYPE_IMAGE: Image file
-TYPE_VIDEO: Video file</dd>
-</dl>
-<p>width (int): Width of the file content in pixels. Default is None.
-height (int): Height of the file content in pixels. Default is None.
-rotation (int): Clock-wise rotation of the content in degrees. Default</p>
-<blockquote>
-<div>is None. If set the following values may be returned: 0, 90, 180
-or 270.</div></blockquote>
-<dl class="docutils">
-<dt>orientation (int): Orientation of the content considering rotation.</dt>
-<dd>Default is None. If set the following values may be returned:
-ORIENTATION_LANDSCAPE: Content wider than high (default)
-ORIENTATION_PORTRAIT: Content heigher than wide</dd>
-<dt>creation_date (DateTime): Creation date of file content. Default is</dt>
-<dd>None.</dd>
-</dl>
-<p>description (str): Description of the file content. Default is None.
-rating (int): Rating of the file content. Default is None.
-tags (set of str): User defined tags on the file. Not to be confounded</p>
-<blockquote class="last">
-<div>with EXIF tags in image files. Default is None.</div></blockquote>
-</dd>
-</dl>
-<dl class="attribute">
-<dt id="repository.File.ORIENTATION_LANDSCAPE">
-<code class="descname">ORIENTATION_LANDSCAPE</code><em class="property"> = 0</em><a class="headerlink" href="#repository.File.ORIENTATION_LANDSCAPE" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="repository.File.ORIENTATION_PORTRAIT">
-<code class="descname">ORIENTATION_PORTRAIT</code><em class="property"> = 1</em><a class="headerlink" href="#repository.File.ORIENTATION_PORTRAIT" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="repository.File.TYPE_IMAGE">
-<code class="descname">TYPE_IMAGE</code><em class="property"> = 1</em><a class="headerlink" href="#repository.File.TYPE_IMAGE" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="repository.File.TYPE_UNKNOWN">
-<code class="descname">TYPE_UNKNOWN</code><em class="property"> = 0</em><a class="headerlink" href="#repository.File.TYPE_UNKNOWN" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="repository.File.TYPE_VIDEO">
-<code class="descname">TYPE_VIDEO</code><em class="property"> = 2</em><a class="headerlink" href="#repository.File.TYPE_VIDEO" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="repository.File.creation_date">
-<code class="descname">creation_date</code><a class="headerlink" href="#repository.File.creation_date" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return creation date of the file content.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Creation date of the file content. Note that this is not
-necessarily the creation date of the file.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">DateTime</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="repository.File.description">
-<code class="descname">description</code><a class="headerlink" href="#repository.File.description" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return description of the file content.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Description of the file content.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="repository.File.height">
-<code class="descname">height</code><a class="headerlink" href="#repository.File.height" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return height of the file content.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Height of file content in pixels.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="repository.File.name">
-<code class="descname">name</code><a class="headerlink" href="#repository.File.name" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return name of the file.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Name of the file.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="repository.File.orientation">
-<code class="descname">orientation</code><a class="headerlink" href="#repository.File.orientation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return orientation of the file content.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Orientation of the content considering rotation. The
-following values may be returned:
-ORIENTATION_LANDSCAPE: Content wider than high (default)
-ORIENTATION_PORTRAIT: Content heigher than wide.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="repository.File.rating">
-<code class="descname">rating</code><a class="headerlink" href="#repository.File.rating" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return rating of the file content.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Rating of the file content. Typically a star rating with values
-from 1 to 5.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="repository.File.rep">
-<code class="descname">rep</code><a class="headerlink" href="#repository.File.rep" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return repository containing the file.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Repository containing the file.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#repository.Repository" title="repository.Repository">repository.Repository</a></td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="repository.File.rotation">
-<code class="descname">rotation</code><a class="headerlink" href="#repository.File.rotation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return rotation of the file content.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Clock-wise rotation of the content in degrees. Typical
-values are 0, 90, 180 and 270.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="repository.File.tags">
-<code class="descname">tags</code><a class="headerlink" href="#repository.File.tags" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return tags on the file.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Tags on the file.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">set of str</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="repository.File.type">
-<code class="descname">type</code><a class="headerlink" href="#repository.File.type" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return type of the file.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Type of the file. The following values may be returend:
-TYPE_UNKNOWN: Unknown file type
-TYPE_IMAGE: Image file
-TYPE_VIDEO: Video file</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="repository.File.uuid">
-<code class="descname">uuid</code><a class="headerlink" href="#repository.File.uuid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return UUID of the file.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Universally unique identifier (UUID) of the file. Typically
-the full path of the file within the repository.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="repository.File.width">
-<code class="descname">width</code><a class="headerlink" href="#repository.File.width" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return width of the file content.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Width of the file content in pixels.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.8)">int</a></td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="repository.FileIterator">
-<em class="property">class </em><code class="descclassname">repository.</code><code class="descname">FileIterator</code><a class="reference internal" href="_modules/repository/repository.html#FileIterator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#repository.FileIterator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
-<p>Iterator which can be used to traverse through files in a repository.</p>
-</dd></dl>
-
-<dl class="class">
-<dt id="repository.Index">
-<em class="property">class </em><code class="descclassname">repository.</code><code class="descname">Index</code><span class="sig-paren">(</span><em>dbname='index.sqlite'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/repository/index.html#Index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#repository.Index" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
-<p>File meta data index.</p>
-<p>Enables quick lookup and filtering of files based on their meta data. Index
-may span multiple repositories. Files and repositories are referenced via
-there universal unique identifiers.</p>
-<p>Use method build() to build index.</p>
-<dl class="attribute">
-<dt id="repository.Index.ORDER_DATE_ASC">
-<code class="descname">ORDER_DATE_ASC</code><em class="property"> = 1</em><a class="headerlink" href="#repository.Index.ORDER_DATE_ASC" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="repository.Index.ORDER_DATE_DESC">
-<code class="descname">ORDER_DATE_DESC</code><em class="property"> = 2</em><a class="headerlink" href="#repository.Index.ORDER_DATE_DESC" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="repository.Index.ORDER_NAME_ASC">
-<code class="descname">ORDER_NAME_ASC</code><em class="property"> = 3</em><a class="headerlink" href="#repository.Index.ORDER_NAME_ASC" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="repository.Index.ORDER_NAME_DESC">
-<code class="descname">ORDER_NAME_DESC</code><em class="property"> = 4</em><a class="headerlink" href="#repository.Index.ORDER_NAME_DESC" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="repository.Index.ORDER_RANDOM">
-<code class="descname">ORDER_RANDOM</code><em class="property"> = 0</em><a class="headerlink" href="#repository.Index.ORDER_RANDOM" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="repository.Index.build">
-<code class="descname">build</code><span class="sig-paren">(</span><em>rep</em>, <em>rebuild=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/repository/index.html#Index.build"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#repository.Index.build" title="Permalink to this definition">¶</a></dt>
-<dd><p>Build meta data index.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>rep</strong> (<a class="reference internal" href="#repository.Repository" title="repository.Repository"><em>repository.Repository</em></a>) – Repository for which to build the index.</li>
-<li><strong>rebuild</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.8)"><em>bool</em></a>) – Indicates whether index is to be completely rebuilt.
-Default (False) is to update only, i.e. add the missing entries.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="repository.Index.iterator">
-<code class="descname">iterator</code><span class="sig-paren">(</span><em>**criteria</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/repository/index.html#Index.iterator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#repository.Index.iterator" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return selective iterator.</p>
-<p>Return selective iterator which allows to traverse through a
-sub-population of files in the index according to specified criteria.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>criteria</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.8)"><em>dict</em></a>) – Selection criteria</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Selective iterator</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">repository.SelectiveIndexIterator</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="repository.Index.lookup">
-<code class="descname">lookup</code><span class="sig-paren">(</span><em>file</em>, <em>rep</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/repository/index.html#Index.lookup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#repository.Index.lookup" title="Permalink to this definition">¶</a></dt>
-<dd><p>Lookup file meta data.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>file</strong> (<a class="reference internal" href="#repository.Index" title="repository.Index"><em>repository.Index</em></a>) – File for which to lookup meta data.</li>
-<li><strong>rep</strong> (<a class="reference internal" href="#repository.Repository" title="repository.Repository"><em>repository.Repository</em></a>) – Repository containing the file.</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">Returns a meta data object for the file if available. Returns
-None otherwise.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">repository.MetaData</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="exception">
-<dt id="repository.InvalidUuidError">
-<em class="property">exception </em><code class="descclassname">repository.</code><code class="descname">InvalidUuidError</code><span class="sig-paren">(</span><em>msg</em>, <em>uuid=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/repository/repository.html#InvalidUuidError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#repository.InvalidUuidError" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Exception" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">Exception</span></code></a></p>
-<p>Invalid universal unique identifier (UUID) error.</p>
-</dd></dl>
-
-<dl class="class">
-<dt id="repository.MetaData">
-<em class="property">class </em><code class="descclassname">repository.</code><code class="descname">MetaData</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/repository/index.html#MetaData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#repository.MetaData" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">sqlalchemy.ext.declarative.api.Base</span></code></p>
-<p>Database model for file meta data.</p>
-<p>Database representation of file meta data using SQLAlchemy object relational
-mapper. Properties resemble properties of class repository.File.</p>
-<dl class="docutils">
-<dt>Properties:</dt>
-<dd><p class="first">id(Integer): Numerical unique identifier. Automatically generated.
-uuid(String(255)): Universally unique identifier of the file.
-rep_uuid(String(36)): Universally unique identifier of the repository</p>
-<blockquote>
-<div>containing the file.</div></blockquote>
-<dl class="docutils">
-<dt>type(Integer): Type of the file. See repository.File for acceptable</dt>
-<dd>values.</dd>
-</dl>
-<p>width(Integer): Width of the file content in pixels.
-height(Integer): Height of the file content in pixels.
-rotation(Iteger): Clock-wise rotation of the content in degrees. See</p>
-<blockquote>
-<div>repository.File for acceptable values.</div></blockquote>
-<dl class="docutils">
-<dt>orientation(Integer): Orientation of the content considering rotation.</dt>
-<dd>See repository.File for acceptable values.</dd>
-</dl>
-<p class="last">creation_date(DateTime): Creation date of the file content.
-description(String(255)): Description of the file.
-rating(Integer): Rating of the file content.</p>
-</dd>
-</dl>
-<dl class="attribute">
-<dt id="repository.MetaData.creation_date">
-<code class="descname">creation_date</code><a class="headerlink" href="#repository.MetaData.creation_date" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="repository.MetaData.description">
-<code class="descname">description</code><a class="headerlink" href="#repository.MetaData.description" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="repository.MetaData.file_uuid">
-<code class="descname">file_uuid</code><a class="headerlink" href="#repository.MetaData.file_uuid" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="repository.MetaData.height">
-<code class="descname">height</code><a class="headerlink" href="#repository.MetaData.height" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="repository.MetaData.id">
-<code class="descname">id</code><a class="headerlink" href="#repository.MetaData.id" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="repository.MetaData.name">
-<code class="descname">name</code><a class="headerlink" href="#repository.MetaData.name" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="repository.MetaData.orientation">
-<code class="descname">orientation</code><a class="headerlink" href="#repository.MetaData.orientation" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="repository.MetaData.rating">
-<code class="descname">rating</code><a class="headerlink" href="#repository.MetaData.rating" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="repository.MetaData.rep_uuid">
-<code class="descname">rep_uuid</code><a class="headerlink" href="#repository.MetaData.rep_uuid" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="repository.MetaData.rotation">
-<code class="descname">rotation</code><a class="headerlink" href="#repository.MetaData.rotation" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="repository.MetaData.tags">
-<code class="descname">tags</code><a class="headerlink" href="#repository.MetaData.tags" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="repository.MetaData.type">
-<code class="descname">type</code><a class="headerlink" href="#repository.MetaData.type" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="repository.MetaData.width">
-<code class="descname">width</code><a class="headerlink" href="#repository.MetaData.width" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="repository.Repository">
-<em class="property">class </em><code class="descclassname">repository.</code><code class="descname">Repository</code><span class="sig-paren">(</span><em>uuid</em>, <em>index=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/repository/repository.html#Repository"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#repository.Repository" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/abc.html#abc.ABC" title="(in Python v3.8)"><code class="xref py py-class docutils literal"><span class="pre">abc.ABC</span></code></a></p>
-<p>Repository of files.</p>
-<p>Abstract base class providing basic functionality common to all Repository
-subclasses.</p>
-<dl class="attribute">
-<dt id="repository.Repository.MAX_LEN_UUID">
-<code class="descname">MAX_LEN_UUID</code><em class="property"> = 36</em><a class="headerlink" href="#repository.Repository.MAX_LEN_UUID" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="staticmethod">
-<dt id="repository.Repository.by_uuid">
-<em class="property">static </em><code class="descname">by_uuid</code><span class="sig-paren">(</span><em>uuid</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/repository/repository.html#Repository.by_uuid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#repository.Repository.by_uuid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return an existing repository instance by its UUID.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>uuid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – UUID of the repository.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body">InvalidUuidError</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="repository.Repository.file_by_uuid">
-<code class="descname">file_by_uuid</code><span class="sig-paren">(</span><em>uuid</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/repository/repository.html#Repository.file_by_uuid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#repository.Repository.file_by_uuid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a file within the repository by its UUID.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>uuid</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)"><em>str</em></a>) – UUID of the file.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body">InvalidUuirError</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="repository.Repository.index">
-<code class="descname">index</code><a class="headerlink" href="#repository.Repository.index" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return meta data index of the repository.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Meta data index of the repository. May return None if no index
-was specified.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#repository.Index" title="repository.Index">repository.Index</a></td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="repository.Repository.uuid">
-<code class="descname">uuid</code><a class="headerlink" href="#repository.Repository.uuid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return UUID of the repository.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">UUID of repository.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.8)">str</a></td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-</dd></dl>
-
-</div>
-</div>
+</section>
+<section id="module-contents">
+<h2>Module contents<a class="headerlink" href="#module-contents" title="Permalink to this headline">¶</a></h2>
+</section>
+</section>
 
 
           </div>
+          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -653,15 +70,15 @@ was specified.</td>
 </ul>
 </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
     </form>
+    </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -670,8 +87,8 @@ was specified.</td>
       &copy;2019, Bernd Kalbfuss.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.7</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.3.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
       <a href="_sources/repository.rst.txt"
