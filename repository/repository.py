@@ -68,13 +68,23 @@ class Repository(ABC):
             del Repository._repositories[self.uuid]
 
     @abstractmethod
+    def iterator(self, index_lookup=True):
+        """Provide iterator which allows to traverse through all files in the repository.
+
+        :param index_lookup: True if file metadata shall be looked up from index.
+        :type index_lookup: bool
+        :return: File iterator.
+        :return type: repository.FileIterator
+        """
+        pass
+
     def __iter__(self):
         """Provide iterator which allows to traverse through all files in the repository.
 
         :return: File iterator.
         :return type: repository.FileIterator
         """
-        pass
+        return self.iterator()
 
     @abstractmethod
     def _check_config(self, config):
@@ -105,16 +115,18 @@ class Repository(ABC):
             raise InvalidUuidError(f"There is no repository with UUID '{uuid}'", uuid)
 
     @abstractmethod
-    def file_by_uuid(self, uuid):
+    def file_by_uuid(self, uuid, index_lookup=True):
         """Return a file within the repository by its UUID. Raises an
         InvalidUuidError if the repository does not contain a file with the
         specified UUID.
 
-        : param uuid: UUID of the file.
-        : type uuid: str
-        : return: File with matching UUID.
-        : rtype: repository.RepositoryFile
-        : raises: InvalidUuidError
+        :param uuid: UUID of the file.
+        :type uuid: str
+        :param index_lookup: True if file metadata shall be looked up from index.
+        :type index_lookup: bool
+        :return: File with matching UUID.
+        :rtype: repository.RepositoryFile
+        :raises: InvalidUuidError
         """
         pass
 
@@ -159,3 +171,15 @@ class FileIterator:
         :raises: StopIteration
         """
         pass
+
+    def __iter__(self):
+        """Provide self as iterator for traversing through all files in the
+        repository.
+
+        Enables the Repository.iterator method to create iterators with
+        additional arguments.
+
+        :return: File iterator.
+        :return type: repository.FileIterator
+        """
+        return self

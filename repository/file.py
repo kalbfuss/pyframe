@@ -210,11 +210,11 @@ class RepositoryFile(ABC):
                 logging.info(f"Invalid creation time format {creation_time}")
 
         # Log debug information
-        logging.debug(f"\twidth: {self._width}")
-        logging.debug(f"\theight: {self._height}")
-        logging.debug(f"\torientation: {self._orientation}")
-        logging.debug(f"\trotation: {self._rotation}")
-        logging.debug(f"\tcreation_date: {self._creation_date}")
+#        logging.debug(f"\twidth: {self._width}")
+#        logging.debug(f"\theight: {self._height}")
+#        logging.debug(f"\torientation: {self._orientation}")
+#        logging.debug(f"\trotation: {self._rotation}")
+#        logging.debug(f"\tcreation_date: {self._creation_date}")
 
     def _type_from_extension(self):
         """Determine file type based on file extension."""

@@ -4,6 +4,7 @@
 import logging
 import repository.local
 import repository.webdav
+import threading
 import yaml
 
 from repository import Index
@@ -14,6 +15,10 @@ from kivy.app import App
 from kivy.logger import Logger, LOG_LEVELS
 from kivy.core.window import Window
 from kivy.uix.boxlayout import BoxLayout
+
+
+def build_index(index, rep):
+    index.build(rep)
 
 
 class MainApp(App):
@@ -61,13 +66,13 @@ class MainApp(App):
                 if rep_config.get('type') == "local":
                     Logger.info(f"Creating local repository '{uuid}' and building index.")
                     rep = repository.local.Repository(uuid, rep_config, index=index)
-                    index.build(rep, rebuild=True)
+                    threading.Thread(target=build_index, args=(index, rep)).start()
 
                 if rep_config.get('type') == "webdav":
                     Logger.info(f"Configuration: Creating WebDav repository '{uuid}' and building index.")
                     rep_config['cache'] = config['cache']
                     rep = repository.webdav.Repository(uuid, rep_config, index=index)
-                    index.build(rep, rebuild=False)
+                    threading.Thread(target=build_index, args=(index, rep)).start()
 
             # Catch any invalid configuration errors
             except InvalidConfigurationError:

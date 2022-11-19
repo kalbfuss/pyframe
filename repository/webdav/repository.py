@@ -94,33 +94,47 @@ class Repository(repository.Repository):
         """
         return self._root
 
-    def __iter__(self):
-        """Provide iterator which allows to traverse through all files in the repository."""
-        return FileIterator(self)
+    def iterator(self, index_lookup=True):
+        """Provide iterator which allows to traverse through all files in the repository.
 
-    def file_by_uuid(self, uuid):
+        :param index_lookup: True if file metadata shall be looked up from index.
+        :type index_lookup: bool
+        :return: File iterator.
+        :return type: repository.FileIterator
+        """
+        return FileIterator(self, index_lookup)
+
+    def file_by_uuid(self, uuid, index_lookup=True):
         """Return a file within the repository by its UUID.
 
         :param uuid: UUID of the file.
         :type uuid: str
+        :param index_lookup: True if file metadata shall be looked up from index.
+        :type index_lookup: bool
         :return: File with matching UUID.
         :rtype: repository.RepositoryFile
         :raises: InvalidUuirError
         """
-        return RepositoryFile(uuid, self, self._index)
+        if index_lookup:
+            return RepositoryFile(uuid, self, self._index)
+        else:
+            return RepositoryFile(uuid, self)
 
 
 class FileIterator(repository.FileIterator):
     """Iterator which can be used to traverse through files in a webdav repository."""
 
-    def __init__(self, rep):
+    def __init__(self, rep, index_lookup=True):
         """Initialize file iterator.
 
         :param root: Webdav repository.
         :type root: repository.webdav.repository
+        :param index_lookup: True if file metadata shall be looked up from index.
+        :type index_lookup: bool
         """
         # Basic initialization.
         self._rep = rep
+        self._index_lookup = index_lookup
         self._dir_list = []
 
         # Create iterator for list of root directory.
@@ -149,7 +163,7 @@ class FileIterator(repository.FileIterator):
             uuid = entry['path']
             logging.info(f"Creating webdav repository file {uuid}.")
             # Return the next file.
-            return RepositoryFile(uuid, self._rep, index=self._rep.index)
+            return self._rep.file_by_uuid(uuid, self._index_lookup)
 
         except StopIteration:
             if len(self._dir_list) > 0:

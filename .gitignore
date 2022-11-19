@@ -1,3 +1,4 @@
 cache/
 local/
 __pycache__
+index.sqlite

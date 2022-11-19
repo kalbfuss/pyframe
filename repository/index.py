@@ -8,16 +8,13 @@ References;
 1. https://bytefish.de/blog/first_steps_with_sqlalchemy/
 """
 
-import ffmpeg
-import fnmatch
 import logging
-import pyexiv2
 
 from repository import RepositoryFile, InvalidUuidError, Repository
 from sqlalchemy import create_engine, desc, event, func, Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.engine import Engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import backref, relationship, sessionmaker
+from sqlalchemy.orm import backref, relationship, sessionmaker, Session
 
 
 # Install listener for connection events to automatically enable foreign key
@@ -106,7 +103,8 @@ class Index:
     may span multiple repositories. Files and repositories are referenced via
     there universal unique identifiers.
 
-    Use method build() to build index.
+    Use method build() to build meta data index. Method build() may be run in
+    the background from a different thread.
     """
 
     def __init__(self, dbname="index.sqlite"):
@@ -127,8 +125,8 @@ class Index:
             # Create base class metadata
             Base.metadata.create_all(self._engine)
             # Open database session
-            Session = sessionmaker(bind=self._engine)
-            self._session = Session()
+            self._session_factory = sessionmaker(bind=self._engine)
+            self._session = self._session_factory()
         except Exception as e:
             logging.critical(f"An error ocurred while opening the index database '{dbname}': {e}")
 
@@ -145,43 +143,51 @@ class Index:
     def build(self, rep, rebuild=False):
         """Build meta data index.
 
+        Build method may be called from a different thread to build the index in
+        the background. The method thus creates its own session and prevents
+        files from looking up meta data from the index.
+
         :param rep: Repository for which to build the index.
         :type rep: repository.Repository
         :param rebuild: Indicates whether index is to be completely rebuilt.
             Default (False) is to update only, i.e. add the missing entries.
         :type rebuild: bool
         """
+
+        # Create new session since build may be called from different thread.
+        session = self._session_factory()
+
         # Check whether we are asked to rebuild the index.
         if rebuild:
             logging.info(f"Rebuilding meta data index for repository '{rep.uuid}'")
             try:
                 logging.info(f"Deleting all meta data entries for repository '{rep.uuid}'.")
                 # Delete all file entries for the specified repository.
-                self._session.query(MetaData).filter(MetaData.rep_uuid == rep.uuid).delete()
-                self._session.commit()
+                session.query(MetaData).filter(MetaData.rep_uuid == rep.uuid).delete()
+                session.commit()
                 # Delete all unused tags.
-                tags = self._session.query(MetaDataTag).all()
+                tags = session.query(MetaDataTag).all()
                 for tag in tags:
                     if tag.files.count() == 0:
                         logging.info(f"Deleting unused tag '{tag.name}'.")
-                        self._session.delete(tag)
-                self._session.commit()
+                        session.delete(tag)
+                session.commit()
             except Exception as e:
-                logging.error(f"An error has ocurred while deleting meta data for repository {rep.uuid}: {e}")
+                logging.error(f"An error occurred while deleting meta data for repository {rep.uuid} from index: {e}")
         else:
             logging.info(f"Updating meta data index for repository '{rep.uuid}'")
 
         # Iterate through all files in the repository.
-        for file in rep:
+        for file in rep.iterator(index_lookup=False):
             try:
                 # Check whether meta data entry for file does not exist yet.
-                if self._session.query(MetaData).filter(MetaData.rep_uuid == rep.uuid).filter(MetaData.file_uuid == file.uuid).first() is None:
+                if session.query(MetaData).filter(MetaData.rep_uuid == rep.uuid).filter(MetaData.file_uuid == file.uuid).first() is None:
                     # Create all necessary tags in database.
                     tags = list()
                     if file.tags:
                         for name in file.tags:
                             # Try to query tag from database.
-                            tag = self._session.query(MetaDataTag).filter(MetaDataTag.name == name).first()
+                            tag = session.query(MetaDataTag).filter(MetaDataTag.name == name).first()
                             # Create and add tag to database otherwise.
                             if tag is None:
                                 logging.info(f"Adding tag '{name}'.")
@@ -192,11 +198,13 @@ class Index:
                     # Create new database entry with file meta data.
                     mdata = MetaData(rep_uuid=file.rep.uuid, file_uuid=file.uuid, name=file.name, type=file.type, width=file.width, height=file.height, rotation=file.rotation,
                                      orientation=file.orientation, creation_date=file.creation_date, description=file.description, rating=file.rating, tags=tags)
-                    self._session.add(mdata)
-                # Commit all changes to the database.
-                self._session.commit()
+                    session.add(mdata)
+                    # Commit all changes to the database.
+                    session.commit()
+                # Close session
+                session.close()
             except Exception as e:
-                logging.error(f"An error ocurred while building the meta data index: {e}")
+                logging.error(f"An error occurred while building the meta data index: {e}")
 
     def lookup(self, file, rep):
         """Lookup file meta data.
