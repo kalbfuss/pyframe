@@ -1,0 +1,178 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>repository.local.repository &#8212; PyFrame 0.0.1 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for repository.local.repository</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;...&quot;&quot;&quot;</span>
+
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">os.path</span>
+<span class="kn">import</span> <span class="nn">repository</span>
+
+<span class="kn">from</span> <span class="nn">repository</span> <span class="k">import</span> <span class="n">Index</span>
+<span class="kn">from</span> <span class="nn">repository.local</span> <span class="k">import</span> <span class="n">File</span>
+
+
+<div class="viewcode-block" id="Repository"><a class="viewcode-back" href="../../../repository.local.html#repository.local.repository.Repository">[docs]</a><span class="k">class</span> <span class="nc">Repository</span><span class="p">(</span><span class="n">repository</span><span class="o">.</span><span class="n">Repository</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Repository with local file base.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uuid</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialize repository with local file base.</span>
+
+<span class="sd">        :param uuid: UUID of the repository.</span>
+<span class="sd">        :type name: str</span>
+<span class="sd">        :param root: Root directory of the repository.</span>
+<span class="sd">        :type root: str</span>
+<span class="sd">        :param index: Optional file meta data index. Default is None.</span>
+<span class="sd">        :type index: repository.Index</span>
+<span class="sd">        :raises: InvalidUuidError</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">repository</span><span class="o">.</span><span class="n">Repository</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uuid</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_root</span> <span class="o">=</span> <span class="n">root</span>
+
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Provide iterator which allows to traverse through all files in the repository.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">FileIterator</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Repository.file_by_uuid"><a class="viewcode-back" href="../../../repository.local.html#repository.local.repository.Repository.file_by_uuid">[docs]</a>    <span class="k">def</span> <span class="nf">file_by_uuid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uuid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a file within the repository by its UUID.</span>
+
+<span class="sd">        :param uuid: UUID of the file.</span>
+<span class="sd">        :type uuid: str</span>
+<span class="sd">        :raises: InvalidUuirError</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">File</span><span class="p">(</span><span class="n">uuid</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_index</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">root</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return root directory of the repository.</span>
+
+<span class="sd">        :return: Root directory of repository.</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_root</span></div>
+
+
+<div class="viewcode-block" id="FileIterator"><a class="viewcode-back" href="../../../repository.local.html#repository.local.repository.FileIterator">[docs]</a><span class="k">class</span> <span class="nc">FileIterator</span><span class="p">(</span><span class="n">repository</span><span class="o">.</span><span class="n">FileIterator</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Iterator which can be used to traverse through files in a repository with local file base.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rep</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialize file iterator.</span>
+
+<span class="sd">        :param root: Repository with local file base.</span>
+<span class="sd">        :type root: repository.local.repository</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rep</span> <span class="o">=</span> <span class="n">rep</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dir_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># Create scandir iterator for provided root directory</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_iterator</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">scandir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_rep</span><span class="o">.</span><span class="n">root</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Provide the next file.</span>
+
+<span class="sd">        :returns: Next file in the repository.</span>
+<span class="sd">        :rtype: repository.local.File</span>
+<span class="sd">        :raises: StopIteration</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># Retrieve the next directory entry.</span>
+            <span class="n">entry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_iterator</span><span class="o">.</span><span class="fm">__next__</span><span class="p">()</span>
+            <span class="c1"># Continue to retrieve entries if not a file.</span>
+            <span class="k">while</span> <span class="ow">not</span> <span class="n">entry</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+                <span class="c1"># Save all sub-directories for later.</span>
+                <span class="k">if</span> <span class="n">entry</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_dir_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">entry</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+                <span class="n">entry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_iterator</span><span class="o">.</span><span class="fm">__next__</span><span class="p">()</span>
+
+            <span class="c1"># Construct relative path to root directory of the repository.</span>
+            <span class="n">uuid</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">entry</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_rep</span><span class="o">.</span><span class="n">root</span><span class="p">)</span>
+            <span class="c1"># Return the next file.</span>
+            <span class="k">return</span> <span class="n">File</span><span class="p">(</span><span class="n">uuid</span><span class="o">=</span><span class="n">uuid</span><span class="p">,</span> <span class="n">rep</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_rep</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_rep</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dir_list</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c1"># Start all over with first subdirectory in the list</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_iterator</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">scandir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dir_list</span><span class="o">.</span><span class="n">pop</span><span class="p">())</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__next__</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Raise exception to indicate end of iteration otherwise</span>
+                <span class="k">raise</span> <span class="ne">StopIteration</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Bernd Kalbfuss.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.7</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

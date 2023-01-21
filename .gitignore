@@ -1,6 +1,6 @@
-cache/
-local/
-__pycache__
-index.sqlite
-config.yaml
+/cache/
+/local/
+__pycache__/
+/index.sqlite
+/config.yaml
 

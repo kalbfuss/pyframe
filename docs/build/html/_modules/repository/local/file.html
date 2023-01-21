@@ -1,0 +1,249 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>repository.local.file &#8212; PyFrame 0.0.1 documentation</title>
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for repository.local.file</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;&quot;...</span>
+
+
+<span class="sd">The following test script is based on instructions provided as part of the</span>
+<span class="sd">project description [1]. An overview of common EXIF tags is provided in [2].</span>
+
+<span class="sd">Dependencies;</span>
+<span class="sd">-------------</span>
+<span class="sd">- py3exiv2</span>
+<span class="sd">- boost (indirectly via py3exiv2)</span>
+
+<span class="sd">Requires the following ubuntu/debian packages libexiv2, libexiv2-dev,</span>
+<span class="sd">libboost-all-dev</span>
+
+<span class="sd">References;</span>
+<span class="sd">----------</span>
+<span class="sd">1. https://py3exiv2.tuxfamily.org/</span>
+<span class="sd">2. https://www.exiv2.org/tags.html</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<span class="kn">import</span> <span class="nn">fnmatch</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os.path</span>
+<span class="kn">import</span> <span class="nn">pyexiv2</span>
+<span class="kn">import</span> <span class="nn">repository</span>
+
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">repository</span> <span class="k">import</span> <span class="n">InvalidUuidError</span>
+
+
+<div class="viewcode-block" id="File"><a class="viewcode-back" href="../../../repository.local.html#repository.local.file.File">[docs]</a><span class="k">class</span> <span class="nc">File</span><span class="p">(</span><span class="n">repository</span><span class="o">.</span><span class="n">File</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;File within a local repository.</span>
+
+<span class="sd">    For images the following properties are read out from EXIF tag if available:</span>
+<span class="sd">    width, height, rotation, creation_date, description, rating, tags.</span>
+
+<span class="sd">    Properties:</span>
+<span class="sd">        uuid (str): Relative path to the root directory of the local repository.</span>
+<span class="sd">        rep (repository.Repository): Repository containing the file.</span>
+<span class="sd">        type (int): Type of the file. Determined based on the extension of the</span>
+<span class="sd">            file. The following values may be returned:</span>
+<span class="sd">            TYPE_UNKNOWN: Unknown file type (default)</span>
+<span class="sd">            TYPE_IMAGE: Image file</span>
+<span class="sd">            TYPE_VIDEO: Video file</span>
+<span class="sd">        width (int): Width of the file content in pixels. Default is 0.</span>
+<span class="sd">        height (int): Height of the file content in pixels. Default is 0.</span>
+<span class="sd">        rotation (int): Clock-wise rotation of the content in degrees. The only</span>
+<span class="sd">            values allowed are 0, 90, 180 and 270. Default is 0.</span>
+<span class="sd">        orientation (int): Orientation of the content considering rotation. The</span>
+<span class="sd">            following values may be returned:</span>
+<span class="sd">            ORIENTATION_LANDSCAPE: Content wider than high (default)</span>
+<span class="sd">            ORIENTATION_PORTRAIT: Content heigher than wide</span>
+<span class="sd">        creation_date (DateTime): Creation date of the file content. Creation</span>
+<span class="sd">            date of file used as fallback.</span>
+<span class="sd">        description (str): Description of the file content. Default is empty</span>
+<span class="sd">            string.</span>
+<span class="sd">        rating (int): Rating of the file content. Default is 0.</span>
+<span class="sd">        tags (set of str): User defined tags on the file. Not to be confounded</span>
+<span class="sd">            with EXIF tags in image files. Default is empty list.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Extensions of supported files</span>
+    <span class="n">EXT_IMAGE</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;*.jpg&quot;</span><span class="p">,</span> <span class="s2">&quot;*.jpeg&quot;</span><span class="p">)</span>
+    <span class="n">EXT_VIDEO</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;*.mp4&quot;</span><span class="p">,</span> <span class="s2">&quot;*.mv4&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uuid</span><span class="p">,</span> <span class="n">rep</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialize file.&quot;&quot;&quot;</span>
+        <span class="n">repository</span><span class="o">.</span><span class="n">File</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uuid</span><span class="p">,</span> <span class="n">rep</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+
+        <span class="c1"># Throw exception if file does not exist</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">rep</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">uuid</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">InvalidUuidError</span><span class="p">(</span><span class="s2">&quot;There is no file with UUID &#39;</span><span class="si">{uuid}</span><span class="s2">&#39;.&quot;</span><span class="p">,</span> <span class="n">uuid</span><span class="p">)</span>
+
+        <span class="c1"># Basic initialization.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">uuid</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_type</span> <span class="o">=</span> <span class="n">repository</span><span class="o">.</span><span class="n">File</span><span class="o">.</span><span class="n">TYPE_UNKNOWN</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_width</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_height</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rotation</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_orientation</span> <span class="o">=</span> <span class="n">repository</span><span class="o">.</span><span class="n">File</span><span class="o">.</span><span class="n">ORIENTATION_LANDSCAPE</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_creation_date</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getctime</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_description</span> <span class="o">=</span> <span class="nb">str</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rating</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tags</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+
+        <span class="c1"># Try to retrieve meta data from index if available.</span>
+        <span class="n">mdata</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">mdata</span> <span class="o">=</span> <span class="n">index</span><span class="o">.</span><span class="n">lookup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rep</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">mdata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Assigning meta data of file &#39;</span><span class="si">{self.uuid}</span><span class="s2">&#39; from index.&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_type</span> <span class="o">=</span> <span class="n">mdata</span><span class="o">.</span><span class="n">type</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_width</span> <span class="o">=</span> <span class="n">mdata</span><span class="o">.</span><span class="n">width</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_height</span> <span class="o">=</span> <span class="n">mdata</span><span class="o">.</span><span class="n">height</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_rotation</span> <span class="o">=</span> <span class="n">mdata</span><span class="o">.</span><span class="n">rotation</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_orientation</span> <span class="o">=</span> <span class="n">mdata</span><span class="o">.</span><span class="n">orientation</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_creation_date</span> <span class="o">=</span> <span class="n">mdata</span><span class="o">.</span><span class="n">creation_date</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_description</span> <span class="o">=</span> <span class="n">mdata</span><span class="o">.</span><span class="n">description</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_rating</span> <span class="o">=</span> <span class="n">mdata</span><span class="o">.</span><span class="n">rating</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_tags</span> <span class="o">=</span> <span class="p">[</span><span class="n">tag</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">mdata</span><span class="o">.</span><span class="n">tags</span><span class="p">]</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Extracting meta data of file &#39;</span><span class="si">{self.uuid}</span><span class="s2">&#39; from file content.&quot;</span><span class="p">)</span>
+            <span class="c1"># Determine type from file extension.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_type_from_extension</span><span class="p">()</span>
+            <span class="c1"># If image try to extract meta data from EXIF tag.</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type</span> <span class="o">==</span> <span class="n">repository</span><span class="o">.</span><span class="n">File</span><span class="o">.</span><span class="n">TYPE_IMAGE</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_extract_image_meta_data</span><span class="p">()</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_type_from_extension</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Determine file type based on file extension.&quot;&quot;&quot;</span>
+        <span class="n">fname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_uuid</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">pattern</span> <span class="ow">in</span> <span class="n">File</span><span class="o">.</span><span class="n">EXT_IMAGE</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">fnmatch</span><span class="o">.</span><span class="n">fnmatch</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">pattern</span><span class="o">.</span><span class="n">upper</span><span class="p">()):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_type</span> <span class="o">=</span> <span class="n">repository</span><span class="o">.</span><span class="n">File</span><span class="o">.</span><span class="n">TYPE_IMAGE</span>
+        <span class="k">for</span> <span class="n">pattern</span> <span class="ow">in</span> <span class="n">File</span><span class="o">.</span><span class="n">EXT_VIDEO</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">fnmatch</span><span class="o">.</span><span class="n">fnmatch</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">pattern</span><span class="o">.</span><span class="n">upper</span><span class="p">()):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_type</span> <span class="o">=</span> <span class="n">repository</span><span class="o">.</span><span class="n">File</span><span class="o">.</span><span class="n">TYPE_VIDEO</span>
+
+    <span class="k">def</span> <span class="nf">_extract_image_meta_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Extract meta data from file content.&quot;&quot;&quot;</span>
+        <span class="c1"># Extract all meta data from image file</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">pyexiv2</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">ImageMetadata</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="p">)</span>
+        <span class="n">data</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+        <span class="c1"># Try to obtain image dimensions from meta data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_width</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">dimensions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_height</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">dimensions</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="c1"># Try to obtain rotation from meta data</span>
+        <span class="n">orientation</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get_orientation</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">orientation</span> <span class="o">==</span> <span class="mi">8</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_rotation</span> <span class="o">=</span> <span class="mi">90</span>
+        <span class="k">elif</span> <span class="n">orientation</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_rotation</span> <span class="o">=</span> <span class="mi">180</span>
+        <span class="k">elif</span> <span class="n">orientation</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_rotation</span> <span class="o">=</span> <span class="mi">270</span>
+
+        <span class="c1"># Derive orientation from dimensions and rotation</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_width</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_height</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rotation</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">rotation</span> <span class="o">==</span> <span class="mi">180</span><span class="p">))</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_width</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_height</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rotation</span> <span class="o">==</span> <span class="mi">90</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">rotation</span> <span class="o">==</span> <span class="mi">270</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_orientation</span> <span class="o">=</span> <span class="n">File</span><span class="o">.</span><span class="n">ORIENTATION_PORTRAIT</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_orientation</span> <span class="o">=</span> <span class="n">File</span><span class="o">.</span><span class="n">ORIENTATION_LANDSCAPE</span>
+
+        <span class="c1"># Try to obtain image comment from meta data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_description</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">comment</span>
+        <span class="c1"># Or from image description EXIF tag if availabe</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_description</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span> <span class="ow">and</span> <span class="s2">&quot;Exif.Image.ImageDescription&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">exif_keys</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_description</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;Exif.Image.ImageDescription&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+
+        <span class="c1"># Extract creation date from EXIF tag if available</span>
+        <span class="k">if</span> <span class="s2">&quot;Exif.Photo.DateTimeOriginal&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">exif_keys</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_creation_date</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;Exif.Photo.DateTimeOriginal&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+
+        <span class="c1"># Extract rating from EXIF tag if available</span>
+        <span class="k">if</span> <span class="s2">&quot;Exif.Image.Rating&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">exif_keys</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_rating</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;Exif.Image.Rating&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span>
+
+        <span class="c1"># Extract data from IPTC tag if available</span>
+        <span class="k">if</span> <span class="s2">&quot;Iptc.Application2.Keywords&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">iptc_keys</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_tags</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;Iptc.Application2.Keywords&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">value</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Bernd Kalbfuss.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.7</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
