@@ -1,10 +1,10 @@
-"""
-"""
+"""Pyframe main module."""
 
 import logging
 import repository.local
 import repository.webdav
 import threading
+import time
 import yaml
 
 from repository import Index
@@ -14,16 +14,15 @@ from slideshow import Slideshow
 from kivy.app import App
 from kivy.logger import Logger, LOG_LEVELS
 from kivy.core.window import Window
-from kivy.uix.boxlayout import BoxLayout
 
 
 def build_index(index, rep):
+    """Build repository index (helper function)."""
     index.build(rep)
 
 
-class MainApp(App):
-    """
-    """
+class PyframeApp(App):
+    """Pyframe main application."""
 
     def build(self):
         """Build Kivy application.
@@ -43,6 +42,16 @@ class MainApp(App):
             config = yaml.safe_load(config_file)
         Logger.debug(f"Configuration: Configuration = {config}")
 
+        # Exit application if no repositories have been defined.
+        if 'repositories'not in config:
+            Logger.critical("Configuration: Exiting application as no repositories have been defined.")
+            App.get_running_app().stop()
+
+        # Exit application if no slideshow has been defined.
+        if 'slideshow' not in config:
+            Logger.critical("Configuration: Exiting application as no slideshow has been defined.")
+            App.get_running_app().stop()
+
         # Create/load index.
         if hasattr(config, 'index'):
             index_file = config['index']
@@ -50,26 +59,21 @@ class MainApp(App):
             index_file = "./index.sqlite"
         index = Index(index_file)
 
-        # Exit application if no repositories have been defined.
-        if not 'repositories' in config:
-            Logger.critical("Configuration: Exiting application as no repositories have been defined.")
-            App.get_running_app().stop()
-
         # Create repositories.
         for uuid, rep_config in config['repositories'].items():
             # Skip disabled repositories.
-            if rep_config.get('enabled') == False:
+            if rep_config.get('enabled') is False:
                 Logger.info(f"Configuration: Skipping repository '{uuid}' as it has been disabled.")
                 continue
             try:
                 # Create repository of the specified type and build index.
                 if rep_config.get('type') == "local":
-                    Logger.info(f"Creating local repository '{uuid}' and building index.")
+                    Logger.info(f"Creating local repository '{uuid}' and starting to build index in the background.")
                     rep = repository.local.Repository(uuid, rep_config, index=index)
                     threading.Thread(target=build_index, args=(index, rep)).start()
 
                 if rep_config.get('type') == "webdav":
-                    Logger.info(f"Configuration: Creating WebDav repository '{uuid}' and building index.")
+                    Logger.info(f"Configuration: Creating WebDav repository '{uuid}' and starting to build index in the background.")
                     rep_config['cache'] = config['cache']
                     rep = repository.webdav.Repository(uuid, rep_config, index=index)
                     threading.Thread(target=build_index, args=(index, rep)).start()
@@ -86,14 +90,15 @@ class MainApp(App):
             Logger.critical("Configuration: Exiting application as no valid repositories have been defined.")
             App.get_running_app().stop()
 
+        # Wait until index contains at least one entry.
+        while index.count() < 2:
+            time.sleep(1)
+            Logger.info("Index still empty. Giving more time to build.")
+        Logger.info(f"Proceeding with {index.count()} index entries.")
+
         # Change to full screen mode.
         #Window.fullscreen = 'auto'
         Window.size = (990, 512)
-
-        # Exit application if no slideshow has been defined.
-        if not 'slideshow' in config:
-            Logger.critical("Configuration: Exiting application as no slideshow has been defined.")
-            App.get_running_app().stop()
 
         # Extract parameters from root config which shall be passed on to slideshow.
         args = {key: config[key] for key in ('rotation', 'bgcolor')}
@@ -103,4 +108,4 @@ class MainApp(App):
 
 
 if __name__ == "__main__":
-    MainApp().run()
+    PyframeApp().run()

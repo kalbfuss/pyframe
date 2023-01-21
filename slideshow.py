@@ -265,7 +265,7 @@ class Slideshow(AnchorLayout):
                 elif value == "name" and config['order'] == "descending":
                     self._criteria['order'] = ORDER_NAME_DESC
                 else:
-                    raise InvalidSlideshowConfigurationError(f"Incorrect sequence '{value}' specified.", config)
+                    raise InvalidSlideshowConfigurationError(f"Invalid value '{value}' for slideshow parameter 'sequence' specified.", config)
 
             # Limit iteration to the n most recent files based on the creation
             # date.
@@ -273,7 +273,7 @@ class Slideshow(AnchorLayout):
                 if int(config['mostRecent']) > 0:
                     self._criteria['mostRecent'] = int(config['mostRecent'])
                 else:
-                    raise InvalidSlideshowConfigurationError(f"Invalid value '{value}' for mostRecent specified.", config)
+                    raise InvalidSlideshowConfigurationError(f"Invalid value '{value}' for slideshow parameter 'mostRecent' specified.", config)
 
             # Filter for orientation of content.
             if key == "orientation":
@@ -282,12 +282,12 @@ class Slideshow(AnchorLayout):
                 elif value == "portrait":
                     self._criteria['orientation'] = RepositoryFile.ORIENTATION_PORTRAIT
                 else:
-                    raise InvalidSlideshowConfigurationError(f"Invalid orientation '{value}' specified.", config)
+                    raise InvalidSlideshowConfigurationError(f"Invalid value '{value}' for slideshow parameter 'orientation' specified.", config)
 
             # Filter for file type.
             if key == "fileType":
                 if value is None:
-                    raise InvalidSlideshowConfigurationError(f"At least one file type has to be specified.", config)
+                    raise InvalidSlideshowConfigurationError(f"At least one file type must be specified for slideshow parameter 'fileType'.", config)
                 # Convert to list if single value specified.
                 if type(value) == str:
                     value = [value]
@@ -298,13 +298,13 @@ class Slideshow(AnchorLayout):
                     elif fileType == "videos":
                         types.append(RepositoryFile.TYPE_VIDEO)
                     else:
-                        raise InvalidSlideshowConfigurationError(f"Invalid type '{fileType}' specified.", config)
+                        raise InvalidSlideshowConfigurationError(f"Invalid type '{fileType}' for slideshow parameter 'fileType' specified.", config)
                 self._criteria['type'] = types
 
             # Filter for file tags.
             if key == "tags":
                 if value is None:
-                    raise InvalidSlideshowConfigurationError(f"At least one tag has to be specified.", config)
+                    raise InvalidSlideshowConfigurationError(f"At least one tag must be specified for slideshow parameter 'tags'.", config)
                 # Convert to list if single value specified.
                 if type(value) == str:
                     value = [value]

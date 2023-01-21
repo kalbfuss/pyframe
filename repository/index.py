@@ -1,4 +1,5 @@
-"""
+"""Meta data index class.
+
 The following test script is based on the tutorial by Philipp Wagner [1]. The
 script depends on the following debian packages:
 - python3-sqlalchemy
@@ -14,7 +15,7 @@ from repository import RepositoryFile, InvalidUuidError, Repository
 from sqlalchemy import create_engine, desc, event, func, Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.engine import Engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import backref, relationship, sessionmaker, Session
+from sqlalchemy.orm import backref, relationship, sessionmaker
 
 
 # Install listener for connection events to automatically enable foreign key
@@ -84,6 +85,7 @@ class MetaDataTag(Base):
         id(Integer): Numerical unique identifier. Automatically generated.
         name(String(255)): Unique name of the tag.
     """
+
     __tablename__ = "tags"
     id = Column(Integer, primary_key=True)
     name = Column(String(255), unique=True, nullable=False)
@@ -91,6 +93,7 @@ class MetaDataTag(Base):
 
 class Link(Base):
     """Association table for file meta data and tags."""
+
     __tablename__ = "tag_file"
     tag_id = Column(Integer, ForeignKey('tags.id', ondelete="CASCADE"), primary_key=True)
     file_id = Column(Integer, ForeignKey('files.id', ondelete="CASCADE"), primary_key=True)
@@ -153,7 +156,6 @@ class Index:
             Default (False) is to update only, i.e. add the missing entries.
         :type rebuild: bool
         """
-
         # Create new session since build may be called from different thread.
         session = self._session_factory()
 
@@ -224,6 +226,14 @@ class Index:
             logging.error(f"An error ocurred while looking up meta data from index for file '{file.uuid}' in repository '{rep.uuid}': {e}")
             return None
 
+    def count(self):
+        """Count the number of rows in the index.
+
+        :return: Number of rows in the index.
+        :return type: int
+        """
+        return self._session.query(MetaData).count()
+
     # Order type definitions
     ORDER_RANDOM = 0
     ORDER_DATE_ASC = 1
@@ -249,6 +259,7 @@ class InvalidIterationCriteriaError(Exception):
     """Invalid index iteration criteria error."""
 
     def __init__(self, msg, criteria=None):
+        """Initialize class instance."""
         super().__init__(msg)
         self.criteria = criteria
 
@@ -269,7 +280,6 @@ class SelectiveIndexIterator:
         :type criteria: dict
         :raises:
         """
-
         # Initialize query.
         query = session.query(MetaData)
 
