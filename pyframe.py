@@ -50,7 +50,7 @@ class PyframeApp(App):
         # Exit application if no slideshow has been defined.
         if 'slideshow' not in config:
             Logger.critical("Configuration: Exiting application as no slideshow has been defined.")
-            App.get_running_app().stop()
+            exit()
 
         # Create/load index.
         if hasattr(config, 'index'):
