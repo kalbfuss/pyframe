@@ -360,6 +360,7 @@ class Slideshow(AnchorLayout):
             file = next(self._iterator)
         # Create new iterator if end of iteration has been reached.
         except StopIteration:
+            Logger.info("End of iteration. Restarting iteration.")
             self._iterator = self._index.iterator(**self._criteria)
             file = next(self._iterator)
         # Create widget for next frame.
