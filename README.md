@@ -1,23 +1,39 @@
-#Pyframe
+# Pyframe #
 
-##Dependencies
+Pyframe is a Phyton-based digital photo frame application. It is capable of
+displaying photos and playing videos from local storage as well as WebDAV
+repositories.
+
+## Dependencies ##
+
 Python
 - exifread
 - IPTCInfo3
 - Kivy
 - SQLAlchemy
-- webdav3
+- webdavclient3
 - yaml
+- ffmeg-python
 
-
-Raspberry Pi OS
+Linux
 - libxslt1.1
 - libmtdev1
+- ffmpeg
 
+## Radxa Zero ##
 
-##Radxa zero
+While pyframe in principle runs on any computer with Python 3 and the necessary
+libraries installed, we typically want it to run on a single-board computer
+(SBC) that is strong enough to process photo files and play videos.
 
-###Linux installation and basic configuration
+An ARM-based SBC, which is fit for the task, is the [Radxa Zero]
+(https://wiki.radxa.com/Zero). It comes with a quad-core ARM Cortex-A53 CPU,
+4 GB of RAM, and up to 128 GB eMMC. It further supports OpenGL ES 3.2 and is
+equipped with an onboard Wifi chip. Still it is not bigger than a Raspberry Pi
+Zero and thus well suited for integration into a digital photo frame.
+
+### Linux installation and basic configuration ###
+
 Intall focal Armbian image with XFCE desktop to SD card
 Boot Radxa zero from SD card
 Set root password and create new user account
@@ -54,7 +70,7 @@ Install fail2ban
 $ sudo apt install fail2ban
 ```
 
-###Python configuration
+### Python configuration ###
 Install python packages via debian package manager
 ```
 $ sudo apt install python3 python3-pip python3-kivy python3-sqlalchemy python3-yaml python3-exifread
