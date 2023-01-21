@@ -8,7 +8,7 @@ from kivy.core.window import Window
 from kivy.graphics import PushMatrix, PopMatrix, Rotate, Color, Rectangle
 from kivy.logger import Logger
 from kivy.uix.anchorlayout import AnchorLayout
-from kivy.uix.image import AsyncImage
+from kivy.uix.image import Image
 from kivy.uix.video import Video
 from kivy.uix.widget import Widget
 
@@ -141,7 +141,7 @@ class SlideshowImage(Widget):
         self._file = file
         self._rotation = file.rotation - rotation
         self._bgcolor = bgcolor
-        self._image = AsyncImage(source=file.source, allow_stretch=True)
+        self._image = Image(source=file.source, allow_stretch=True)
         self.add_widget(self._image)
         # Call update_canvas method when the size of the widget changes.
         self.bind(size=self.update_canvas)
