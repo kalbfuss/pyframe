@@ -1,13 +1,12 @@
-"""..."""
+"""Module for WebDAV repositories."""
 
 
 import logging
-import os
-import os.path
 import repository
 import tempfile
 
 from repository.webdav import RepositoryFile
+from repository import InvalidConfigurationError
 from webdav3.client import Client
 
 
@@ -46,8 +45,7 @@ class Repository(repository.Repository):
         self._client = Client(options)
 
     def _check_config(self, config):
-        """Check the configuration for the repository from the configuration
-        file.
+        """Check the configuration for the repository from the configuration file.
 
         :param config:
         :type config: dict

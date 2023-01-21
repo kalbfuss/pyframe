@@ -6,7 +6,6 @@ project description [1]. An overview of common EXIF tags is provided in [2].
 
 Dependencies;
 -------------
-- py3exiv2
 - boost (indirectly via py3exiv2)
 - ffmpeg-python
 - webdavclient3
@@ -24,11 +23,8 @@ References;
 
 
 import logging
-import os.path
 import repository
 import tempfile
-
-from datetime import datetime
 
 
 class RepositoryFile(repository.RepositoryFile):

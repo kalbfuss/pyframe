@@ -21,7 +21,7 @@ repositories:
     root: /remote.php/webdav/Photos
     user: pyframe
     password: 61wEKZ549c74q3P6
-    enabled: true
+    enabled: false
 
 slideshow:
   sequence: random
