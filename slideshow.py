@@ -221,6 +221,7 @@ class InvalidSlideshowConfigurationError(Exception):
     """Invalid slideshow configuration error."""
 
     def __init__(self, msg, config=None):
+        """Initialize class instance."""
         super().__init__(msg)
         self.config = config
 
@@ -257,13 +258,13 @@ class Slideshow(AnchorLayout):
                 if value == "random":
                     self._criteria['order'] = Index.ORDER_RANDOM
                 elif value == "date" and config['order'] == "ascending":
-                    self._criteria['order'] = ORDER_DATE_ASC
+                    self._criteria['order'] = Index.ORDER_DATE_ASC
                 elif value == "date" and config['order'] == "descending":
-                    self._criteria['order'] = ORDER_DATE_DESC
+                    self._criteria['order'] = Index.ORDER_DATE_DESC
                 elif value == "name" and config['order'] == "ascending":
-                    self._criteria['order'] = ORDER_NAME_ASC
+                    self._criteria['order'] = Index.ORDER_NAME_ASC
                 elif value == "name" and config['order'] == "descending":
-                    self._criteria['order'] = ORDER_NAME_DESC
+                    self._criteria['order'] = Index.ORDER_NAME_DESC
                 else:
                     raise InvalidSlideshowConfigurationError(f"Invalid value '{value}' for slideshow parameter 'sequence' specified.", config)
 
@@ -287,7 +288,7 @@ class Slideshow(AnchorLayout):
             # Filter for file type.
             if key == "fileType":
                 if value is None:
-                    raise InvalidSlideshowConfigurationError(f"At least one file type must be specified for slideshow parameter 'fileType'.", config)
+                    raise InvalidSlideshowConfigurationError("At least one file type must be specified for slideshow parameter 'fileType'.", config)
                 # Convert to list if single value specified.
                 if type(value) == str:
                     value = [value]
@@ -304,7 +305,7 @@ class Slideshow(AnchorLayout):
             # Filter for file tags.
             if key == "tags":
                 if value is None:
-                    raise InvalidSlideshowConfigurationError(f"At least one tag must be specified for slideshow parameter 'tags'.", config)
+                    raise InvalidSlideshowConfigurationError("At least one tag must be specified for slideshow parameter 'tags'.", config)
                 # Convert to list if single value specified.
                 if type(value) == str:
                     value = [value]
