@@ -97,8 +97,10 @@ class PyframeApp(App):
         Logger.info(f"Proceeding with {index.count()} index entries.")
 
         # Change to full screen mode.
-        #Window.fullscreen = 'auto'
-        Window.size = (990, 512)
+        Window.fullscreen = 'auto'
+        #Window.size = (990, 512)
+        # Disable display of mouse cursor
+        Window.show_cursor = False
 
         # Extract parameters from root config which shall be passed on to slideshow.
         args = {key: config[key] for key in ('rotation', 'bgcolor')}

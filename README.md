@@ -47,6 +47,7 @@ Adjust the following configuration settings
 * Keyboard layout
 * Host name
 * WLAN
+* Auto-login
 
 Install Armbian to eMMC using respective function in the System sub-menu.
 Switch off, remove SD card and restart
@@ -85,13 +86,6 @@ gstreamer plug-in.
 $ sudo apt install ffmpeg gstreamer1.0-libav
 ``
 
-###Autologin
-Configure autologin of standard user.
+### Netzteil ###
 
-*/etc/lightdm/lightdm.conf.d/20-autologin*
-```
-[Seat:*]
-autologin-session=xfce   
-autologin-user=langweiler
-autologin-user-timeout=0
-```
+https://www.smart-things.com/de/produkte/scharge-20w-usb-c/
