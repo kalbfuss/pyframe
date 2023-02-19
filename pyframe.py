@@ -97,8 +97,8 @@ class PyframeApp(App):
         Logger.info(f"Proceeding with {index.count()} index entries.")
 
         # Change to full screen mode.
-        #Window.fullscreen = 'auto'
-        Window.size = (800, 450)
+        Window.fullscreen = 'auto'
+        #Window.size = (800, 450)
         # Disable display of mouse cursor
         Window.show_cursor = False
 
