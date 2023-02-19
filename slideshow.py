@@ -21,7 +21,7 @@ class SlideshowVideo(Widget):
     respecting the aspect ratio.
     """
 
-    def __init__(self, file, rotation=0, bgcolor=[1, 1, 1]):
+    def __init__(self, file, config):
         """Initialize slideshow video instance.
 
         :param file: Repository file instance for the video to be displayed.
@@ -33,8 +33,8 @@ class SlideshowVideo(Widget):
         """
         Widget.__init__(self)
         self._file = file
-        self._rotation = file.rotation - rotation
-        self._bgcolor = bgcolor
+        self._rotation = file.rotation - config['rotation']
+        self._bgcolor = config['bgcolor']
         self._video = Video(source=file.source, state='stop', options={'allow_stretch': True, 'eos': 'loop'})
         self.add_widget(self._video)
         # Call update_canvas method when the size of the widget changes.
@@ -57,7 +57,7 @@ class SlideshowVideo(Widget):
 
         # Fill canvas with background color.
         with self._video.canvas.before:
-            Color(self._bgcolor)
+            Color(*self._bgcolor)
             Rectangle(pos=(0, 0), size=self.size)
 
         # Rotate canvas if required.
@@ -91,24 +91,6 @@ class SlideshowVideo(Widget):
             self._video.x = round(self.x + (self.width - max_dim)/2)
             self._video.y = round(self.y + (self.height - max_dim)/2)
 
-            # Log debug information
-#            Logger.debug(f"Video uuid: {self._file.uuid}")
-#            Logger.debug(f"Video type: {self._file.type}")
-#            Logger.debug(f"Video source: {self._file.source}")
-#            Logger.debug(f"Video orientation: {self._file.orientation}")
-#            Logger.debug(f"Video rotation: {self._file.rotation}")
-#            Logger.debug(f"Total rotation: {self._rotation}")
-#            Logger.debug(f"Widget width: {self.width}")
-#            Logger.debug(f"Widget height: {self.height}")
-#            Logger.debug(f"Widget aspect ratio: {widget_ratio}")
-#            Logger.debug(f"max_dim: {max_dim}")
-#            Logger.debug(f"Video width: {self._video.width}")
-#            Logger.debug(f"Video height: {self._video.height}")
-#            Logger.debug(f"Video aspect ratio: {video_ratio}")
-#            Logger.debug(f"Video x: {self._video.x}")
-#            Logger.debug(f"Video y: {self._video.y}")
-#            Logger.debug(f"Video center: {self._video.center}")
-
             # Apply rotation.
             with self._video.canvas.before:
                 PushMatrix()
@@ -117,6 +99,24 @@ class SlideshowVideo(Widget):
                 PopMatrix()
         else:
             self._video.size = self.size
+
+        # Log debug information
+#       Logger.debug(f"Video uuid: {self._file.uuid}")
+#       Logger.debug(f"Video type: {self._file.type}")
+#       Logger.debug(f"Video source: {self._file.source}")
+#       Logger.debug(f"Video orientation: {self._file.orientation}")
+#       Logger.debug(f"Video rotation: {self._file.rotation}")
+#       Logger.debug(f"Total rotation: {self._rotation}")
+#       Logger.debug(f"Widget width: {self.width}")
+#       Logger.debug(f"Widget height: {self.height}")
+#       Logger.debug(f"Widget aspect ratio: {widget_ratio}")
+#       Logger.debug(f"max_dim: {max_dim}")
+#       Logger.debug(f"Video width: {self._video.width}")
+#       Logger.debug(f"Video height: {self._video.height}")
+#       Logger.debug(f"Video aspect ratio: {video_ratio}")
+#       Logger.debug(f"Video x: {self._video.x}")
+#       Logger.debug(f"Video y: {self._video.y}")
+#       Logger.debug(f"Video center: {self._video.center}")
 
 
 class SlideshowImage(Widget):
@@ -127,20 +127,22 @@ class SlideshowImage(Widget):
     respecting the aspect ratio.
     """
 
-    def __init__(self, file, rotation=0, bgcolor=[1, 1, 1]):
+    def __init__(self, file, config):
         """Initialize slideshow image instance.
 
         :param file: Repository file instance for the image to be displayed.
         :type file: repository.File
-        :param rotation: Angle in degrees by which the image is rotated clockwise.
-        :type rotation: int
-        :param bgolor: Canvas background color for areas, which are not covered by the image. The default ist [1, 1, 1] (white).
-        :type bgcolor: list of float (3x)
+        :param config: Dictionary with the following entries:
+            rotation: Angle in degrees (int) by which the image is rotated clockwise.
+            bgolor: Canvas background color (list(3)) for areas, which are not covered by the image.
+            resize: Mode (str) for resizing of images. Must equal "fit" or "fill".
+        :type config: dict
         """
         Widget.__init__(self)
         self._file = file
-        self._rotation = file.rotation - rotation
-        self._bgcolor = bgcolor
+        self._rotation = file.rotation - config['rotation']
+        self._bgcolor = config['bgcolor']
+        self._resize = config['resize']
         self._image = Image(source=file.source, allow_stretch=True)
         self.add_widget(self._image)
         # Call update_canvas method when the size of the widget changes.
@@ -154,31 +156,50 @@ class SlideshowImage(Widget):
 
         # Fill canvas with background color.
         with self._image.canvas.before:
-            Color(self._bgcolor)
+            Color(*self._bgcolor)
+            #Color(0.2, 0.2, 0.1)
             Rectangle(pos=(0, 0), size=self.size)
 
-        # Rotate canvas if required.
-        if self._rotation != 0:
-            # Determine aspect ratios of image slideshow widget (this widget)
-            # and image.
-            widget_ratio = self.width/self.height
-#           image_ratio = self._file.width/self._file.height
-            image_ratio = self._image.image_ratio
-            # Correct image aspect ratio for image rotation. i.e. aspect ratio
-            # corresponds to the ratio after rotation.
-            if abs(self._rotation) == 90 or abs(self._rotation == 270):
-                image_ratio = 1/image_ratio
+        # Determine aspect ratios of image slideshow widget (this widget)
+        # and image.
+        widget_ratio = self.width/self.height
+        image_ratio = self._image.image_ratio
+        # Correct image aspect ratio for image rotation. i.e. aspect ratio
+        # corresponds to the ratio after rotation.
+        if abs(self._rotation) == 90 or abs(self._rotation == 270):
+            image_ratio = 1/image_ratio
 
-            # Determine required maximum dimension for the rotation
-            # transformation based on aspect ratios.
-            if widget_ratio > image_ratio and image_ratio > 1:
-                max_dim = round(self.height*image_ratio)
-            elif widget_ratio <= image_ratio and image_ratio >= 1:
-                max_dim = self.width
-            elif widget_ratio >= image_ratio and image_ratio <= 1:
-                max_dim = self.height
-            else:  # widget_ratio < image_ratio and image_ratio < 1
-                max_dim = round(self.width/image_ratio)
+        # Tranform image to fill the image slideshow widget. Only images with
+        # the same orientation will be resized to fill the widget. Images with a
+        # different orientation will be resized to fit the widget.
+        if self._resize == "fill":
+
+            # Determine maximum dimension for widget with landscape orientation.
+            if widget_ratio > 1:
+                # Determine required maximum dimension for the rotation
+                # transformation based on aspect ratios.
+                if widget_ratio > image_ratio and image_ratio > 1:
+                    max_dim = self.width
+                elif widget_ratio <= image_ratio and image_ratio >= 1:
+                    max_dim = round(self.height*image_ratio)
+                elif widget_ratio >= image_ratio and image_ratio <= 1:
+                    max_dim = self.height
+                else:  # widget_ratio < image_ratio and image_ratio < 1
+                    max_dim = round(self.width/image_ratio)
+            # Determine maximum dimension for widget with portrait orientation.
+            else:  # widget_ratio <= 1:
+                if widget_ratio > image_ratio and image_ratio > 1:
+                    max_dim = round(self.height*image_ratio)
+                    # max_dim = self.width
+                elif widget_ratio <= image_ratio and image_ratio >= 1:
+                    max_dim = self.width
+                    # max_dim = round(self.height*image_ratio)
+                elif widget_ratio >= image_ratio and image_ratio <= 1:
+                    # max_dim = self.height
+                    max_dim = round(self.width/image_ratio)
+                else:  # widget_ratio < image_ratio and image_ratio < 1
+                    # max_dim = round(self.width/image_ratio)
+                    max_dim = self.height
 
             # Set size of image widget to square with maximum dimension
             self._image.size = (max_dim, max_dim)
@@ -186,6 +207,49 @@ class SlideshowImage(Widget):
             # to center rotated image.
             self._image.x = round(self.x + (self.width - max_dim)/2)
             self._image.y = round(self.y + (self.height - max_dim)/2)
+
+            # Apply rotation if not zero
+            if self._rotation != 0:
+                with self._image.canvas.before:
+                    PushMatrix()
+                    Rotate(angle=self._rotation, origin=self._image.center, axis=(0, 0, 1))
+                with self._image.canvas.after:
+                    PopMatrix()
+
+        # Default is to fit the image to the canvas
+        else:  # self._resize == "fit"
+
+            # Resize and rotate the image if required.
+            if self._rotation != 0:
+                # Determine required maximum dimension for the rotation
+                # transformation based on aspect ratios.
+                if widget_ratio > image_ratio and image_ratio > 1:
+                    max_dim = round(self.height*image_ratio)
+                elif widget_ratio <= image_ratio and image_ratio >= 1:
+                    max_dim = self.width
+                elif widget_ratio >= image_ratio and image_ratio <= 1:
+                    max_dim = self.height
+                else:  # widget_ratio < image_ratio and image_ratio < 1
+                    max_dim = round(self.width/image_ratio)
+
+                # Set size of image widget to square with maximum dimension
+                self._image.size = (max_dim, max_dim)
+                # Adjust position of image widget within slideshow image widget
+                # to center rotated image.
+                self._image.x = round(self.x + (self.width - max_dim)/2)
+                self._image.y = round(self.y + (self.height - max_dim)/2)
+
+                # Apply rotation.
+                with self._image.canvas.before:
+                    PushMatrix()
+                    Rotate(angle=self._rotation, origin=self._image.center, axis=(0, 0, 1))
+                with self._image.canvas.after:
+                    PopMatrix()
+
+            # Set size of image widget to size of image slideshow widget (this
+            # widget) otherwise and let image widget do the scaling.
+            else:  # self._rotation == 0:
+                self._image.size = self.size
 
             # Log debug information
 #            Logger.debug(f"Image uuid: {self._file.uuid}")
@@ -204,17 +268,6 @@ class SlideshowImage(Widget):
 #            Logger.debug(f"Image x: {self._image.x}")
 #            Logger.debug(f"Image y: {self._image.y}")
 #            Logger.debug(f"Image center: {self._image.center}")
-
-            # Apply rotation.
-            with self._image.canvas.before:
-                PushMatrix()
-                Rotate(angle=self._rotation, origin=self._image.center, axis=(0, 0, 1))
-            with self._image.canvas.after:
-                PopMatrix()
-        # Set size of image widget to size of image slideshow widget (this
-        # widget) otherwise and let image widget do the scaling.
-        else:
-            self._image.size = self.size
 
 
 class InvalidSlideshowConfigurationError(Exception):
@@ -342,9 +395,9 @@ class Slideshow(AnchorLayout):
         :rtype: Widget
         """
         if file.type == RepositoryFile.TYPE_IMAGE:
-            widget = SlideshowImage(file, **self._args)
+            widget = SlideshowImage(file, self._config)
         elif file.type == RepositoryFile.TYPE_VIDEO:
-            widget = SlideshowVideo(file, **self._args)
+            widget = SlideshowVideo(file, self._config)
         return widget
 
     def next_file(self):
