@@ -35,7 +35,8 @@ class SlideshowVideo(Widget):
         self._file = file
         self._rotation = file.rotation - config['rotation']
         self._bgcolor = config['bgcolor']
-        self._video = Video(source=file.source, state='stop', allow_stretch=True, options={'allow_stretch': True, 'eos': 'loop'})
+        self._resize = config['resize']
+        self._video = Video(source=file.source, state='stop', allow_stretch=True, options={'eos': 'loop'})
         self.add_widget(self._video)
         # Call update_canvas method when the size of the widget changes.
         self.bind(size=self.update_canvas)
@@ -60,29 +61,48 @@ class SlideshowVideo(Widget):
             Color(*self._bgcolor)
             Rectangle(pos=(0, 0), size=self.size)
 
-        # Rotate canvas if required.
-        if (self._rotation != 0):
-            # Determine widget and image aspect ratios.
-            widget_ratio = self.width/self.height
-            # We need to rely on the file meta data in this case since the Kivy
-            # video class does not have a video_ratio attribute and the
-            # dimensions of the widget have not been adjusted yet.
-            video_ratio = self._file.width/self._file.height
-            # Correct image aspect ratio for image rotation. i.e. aspect ratio
-            # corresponds to the ratio after rotation.
-            if abs(self._rotation) == 90 or abs(self._rotation == 270):
-                video_ratio = 1/video_ratio
+        # Determine widget and video aspect ratios.
+        widget_ratio = self.width/self.height
+        # We need to rely on the file meta data in this case since the Kivy
+        # video class does not have a video_ratio attribute and the
+        # dimensions of the widget have not been adjusted yet.
+        video_ratio = self._file.width/self._file.height
+        # Correct image aspect ratio for image rotation. i.e. aspect ratio
+        # corresponds to the ratio after rotation.
+        if abs(self._rotation) == 90 or abs(self._rotation == 270):
+            video_ratio = 1/video_ratio
 
-            # Determine required maximum dimension for the rotation
-            # transformation based on aspect ratios.
-            if widget_ratio > video_ratio and video_ratio > 1:
-                max_dim = round(self.height*video_ratio)
-            elif widget_ratio <= video_ratio and video_ratio >= 1:
-                max_dim = self.width
-            elif widget_ratio >= video_ratio and video_ratio <= 1:
-                max_dim = self.height
-            else:  # widget_ratio < image_ratio and image_ratio < 1
-                max_dim = round(self.width/video_ratio)
+        # Tranform video to fill the video slideshow widget. Only videos with
+        # the same orientation will be resized to fill the widget. Videos with a
+        # different orientation will be resized to fit the widget.
+        if self._resize == "fill":
+
+            # Determine maximum dimension for widget with landscape orientation.
+            if widget_ratio > 1:
+                # Determine required maximum dimension for the rotation
+                # transformation based on aspect ratios.
+                if widget_ratio > video_ratio and video_ratio > 1:
+                    max_dim = self.width
+                elif widget_ratio <= video_ratio and video_ratio >= 1:
+                    max_dim = round(self.height*video_ratio)
+                elif widget_ratio >= video_ratio and video_ratio <= 1:
+                    max_dim = self.height
+                else:  # widget_ratio < video_ratio and video_ratio < 1
+                    max_dim = round(self.width/video_ratio)
+            # Determine maximum dimension for widget with portrait orientation.
+            else:  # widget_ratio <= 1:
+                if widget_ratio > video_ratio and video_ratio > 1:
+                    max_dim = round(self.height*video_ratio)
+                    # max_dim = self.width
+                elif widget_ratio <= video_ratio and video_ratio >= 1:
+                    max_dim = self.width
+                    # max_dim = round(self.height*image_ratio)
+                elif widget_ratio >= video_ratio and video_ratio <= 1:
+                    # max_dim = self.height
+                    max_dim = round(self.width/video_ratio)
+                else:  # widget_ratio < video_ratio and video_ratio < 1
+                    # max_dim = round(self.width/video_ratio)
+                    max_dim = self.height
 
             # Set size of image widget to square with maximum dimension
             self._video.size = (max_dim, max_dim)
@@ -91,14 +111,45 @@ class SlideshowVideo(Widget):
             self._video.x = round(self.x + (self.width - max_dim)/2)
             self._video.y = round(self.y + (self.height - max_dim)/2)
 
-            # Apply rotation.
-            with self._video.canvas.before:
-                PushMatrix()
-                Rotate(angle=self._rotation, origin=self._video.center, axis=(0, 0, 1))
-            with self._video.canvas.after:
-                PopMatrix()
-        else:
-            self._video.size = self.size
+            # Apply rotation if not zero
+            if self._rotation != 0:
+                with self._video.canvas.before:
+                    PushMatrix()
+                    Rotate(angle=self._rotation, origin=self._video.center, axis=(0, 0, 1))
+                with self._video.canvas.after:
+                    PopMatrix()
+
+        # Default is to fit the video to the canvas
+        else:  # self._resize == "fit"
+
+            # Rotate canvas if required.
+            if (self._rotation != 0):
+                # Determine required maximum dimension for the rotation
+                # transformation based on aspect ratios.
+                if widget_ratio > video_ratio and video_ratio > 1:
+                    max_dim = round(self.height*video_ratio)
+                elif widget_ratio <= video_ratio and video_ratio >= 1:
+                    max_dim = self.width
+                elif widget_ratio >= video_ratio and video_ratio <= 1:
+                    max_dim = self.height
+                else:  # widget_ratio < image_ratio and image_ratio < 1
+                    max_dim = round(self.width/video_ratio)
+
+                # Set size of image widget to square with maximum dimension
+                self._video.size = (max_dim, max_dim)
+                # Adjust position of image widget within slideshow image widget
+                # to center rotated image.
+                self._video.x = round(self.x + (self.width - max_dim)/2)
+                self._video.y = round(self.y + (self.height - max_dim)/2)
+
+                # Apply rotation.
+                with self._video.canvas.before:
+                    PushMatrix()
+                    Rotate(angle=self._rotation, origin=self._video.center, axis=(0, 0, 1))
+                with self._video.canvas.after:
+                    PopMatrix()
+            else:
+                self._video.size = self.size
 
         # Log debug information
 #       Logger.debug(f"Video uuid: {self._file.uuid}")
