@@ -35,7 +35,7 @@ class SlideshowVideo(Widget):
         self._file = file
         self._rotation = file.rotation - config['rotation']
         self._bgcolor = config['bgcolor']
-        self._video = Video(source=file.source, state='stop', options={'allow_stretch': True, 'eos': 'loop'})
+        self._video = Video(source=file.source, state='stop', allow_stretch=True, options={'allow_stretch': True, 'eos': 'loop'})
         self.add_widget(self._video)
         # Call update_canvas method when the size of the widget changes.
         self.bind(size=self.update_canvas)
