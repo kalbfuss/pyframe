@@ -4,13 +4,13 @@ Provides interface definitions for classes :class:`repository.Repository` and :c
 
 The following implementations, i.e. sub-packages, are currently available:
     - local: Files are stored on a local file system.
+    - webdav: Files are stored on a WebDAV accessible share.
 
 The :class:`repository.Index` class provides functionality to index file meta
 data for the purpose of caching, filtering and sorting.
 
 Author: Bernd Kalbfuß
 License: t.b.d.
-
 """
 
 from . file import RepositoryFile
