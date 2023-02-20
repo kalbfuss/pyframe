@@ -26,10 +26,11 @@ class SlideshowVideo(Widget):
 
         :param file: Repository file instance for the video to be displayed.
         :type file: repository.File
-        :param rotation: Angle in degrees by which the video is rotated clockwise.
-        :type rotation: int
-        :param bgolor: Canvas background color for areas, which are not covered by the video. The default ist [1, 1, 1] (white).
-        :type bgcolor: list of float (3x)
+        :param config: Dictionary with the following entries:
+            rotation: Angle in degrees (int) by which the video is rotated clockwise.
+            bgolor: Canvas background color (list(3)) for areas, which are not covered by the image.
+            resize: Mode (str) for resizing of images. Must equal "fit" or "fill".
+        :type config: dict
         """
         Widget.__init__(self)
         self._file = file
