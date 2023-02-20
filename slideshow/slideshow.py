@@ -1,4 +1,4 @@
-"""Module providing slideshow and related classes."""
+"""Module providing slideshow class."""
 
 from repository import Index, RepositoryFile
 
