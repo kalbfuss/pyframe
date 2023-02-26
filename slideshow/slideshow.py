@@ -29,8 +29,8 @@ class Slideshow(AnchorLayout):
     optional parameters, which are passed to the constructor.
     """
 
-    def __init__(self, index, config, **args):
-        """Initialize slideshow instance.
+    def __init__(self, index, config):
+        """Initialize Slideshow instance.
 
         :param index: Index of files in active repositories.
         :type index: repository.Index
@@ -41,7 +41,10 @@ class Slideshow(AnchorLayout):
         AnchorLayout.__init__(self, anchor_x='center', anchor_y='center')
         self._index = index
         self._config = config
-        self._args = args
+        self._event = None
+        self._currentWidget = None
+        self._nextWidget = None
+        self._iterator = None
 
         self._criteria = dict()
         # Compile filter criteria from slideshow configuration.
@@ -105,28 +108,8 @@ class Slideshow(AnchorLayout):
                     value = [value]
                 self._criteria['tags'] = value
 
-        # Create selective index iterator with sorting/filter criteria from the
-        # slideshow configuration.
-        self._iterator = self._index.iterator(**self._criteria)
-
-        # Create current widget from first file, add to layout and start playing.
-        file = next(self._iterator)
-        self._currentWidget = self._create_widget(file)
-        self.add_widget(self._currentWidget)
-        # Create next widget from second file
-        try:
-            file = next(self._iterator)
-            # Create new iterator if end of iteration has been reached.
-        except StopIteration:
-            self._iterator = self._index.iterator(**self._criteria)
-            file = next(self._iterator)
-
-        self._nextWidget = self._create_widget(file)
-
         # Bind keyboard listener
         Window.bind(on_keyboard=self._on_keyboard)
-        # Set clock interval and callback function
-        Clock.schedule_interval(self._clock_callback, config['pause'])
 
     def _create_widget(self, file):
         """Create widget for display of the specified file.
@@ -159,6 +142,43 @@ class Slideshow(AnchorLayout):
             file = next(self._iterator)
         # Create widget for next frame.
         self._nextWidget = self._create_widget(file)
+
+    def play(self):
+        """Start playing slideshow."""
+        # Create selective index iterator with sorting/filter criteria from the
+        # slideshow configuration.
+        self._iterator = self._index.iterator(**self._criteria)
+
+        # Create current widget from first file, add to layout and start playing.
+        file = next(self._iterator)
+        self._currentWidget = self._create_widget(file)
+        self.add_widget(self._currentWidget)
+
+        # Create next widget from second file
+        try:
+            file = next(self._iterator)
+            # Create new iterator if end of iteration has been reached.
+        except StopIteration:
+            self._iterator = self._index.iterator(**self._criteria)
+            file = next(self._iterator)
+        self._nextWidget = self._create_widget(file)
+
+        # Set clock interval and callback function
+        if self._event is None:
+          self._event = Clock.schedule_interval(self._clock_callback, self._config['pause'])
+
+    def stop(self):
+        """Stop playing slideshow."""
+        # Unschedule callback function
+        if self._event is not None:
+            self._event.cancel()
+        # Remove and destroy current widget
+        if self._currentWidget is not None:
+            self.remove_widget(self._currentWidget)
+            self._currentWidget = None
+        # Destroy next widget and iterator
+        self._nextWidget = None
+        self._iterator = None
 
     def _clock_callback(self, dt):
         """Clock callback function. Display the next file in the slideshow."""

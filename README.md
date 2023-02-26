@@ -14,6 +14,7 @@ Python
 - webdavclient3
 - yaml
 - ffmeg-python
+- schedule
 
 Linux
 - libxslt1.1

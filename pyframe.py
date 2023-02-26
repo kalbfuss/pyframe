@@ -9,7 +9,7 @@ import yaml
 
 from repository import Index
 from repository import Repository, InvalidConfigurationError, InvalidUuidError
-from slideshow import Slideshow
+from slideshow import Slideshow, Scheduler
 
 from kivy.app import App
 from kivy.logger import Logger, LOG_LEVELS
@@ -80,7 +80,7 @@ class PyframeApp(App):
 
             # Catch any invalid configuration errors
             except InvalidConfigurationError:
-                Logger.error(f"Skipping repository '{uuid}' as its configuraiton is invalid.")
+                Logger.error(f"Skipping repository '{uuid}' as its configuration is invalid.")
             # Catch any invalid UUIR errors
             except InvalidUuidError:
                 Logger.error(f"Skipping repository '{uuid}' as its UUID is invalid.")
@@ -97,8 +97,8 @@ class PyframeApp(App):
         Logger.info(f"Proceeding with {index.count()} index entries.")
 
         # Change to full screen mode.
-        Window.fullscreen = 'auto'
-        #Window.size = (800, 450)
+        #Window.fullscreen = 'auto'
+        Window.size = (800, 450)
         # Disable display of mouse cursor
         Window.show_cursor = False
 
@@ -110,6 +110,7 @@ class PyframeApp(App):
 
         # Create slideshow
         root = Slideshow(index, slideshow_config)
+        self._scheduler = Scheduler(config['schedule'], root)
         return root
 
 
