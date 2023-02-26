@@ -75,7 +75,7 @@ class Scheduler:
 
             # Catch all schedule errors.
             except (TypeError, ScheduleValueError):
-                raise InvalidScheduleConfiguratioError(f"The configuration {event_config} for event '{event}' is invalid.", event_config)
+                raise InvalidScheduleConfigurationError(f"The configuration {event_config} for event '{event}' is invalid.", event_config)
 
         # Turn display off
         self.display_off()

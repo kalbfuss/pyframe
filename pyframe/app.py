@@ -166,9 +166,11 @@ class App(kivy.app.App):
         # Switch to new slideshow if specified. Continue to use current
         # slideshow if new slideshow does not exist.
         if slideshow is not None:
+            new_root = self._slideshows.get(slideshow, self.root)
+            Window.add_widget(new_root)
             Window.remove_widget(self.root)
-            self.root = self._slideshows.get(slideshow, self.root)
-            Window.add_widget(self.root)
+            self.root = new_root
+
         # Start playing new slideshow.
         self.root.play()
 
