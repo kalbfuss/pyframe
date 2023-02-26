@@ -8,7 +8,7 @@ from kivy.core.window import Window
 from kivy.logger import Logger
 from kivy.uix.anchorlayout import AnchorLayout
 
-from slideshow import SlideshowImage, SlideshowVideo
+from pyframe import SlideshowImage, SlideshowVideo
 
 
 class InvalidSlideshowConfigurationError(Exception):

@@ -10,7 +10,8 @@ Author: Bernd Kalbfuß
 License: t.b.d.
 """
 
-from . video import SlideshowVideo
 from . image import SlideshowImage
+from . video import SlideshowVideo
 from . slideshow import Slideshow, InvalidSlideshowConfigurationError
 from . scheduler import Scheduler
+from . app import App

@@ -69,7 +69,7 @@ class Scheduler:
                     schedule.every().day.at(event_config['time']).do(self.display_off)
                 # Raise exception due to invalid value for 'display'.
                 else:
-                    raise InvalidScheduleConfigurationError(f"The value '{event_config['display']}' for parameter 'display' in the configuration of event '{event}' is invalid.", , event_config)
+                    raise InvalidScheduleConfigurationError(f"The value '{event_config['display']}' for parameter 'display' in the configuration of event '{event}' is invalid.", event_config)
 
                 Logger.info(f"Scheduler: Event '{event}' scheduled at '{event_config['time']}'.")
 
