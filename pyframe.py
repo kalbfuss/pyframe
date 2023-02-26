@@ -60,6 +60,32 @@ class PyframeApp(App):
         index = Index(index_file)
 
         # Create repositories.
+        self._create_repositories(config, index)
+
+        # Change to full screen mode.
+#        Window.fullscreen = 'auto'
+        Window.size = (800, 450)
+        # Disable display of mouse cursor
+        Window.show_cursor = False
+
+        # Create slideshow configuration and add parameters from root
+        # configuration which shall be passed on to slideshow.
+        slideshow_config = {key: config[key] for key in ('rotation', 'bgcolor')}
+        slideshow_config.update(config['slideshow'])
+#        Logger.info(f"Slideshow configuration: {slideshow_config}")
+
+        # Create slideshow
+        root = Slideshow(index, slideshow_config)
+
+        # Create scheduler if configured.
+        if 'schedule' in config:
+            self._scheduler = Scheduler(config['schedule'], root)
+
+        return root
+
+    def _create_repositories(self, config, index):
+        """Create file repositories from configuration."""
+        # Create repositories.
         for uuid, rep_config in config['repositories'].items():
             # Skip disabled repositories.
             if rep_config.get('enabled') is False:
@@ -95,23 +121,6 @@ class PyframeApp(App):
             time.sleep(1)
             Logger.info("Index still empty. Giving more time to build.")
         Logger.info(f"Proceeding with {index.count()} index entries.")
-
-        # Change to full screen mode.
-        #Window.fullscreen = 'auto'
-        Window.size = (800, 450)
-        # Disable display of mouse cursor
-        Window.show_cursor = False
-
-        # Create slideshow configuration and add parameters from root
-        # configuration which shall be passed on to slideshow.
-        slideshow_config = {key: config[key] for key in ('rotation', 'bgcolor')}
-        slideshow_config.update(config['slideshow'])
-        #Logger.info(f"Slideshow configuration: {slideshow_config}")
-
-        # Create slideshow
-        root = Slideshow(index, slideshow_config)
-        self._scheduler = Scheduler(config['schedule'], root)
-        return root
 
 
 if __name__ == "__main__":
