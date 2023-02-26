@@ -278,16 +278,16 @@ class SelectiveIndexIterator:
         :type session: sqlalchemy.orm.Session
         :param criteria: Dictionary containing iteration criteria
         :type criteria: dict
-        :raises:
+        :raises: InvalidIterationCriteriaError
         """
         # Initialize query.
         query = session.query(MetaData)
 
         # Make sure only valid parameters have been specified.
-        valid_keys = {"mostRecent", "order", "orientation", "tags", "type"}
+        valid_keys = {"mostRecent", "order", "orientation", "repository", "tags", "type"}
         keys = set(criteria.keys())
         if not keys.issubset(valid_keys):
-            raise InvalidIterationCriteriaError(f"Only the parameters {valid_keys} are accepted, but additional parameter(s) {keys.difference(valid_keys)} was/were specified.")
+            raise InvalidIterationCriteriaError(f"Only the parameters {valid_keys} are accepted, but the additional parameter(s) {keys.difference(valid_keys)} has/have been specified.")
 
         # Helper function to raise error.
         def __raise():
@@ -296,8 +296,17 @@ class SelectiveIndexIterator:
         # Extend query based on iteration criteria.
         for key, value in criteria.items():
 
+            # Filter for repository by UUID
+            if key == "repository":
+                if type(value) is str:
+                    query = query.filter(MetaData.rep_uuid == value)
+                elif type(value) is list:
+                    query = query.filter(MetaData.rep_uuid.in_(value))
+                else:
+                    __raise()
+
             # Filter for file type.
-            if key == "type":
+            elif key == "type":
                 if type(value) is int:
                     query = query.filter(MetaData.type == value)
                 elif type(value) is list:
@@ -344,6 +353,7 @@ class SelectiveIndexIterator:
                 __raise()
 
         # Query data and save iterator for list with meta data objects.
+        self._count = query.count()
         self._iterator = query.all().__iter__()
 
     def __iter__(self):
@@ -367,8 +377,13 @@ class SelectiveIndexIterator:
         while True:
             # Retrieve next meta data object in iteration.
             mdata = self._iterator.__next__()
+            self._count = self._count - 1
             # Try to obtain corresponding file.
             try:
                 return Repository.by_uuid(mdata.rep_uuid).file_by_uuid(mdata.file_uuid)
             except InvalidUuidError:
                 pass
+
+    def count(self):
+        """Return number of remaining elments in iteration."""
+        return self._count

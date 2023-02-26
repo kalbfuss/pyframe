@@ -45,10 +45,15 @@ class Slideshow(AnchorLayout):
         self._currentWidget = None
         self._nextWidget = None
         self._iterator = None
+        self._length = 0
 
         self._criteria = dict()
         # Compile filter criteria from slideshow configuration.
         for key, value in config.items():
+
+            # Filter repository by uuid.
+            if key == "repositories":
+                self._criteria['repository'] = value
 
             # Retrieve files in a specific or random order.
             if key == "sequence":
@@ -124,6 +129,15 @@ class Slideshow(AnchorLayout):
             widget = SlideshowVideo(file, self._config)
         return widget
 
+    def length(self):
+        """Returns the number of files in the slideshow."""
+        # Return initial count of current iterator if exists.
+        if self._iterator is not None:
+            return self._length()
+        else:
+            # Create temporary iterator otherwise to determine length.
+            return self._index.iterator(**self._criteria).count()
+
     def next_file(self):
         """Display next file in the index."""
         # Remove current widget from layout.
@@ -148,6 +162,8 @@ class Slideshow(AnchorLayout):
         # Create selective index iterator with sorting/filter criteria from the
         # slideshow configuration.
         self._iterator = self._index.iterator(**self._criteria)
+        # Save number of images in the slide show
+        self._length = self._iterator.count()
 
         # Create current widget from first file, add to layout and start playing.
         file = next(self._iterator)
@@ -201,7 +217,7 @@ class Slideshow(AnchorLayout):
         # Exit application if escape key pressed.
         elif key == 27:
             App.get_running_app().stop()
-            # Display next file for all other keys
+        # Display next file for all other keys
         else:
             Clock.unschedule(self._clock_callback)
             self.next_file()
