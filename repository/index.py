@@ -196,7 +196,7 @@ class Index:
                                 tag = MetaDataTag(name=name)
                             tags.append(tag)
 
-                    logging.info(f"Adding meta data of file '{file.uuid}'.")
+                    logging.info(f"Adding meta data of file '{file.uuid}' to index.")
                     # Create new database entry with file meta data.
                     mdata = MetaData(rep_uuid=file.rep.uuid, file_uuid=file.uuid, name=file.name, type=file.type, width=file.width, height=file.height, rotation=file.rotation,
                                      orientation=file.orientation, creation_date=file.creation_date, description=file.description, rating=file.rating, tags=tags)

@@ -172,7 +172,7 @@ class RepositoryFile:
 #            self._rating = data["Image Rating"].value
 
         # Extract image tags(keywords) from IPTC tag if available
-        info = IPTCInfo(path)
+        info = IPTCInfo(path, force=True)
         self._tags = info["keywords"]
 
     def _extract_video_meta_data(self, path):

@@ -12,6 +12,7 @@ License: t.b.d.
 
 from . image import SlideshowImage
 from . video import SlideshowVideo
+from . indexer import Indexer
 from . slideshow import Slideshow, InvalidSlideshowConfigurationError
 from . scheduler import Scheduler
 from . app import App

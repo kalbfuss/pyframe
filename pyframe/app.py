@@ -11,7 +11,7 @@ import kivy.app
 
 from repository import Index
 from repository import Repository, InvalidConfigurationError, InvalidUuidError
-from . import Slideshow, Scheduler, InvalidSlideshowConfigurationError
+from . import Indexer, Slideshow, Scheduler, InvalidSlideshowConfigurationError
 
 from kivy.logger import Logger, LOG_LEVELS
 from kivy.core.window import Window
@@ -39,17 +39,19 @@ class App(kivy.app.App):
                 Logger.info(f"Configuration: Skipping repository '{uuid}' as it has been disabled.")
                 continue
             try:
-                # Create repository of the specified type and build index.
+                # Create repository of the specified type and queue for indexing.
                 if rep_config.get('type') == "local":
                     Logger.info(f"Configuration: Creating local repository '{uuid}' and starting to build index in the background.")
                     rep = repository.local.Repository(uuid, rep_config, index=index)
-                    threading.Thread(target=build_index, args=(index, rep)).start()
+                    interval = rep_config.get('index_update_interval', 0)
+                    self._indexer.queue(rep, interval)
 
                 if rep_config.get('type') == "webdav":
                     Logger.info(f"Configuration: Creating WebDav repository '{uuid}' and starting to build index in the background.")
                     rep_config['cache'] = config['cache']
                     rep = repository.webdav.Repository(uuid, rep_config, index=index)
-                    threading.Thread(target=build_index, args=(index, rep)).start()
+                    interval = rep_config.get('index_update_interval', 0)
+                    self._indexer.queue(rep)
 
             # Catch any invalid configuration errors
             except InvalidConfigurationError:
@@ -106,9 +108,9 @@ class App(kivy.app.App):
         Creates configured repositories and builds an index across the latter.
         """
         # Set log level of default python Logger. This logger is used by non-kivy dependent components.
-        logging.basicConfig(level=logging.DEBUG)
+        logging.basicConfig(level=logging.INFO)
         # Set log level of kivy logger.
-        Logger.setLevel(LOG_LEVELS["debug"])
+        Logger.setLevel(LOG_LEVELS["info"])
         # Reduce logging by SQLAlchemy to errors.
         logging.getLogger("sqlalchemy").setLevel(logging.ERROR)
 
@@ -124,8 +126,12 @@ class App(kivy.app.App):
             index_file = "./index.sqlite"
         index = Index(index_file)
 
+        # Create background indexer.
+        self._indexer = Indexer(index)
         # Create repositories.
         self._create_repositories(config, index)
+        # Start building index in the background.
+        self._indexer.start()
         # Create slideshows.
         self._create_slideshows(config, index)
 
