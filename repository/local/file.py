@@ -1,10 +1,12 @@
 """Module for local repository files."""
 
 import logging
+import os
 import os.path
 import repository
 
 from repository import InvalidUuidError
+from datetime import datetime
 
 
 class RepositoryFile(repository.RepositoryFile):
@@ -25,8 +27,15 @@ class RepositoryFile(repository.RepositoryFile):
         if not os.path.isfile(self._path):
             raise InvalidUuidError("There is no file with UUID '{uuid}'.", uuid)
 
+        # Determine file creation and last modification date
+        last_modified = datetime.fromtimestamp(os.path.getmtime(self._path))
+
         # Attempt to extract meta data from file content.
-        if not self._in_index:
+        if not self._in_index or self.last_updated < last_modified:
+            # Determine file creation and last modification date
+            self._last_modified = last_modified
+            self._creation_date = datetime.fromtimestamp(os.path.getctime(self._path))
+
             logging.info(f"Extracting meta data of file '{self.uuid}' from file content.")
             # If image try to extract meta data from EXIF tag.
             if self._type == repository.RepositoryFile.TYPE_IMAGE:

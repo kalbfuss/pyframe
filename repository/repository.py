@@ -1,4 +1,4 @@
-"""..."""
+"""Module providing repository class"""
 
 
 import logging

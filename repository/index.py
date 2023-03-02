@@ -1,4 +1,4 @@
-"""Meta data index class.
+"""Module providing meta data index class.
 
 The following test script is based on the tutorial by Philipp Wagner [1]. The
 script depends on the following debian packages:

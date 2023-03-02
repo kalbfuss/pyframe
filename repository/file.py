@@ -1,10 +1,9 @@
-""""..."""
+""""Module providing repository file class."""
 
 import exifread
 import ffmpeg
 import fnmatch
 import logging
-import os
 
 
 from datetime import datetime
@@ -130,10 +129,7 @@ class RepositoryFile:
         Note the star rating tag is not yet supported by exifread and therefore
         always remains at the default.
         """
-
-        # Determine file creation and last modified date
-        self._last_modified = datetime.fromtimestamp(os.path.getmtime(path))
-        self._creation_date = datetime.fromtimestamp(os.path.getctime(path))
+        # Save current datetime in property last_updated.
         self._last_updated = datetime.today()
 
         # Open image file for reading (binary mode)
@@ -192,18 +188,21 @@ class RepositoryFile:
         Uses the ffmpeg ffprobe command to extract video meta data from the
         video file and stores meta data in corresponding object properties.
         """
+        # Save current datetime in property last_updated.
+        self._last_updated = datetime.today()
+
         data = ffmpeg.probe(path)['streams'][0]
         logging.debug(data)
 
         # Try to obtain image dimensions from meta data.
-        if data.get('width') != None:
+        if data.get('width') is not None:
             self._width = int(data.get('width'))
-        if data.get('height') != None:
+        if data.get('height') is not None:
             self._height = int(data.get('height'))
 
         # Try to obtain rotation from meta data.
         rotate = data['tags'].get('rotate')
-        if rotate != None:
+        if rotate is not None:
             if rotate == "0":
                 self._rotation = 0
             elif rotate == "90":

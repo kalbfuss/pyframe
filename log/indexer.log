@@ -2779,3 +2779,217 @@
 2023-03-02 21:19:14 [Local Frankreich] Indexing of repository 'Local Frankreich' completed after 0.2 seconds.
 2023-03-02 21:19:14 [Local Frankreich] The next indexing run is due at Thu Mar  2 21:21:16 2023.
 2023-03-02 21:19:14 Sleeping for 1.0 minutes.
+2023-03-02 21:21:39 Starting to build meta data index in the background.
+2023-03-02 21:21:39 [Local Photos 1] Updating meta data index for repository 'Local Photos 1'.
+2023-03-02 21:21:39 [Local Photos 1] Resetting verification flags for all meta data entries of repository 'Local Photos 1'.
+2023-03-02 21:21:39 [Local Photos 1] stderr: Exception in thread indexer:
+2023-03-02 21:21:39 [Local Photos 1] stderr: Traceback (most recent call last):
+2023-03-02 21:21:39 [Local Photos 1] stderr:   File "/usr/lib/python3.10/threading.py", line 1016, in _bootstrap_inner
+2023-03-02 21:21:39 [Local Photos 1] stderr:     self.run()
+2023-03-02 21:21:39 [Local Photos 1] stderr:   File "/usr/lib/python3.10/threading.py", line 953, in run
+2023-03-02 21:21:39 [Local Photos 1] stderr:     self._target(*self._args, **self._kwargs)
+2023-03-02 21:21:39 [Local Photos 1] stderr:   File "/home/langweiler/CloudStation/Documents/Projekte/Digitaler Bilderrahmen/Eigenes Projekt/pyframe/pyframe/indexer.py", line 188, in _build
+2023-03-02 21:21:39 [Local Photos 1] stderr:     self._index.build(rep)
+2023-03-02 21:21:39 [Local Photos 1] stderr:   File "/home/langweiler/CloudStation/Documents/Projekte/Digitaler Bilderrahmen/Eigenes Projekt/pyframe/repository/index.py", line 198, in build
+2023-03-02 21:21:39 [Local Photos 1] stderr:     for file in rep.iterator(index_lookup=False):
+2023-03-02 21:21:39 [Local Photos 1] stderr:   File "/home/langweiler/CloudStation/Documents/Projekte/Digitaler Bilderrahmen/Eigenes Projekt/pyframe/repository/local/repository.py", line 127, in __next__
+2023-03-02 21:21:39 [Local Photos 1] stderr:     return self._rep.file_by_uuid(uuid, self._index_lookup)
+2023-03-02 21:21:39 [Local Photos 1] stderr:   File "/home/langweiler/CloudStation/Documents/Projekte/Digitaler Bilderrahmen/Eigenes Projekt/pyframe/repository/local/repository.py", line 78, in file_by_uuid
+2023-03-02 21:21:39 [Local Photos 1] stderr:     root = self.build()    return RepositoryFile(uuid, self)
+2023-03-02 21:21:39 [Local Photos 1] stderr:   File "/home/langweiler/CloudStation/Documents/Projekte/Digitaler Bilderrahmen/Eigenes Projekt/pyframe/repository/local/file.py", line 21, in __init__
+2023-03-02 21:21:39 [Local Photos 1] stderr:     super().__init__(self, uuid, rep, index)
+2023-03-02 21:21:39 [Local Photos 1] stderr: TypeError: RepositoryFile.__init__() takes from 3 to 4 positional arguments but 5 were given
+2023-03-02 21:22:16 Starting to build meta data index in the background.
+2023-03-02 21:22:16 [Local Photos 1] Updating meta data index for repository 'Local Photos 1'.
+2023-03-02 21:22:16 [Local Photos 1] Resetting verification flags for all meta data entries of repository 'Local Photos 1'.
+2023-03-02 21:22:16 [Local Photos 1] Extracting meta data of file 'IMG-20220501-WA0010.jpg' from file content.
+2023-03-02 21:22:16 [Local Photos 1] Skipping file 'IMG-20220501-WA0010.jpg as already included in index.
+2023-03-02 21:22:16 [Local Photos 1] Extracting meta data of file 'photo.png' from file content.
+2023-03-02 21:22:16 [Local Photos 1] Skipping file 'photo.png as already included in index.
+2023-03-02 21:22:16 [Local Photos 1] Extracting meta data of file '02 Landscape.jpg' from file content.
+2023-03-02 21:22:16 [Local Photos 1] Skipping file '02 Landscape.jpg as already included in index.
+2023-03-02 21:22:16 [Local Photos 1] Extracting meta data of file '01 Portrait.jpg' from file content.
+2023-03-02 21:22:16 [Local Photos 1] Skipping file '01 Portrait.jpg as already included in index.
+2023-03-02 21:22:16 [Local Photos 1] Extracting meta data of file '03 Panorama.JPG' from file content.
+2023-03-02 21:22:16 [Local Photos 1] Skipping file '03 Panorama.JPG as already included in index.
+2023-03-02 21:22:16 [Local Photos 1] Extracting meta data of file 'Urlaub/IMG_20190828_145905.jpg' from file content.
+2023-03-02 21:22:16 [Local Photos 1] Skipping file 'Urlaub/IMG_20190828_145905.jpg as already included in index.
+2023-03-02 21:22:16 [Local Photos 1] Indexing of repository 'Local Photos 1' completed after 0.2 seconds.
+2023-03-02 21:22:16 [Local Photos 1] The next indexing run is due at Thu Mar  2 21:23:17 2023.
+2023-03-02 21:22:16 [Local Frankreich] Updating meta data index for repository 'Local Frankreich'.
+2023-03-02 21:22:16 [Local Frankreich] Resetting verification flags for all meta data entries of repository 'Local Frankreich'.
+2023-03-02 21:22:16 [Local Frankreich] Extracting meta data of file 'IMG_20190828_101327.jpg' from file content.
+2023-03-02 21:22:16 [Local Frankreich] Skipping file 'IMG_20190828_101327.jpg as already included in index.
+2023-03-02 21:22:16 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150150.jpg' from file content.
+2023-03-02 21:22:16 [Local Frankreich] Skipping file 'IMG_20190828_150150.jpg as already included in index.
+2023-03-02 21:22:16 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145839.jpg' from file content.
+2023-03-02 21:22:16 [Local Frankreich] Skipping file 'IMG_20190828_145839.jpg as already included in index.
+2023-03-02 21:22:16 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145422.jpg' from file content.
+2023-03-02 21:22:16 [Local Frankreich] Skipping file 'IMG_20190828_145422.jpg as already included in index.
+2023-03-02 21:22:16 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150209.jpg' from file content.
+2023-03-02 21:22:16 [Local Frankreich] Skipping file 'IMG_20190828_150209.jpg as already included in index.
+2023-03-02 21:22:16 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145917.jpg' from file content.
+2023-03-02 21:22:16 [Local Frankreich] Skipping file 'IMG_20190828_145917.jpg as already included in index.
+2023-03-02 21:22:16 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153521.jpg' from file content.
+2023-03-02 21:22:16 [Local Frankreich] Skipping file 'IMG_20190828_153521.jpg as already included in index.
+2023-03-02 21:22:16 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150137.jpg' from file content.
+2023-03-02 21:22:16 [Local Frankreich] Skipping file 'IMG_20190828_150137.jpg as already included in index.
+2023-03-02 21:22:16 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145426.jpg' from file content.
+2023-03-02 21:22:16 [Local Frankreich] Skipping file 'IMG_20190828_145426.jpg as already included in index.
+2023-03-02 21:22:16 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153229.jpg' from file content.
+2023-03-02 21:22:16 [Local Frankreich] Skipping file 'IMG_20190828_153229.jpg as already included in index.
+2023-03-02 21:22:16 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145816.jpg' from file content.
+2023-03-02 21:22:16 [Local Frankreich] Skipping file 'IMG_20190828_145816.jpg as already included in index.
+2023-03-02 21:22:16 [Local Frankreich] Extracting meta data of file 'IMG_20190826_144332.jpg' from file content.
+2023-03-02 21:22:16 [Local Frankreich] Skipping file 'IMG_20190826_144332.jpg as already included in index.
+2023-03-02 21:22:16 [Local Frankreich] Extracting meta data of file 'IMG_20190826_144710.jpg' from file content.
+2023-03-02 21:22:16 [Local Frankreich] Skipping file 'IMG_20190826_144710.jpg as already included in index.
+2023-03-02 21:22:16 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145014.jpg' from file content.
+2023-03-02 21:22:16 [Local Frankreich] Skipping file 'IMG_20190828_145014.jpg as already included in index.
+2023-03-02 21:22:16 [Local Frankreich] Extracting meta data of file 'IMG_20190828_101450.jpg' from file content.
+2023-03-02 21:22:16 [Local Frankreich] Skipping file 'IMG_20190828_101450.jpg as already included in index.
+2023-03-02 21:22:16 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150258.jpg' from file content.
+2023-03-02 21:22:16 [Local Frankreich] Skipping file 'IMG_20190828_150258.jpg as already included in index.
+2023-03-02 21:22:16 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153657.jpg' from file content.
+2023-03-02 21:22:16 [Local Frankreich] Skipping file 'IMG_20190828_153657.jpg as already included in index.
+2023-03-02 21:22:16 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145820.jpg' from file content.
+2023-03-02 21:22:16 [Local Frankreich] Skipping file 'IMG_20190828_145820.jpg as already included in index.
+2023-03-02 21:22:16 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145905.jpg' from file content.
+2023-03-02 21:22:16 [Local Frankreich] Skipping file 'IMG_20190828_145905.jpg as already included in index.
+2023-03-02 21:22:16 [Local Frankreich] Indexing of repository 'Local Frankreich' completed after 0.2 seconds.
+2023-03-02 21:22:16 [Local Frankreich] The next indexing run is due at Thu Mar  2 21:24:18 2023.
+2023-03-02 21:22:16 Sleeping for 1.0 minutes.
+2023-03-02 21:34:16 Starting to build meta data index in the background.
+2023-03-02 21:34:16 [Local Photos 1] Updating meta data index for repository 'Local Photos 1'.
+2023-03-02 21:34:16 [Local Photos 1] Resetting verification flags for all meta data entries of repository 'Local Photos 1'.
+2023-03-02 21:34:16 [Local Photos 1] Extracting meta data of file 'IMG-20220501-WA0010.jpg' from file content.
+2023-03-02 21:34:16 [Local Photos 1] Skipping file 'IMG-20220501-WA0010.jpg as already included in index.
+2023-03-02 21:34:16 [Local Photos 1] Extracting meta data of file 'photo.png' from file content.
+2023-03-02 21:34:16 [Local Photos 1] Skipping file 'photo.png as already included in index.
+2023-03-02 21:34:16 [Local Photos 1] Extracting meta data of file '02 Landscape.jpg' from file content.
+2023-03-02 21:34:16 [Local Photos 1] Skipping file '02 Landscape.jpg as already included in index.
+2023-03-02 21:34:16 [Local Photos 1] Extracting meta data of file '01 Portrait.jpg' from file content.
+2023-03-02 21:34:16 [Local Photos 1] Skipping file '01 Portrait.jpg as already included in index.
+2023-03-02 21:34:16 [Local Photos 1] Extracting meta data of file '03 Panorama.JPG' from file content.
+2023-03-02 21:34:16 [Local Photos 1] Skipping file '03 Panorama.JPG as already included in index.
+2023-03-02 21:34:16 [Local Photos 1] Extracting meta data of file 'Urlaub/IMG_20190828_145905.jpg' from file content.
+2023-03-02 21:34:16 [Local Photos 1] Skipping file 'Urlaub/IMG_20190828_145905.jpg as already included in index.
+2023-03-02 21:34:16 [Local Photos 1] Indexing of repository 'Local Photos 1' completed after 0.1 seconds.
+2023-03-02 21:34:16 [Local Photos 1] The next indexing run is due at Thu Mar  2 21:35:18 2023.
+2023-03-02 21:34:16 [Local Frankreich] Updating meta data index for repository 'Local Frankreich'.
+2023-03-02 21:34:16 [Local Frankreich] Resetting verification flags for all meta data entries of repository 'Local Frankreich'.
+2023-03-02 21:34:16 [Local Frankreich] Extracting meta data of file 'IMG_20190828_101327.jpg' from file content.
+2023-03-02 21:34:16 [Local Frankreich] Skipping file 'IMG_20190828_101327.jpg as already included in index.
+2023-03-02 21:34:16 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150150.jpg' from file content.
+2023-03-02 21:34:16 [Local Frankreich] Skipping file 'IMG_20190828_150150.jpg as already included in index.
+2023-03-02 21:34:16 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145839.jpg' from file content.
+2023-03-02 21:34:16 [Local Frankreich] Skipping file 'IMG_20190828_145839.jpg as already included in index.
+2023-03-02 21:34:16 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145422.jpg' from file content.
+2023-03-02 21:34:16 [Local Frankreich] Skipping file 'IMG_20190828_145422.jpg as already included in index.
+2023-03-02 21:34:16 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150209.jpg' from file content.
+2023-03-02 21:34:16 [Local Frankreich] Skipping file 'IMG_20190828_150209.jpg as already included in index.
+2023-03-02 21:34:16 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145917.jpg' from file content.
+2023-03-02 21:34:16 [Local Frankreich] Skipping file 'IMG_20190828_145917.jpg as already included in index.
+2023-03-02 21:34:16 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153521.jpg' from file content.
+2023-03-02 21:34:16 [Local Frankreich] Skipping file 'IMG_20190828_153521.jpg as already included in index.
+2023-03-02 21:34:16 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150137.jpg' from file content.
+2023-03-02 21:34:17 [Local Frankreich] Skipping file 'IMG_20190828_150137.jpg as already included in index.
+2023-03-02 21:34:17 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145426.jpg' from file content.
+2023-03-02 21:34:17 [Local Frankreich] Skipping file 'IMG_20190828_145426.jpg as already included in index.
+2023-03-02 21:34:17 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153229.jpg' from file content.
+2023-03-02 21:34:17 [Local Frankreich] Skipping file 'IMG_20190828_153229.jpg as already included in index.
+2023-03-02 21:34:17 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145816.jpg' from file content.
+2023-03-02 21:34:17 [Local Frankreich] Skipping file 'IMG_20190828_145816.jpg as already included in index.
+2023-03-02 21:34:17 [Local Frankreich] Extracting meta data of file 'IMG_20190826_144332.jpg' from file content.
+2023-03-02 21:34:17 [Local Frankreich] Skipping file 'IMG_20190826_144332.jpg as already included in index.
+2023-03-02 21:34:17 [Local Frankreich] Extracting meta data of file 'IMG_20190826_144710.jpg' from file content.
+2023-03-02 21:34:17 [Local Frankreich] Skipping file 'IMG_20190826_144710.jpg as already included in index.
+2023-03-02 21:34:17 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145014.jpg' from file content.
+2023-03-02 21:34:17 [Local Frankreich] Skipping file 'IMG_20190828_145014.jpg as already included in index.
+2023-03-02 21:34:17 [Local Frankreich] Extracting meta data of file 'IMG_20190828_101450.jpg' from file content.
+2023-03-02 21:34:17 [Local Frankreich] Skipping file 'IMG_20190828_101450.jpg as already included in index.
+2023-03-02 21:34:17 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150258.jpg' from file content.
+2023-03-02 21:34:17 [Local Frankreich] Skipping file 'IMG_20190828_150258.jpg as already included in index.
+2023-03-02 21:34:17 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153657.jpg' from file content.
+2023-03-02 21:34:17 [Local Frankreich] Skipping file 'IMG_20190828_153657.jpg as already included in index.
+2023-03-02 21:34:17 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145820.jpg' from file content.
+2023-03-02 21:34:17 [Local Frankreich] Skipping file 'IMG_20190828_145820.jpg as already included in index.
+2023-03-02 21:34:17 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145905.jpg' from file content.
+2023-03-02 21:34:17 [Local Frankreich] Skipping file 'IMG_20190828_145905.jpg as already included in index.
+2023-03-02 21:34:17 [Local Frankreich] Indexing of repository 'Local Frankreich' completed after 0.3 seconds.
+2023-03-02 21:34:17 [Local Frankreich] The next indexing run is due at Thu Mar  2 21:36:19 2023.
+2023-03-02 21:34:17 Sleeping for 1.0 minutes.
+2023-03-02 21:35:18 [Local Photos 1] Updating meta data index for repository 'Local Photos 1'.
+2023-03-02 21:35:18 [Local Photos 1] Resetting verification flags for all meta data entries of repository 'Local Photos 1'.
+2023-03-02 21:35:18 [Local Photos 1] Extracting meta data of file 'IMG-20220501-WA0010.jpg' from file content.
+2023-03-02 21:35:18 [Local Photos 1] Skipping file 'IMG-20220501-WA0010.jpg as already included in index.
+2023-03-02 21:35:18 [Local Photos 1] Extracting meta data of file 'photo.png' from file content.
+2023-03-02 21:35:18 [Local Photos 1] Skipping file 'photo.png as already included in index.
+2023-03-02 21:35:18 [Local Photos 1] Extracting meta data of file '02 Landscape.jpg' from file content.
+2023-03-02 21:35:18 [Local Photos 1] Skipping file '02 Landscape.jpg as already included in index.
+2023-03-02 21:35:18 [Local Photos 1] Extracting meta data of file '01 Portrait.jpg' from file content.
+2023-03-02 21:35:18 [Local Photos 1] Skipping file '01 Portrait.jpg as already included in index.
+2023-03-02 21:35:18 [Local Photos 1] Extracting meta data of file '03 Panorama.JPG' from file content.
+2023-03-02 21:35:18 [Local Photos 1] Skipping file '03 Panorama.JPG as already included in index.
+2023-03-02 21:35:18 [Local Photos 1] Extracting meta data of file 'Urlaub/IMG_20190828_145905.jpg' from file content.
+2023-03-02 21:35:18 [Local Photos 1] Skipping file 'Urlaub/IMG_20190828_145905.jpg as already included in index.
+2023-03-02 21:35:18 [Local Photos 1] Indexing of repository 'Local Photos 1' completed after 0.1 seconds.
+2023-03-02 21:35:18 [Local Photos 1] The next indexing run is due at Thu Mar  2 21:36:19 2023.
+2023-03-02 21:36:19 [Local Photos 1] Updating meta data index for repository 'Local Photos 1'.
+2023-03-02 21:36:19 [Local Photos 1] Resetting verification flags for all meta data entries of repository 'Local Photos 1'.
+2023-03-02 21:36:19 [Local Photos 1] Extracting meta data of file 'IMG-20220501-WA0010.jpg' from file content.
+2023-03-02 21:36:19 [Local Photos 1] Skipping file 'IMG-20220501-WA0010.jpg as already included in index.
+2023-03-02 21:36:19 [Local Photos 1] Extracting meta data of file 'photo.png' from file content.
+2023-03-02 21:36:19 [Local Photos 1] Skipping file 'photo.png as already included in index.
+2023-03-02 21:36:19 [Local Photos 1] Extracting meta data of file '02 Landscape.jpg' from file content.
+2023-03-02 21:36:19 [Local Photos 1] Skipping file '02 Landscape.jpg as already included in index.
+2023-03-02 21:36:19 [Local Photos 1] Extracting meta data of file '01 Portrait.jpg' from file content.
+2023-03-02 21:36:19 [Local Photos 1] Updating meta data of file '01 Portrait.jpg' in index.
+2023-03-02 21:36:19 [Local Photos 1] Extracting meta data of file '03 Panorama.JPG' from file content.
+2023-03-02 21:36:19 [Local Photos 1] Skipping file '03 Panorama.JPG as already included in index.
+2023-03-02 21:36:19 [Local Photos 1] Extracting meta data of file 'Urlaub/IMG_20190828_145905.jpg' from file content.
+2023-03-02 21:36:19 [Local Photos 1] Skipping file 'Urlaub/IMG_20190828_145905.jpg as already included in index.
+2023-03-02 21:36:19 [Local Photos 1] Indexing of repository 'Local Photos 1' completed after 0.1 seconds.
+2023-03-02 21:36:19 [Local Photos 1] The next indexing run is due at Thu Mar  2 21:37:20 2023.
+2023-03-02 21:36:19 [Local Frankreich] Updating meta data index for repository 'Local Frankreich'.
+2023-03-02 21:36:19 [Local Frankreich] Resetting verification flags for all meta data entries of repository 'Local Frankreich'.
+2023-03-02 21:36:19 [Local Frankreich] Extracting meta data of file 'IMG_20190828_101327.jpg' from file content.
+2023-03-02 21:36:19 [Local Frankreich] Skipping file 'IMG_20190828_101327.jpg as already included in index.
+2023-03-02 21:36:19 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150150.jpg' from file content.
+2023-03-02 21:36:19 [Local Frankreich] Skipping file 'IMG_20190828_150150.jpg as already included in index.
+2023-03-02 21:36:19 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145839.jpg' from file content.
+2023-03-02 21:36:19 [Local Frankreich] Skipping file 'IMG_20190828_145839.jpg as already included in index.
+2023-03-02 21:36:19 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145422.jpg' from file content.
+2023-03-02 21:36:19 [Local Frankreich] Skipping file 'IMG_20190828_145422.jpg as already included in index.
+2023-03-02 21:36:19 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150209.jpg' from file content.
+2023-03-02 21:36:19 [Local Frankreich] Skipping file 'IMG_20190828_150209.jpg as already included in index.
+2023-03-02 21:36:19 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145917.jpg' from file content.
+2023-03-02 21:36:19 [Local Frankreich] Skipping file 'IMG_20190828_145917.jpg as already included in index.
+2023-03-02 21:36:19 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153521.jpg' from file content.
+2023-03-02 21:36:19 [Local Frankreich] Skipping file 'IMG_20190828_153521.jpg as already included in index.
+2023-03-02 21:36:19 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150137.jpg' from file content.
+2023-03-02 21:36:19 [Local Frankreich] Skipping file 'IMG_20190828_150137.jpg as already included in index.
+2023-03-02 21:36:19 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145426.jpg' from file content.
+2023-03-02 21:36:19 [Local Frankreich] Skipping file 'IMG_20190828_145426.jpg as already included in index.
+2023-03-02 21:36:19 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153229.jpg' from file content.
+2023-03-02 21:36:19 [Local Frankreich] Skipping file 'IMG_20190828_153229.jpg as already included in index.
+2023-03-02 21:36:19 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145816.jpg' from file content.
+2023-03-02 21:36:19 [Local Frankreich] Skipping file 'IMG_20190828_145816.jpg as already included in index.
+2023-03-02 21:36:19 [Local Frankreich] Extracting meta data of file 'IMG_20190826_144332.jpg' from file content.
+2023-03-02 21:36:19 [Local Frankreich] Skipping file 'IMG_20190826_144332.jpg as already included in index.
+2023-03-02 21:36:19 [Local Frankreich] Extracting meta data of file 'IMG_20190826_144710.jpg' from file content.
+2023-03-02 21:36:19 [Local Frankreich] Skipping file 'IMG_20190826_144710.jpg as already included in index.
+2023-03-02 21:36:19 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145014.jpg' from file content.
+2023-03-02 21:36:19 [Local Frankreich] Skipping file 'IMG_20190828_145014.jpg as already included in index.
+2023-03-02 21:36:19 [Local Frankreich] Extracting meta data of file 'IMG_20190828_101450.jpg' from file content.
+2023-03-02 21:36:19 [Local Frankreich] Skipping file 'IMG_20190828_101450.jpg as already included in index.
+2023-03-02 21:36:19 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150258.jpg' from file content.
+2023-03-02 21:36:19 [Local Frankreich] Skipping file 'IMG_20190828_150258.jpg as already included in index.
+2023-03-02 21:36:19 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153657.jpg' from file content.
+2023-03-02 21:36:19 [Local Frankreich] Skipping file 'IMG_20190828_153657.jpg as already included in index.
+2023-03-02 21:36:19 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145820.jpg' from file content.
+2023-03-02 21:36:19 [Local Frankreich] Skipping file 'IMG_20190828_145820.jpg as already included in index.
+2023-03-02 21:36:19 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145905.jpg' from file content.
+2023-03-02 21:36:19 [Local Frankreich] Skipping file 'IMG_20190828_145905.jpg as already included in index.
+2023-03-02 21:36:19 [Local Frankreich] Indexing of repository 'Local Frankreich' completed after 0.2 seconds.
+2023-03-02 21:36:19 [Local Frankreich] The next indexing run is due at Thu Mar  2 21:38:22 2023.
