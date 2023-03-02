@@ -32,7 +32,7 @@ class Scheduler:
     """
 
     def __init__(self, config, app):
-        """ Initialize Scheduler instance.
+        """ Initialize scheduler instance.
 
         :param config: Scheduler configuration from the corresponding
             configuration file section.
