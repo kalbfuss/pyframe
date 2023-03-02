@@ -20,12 +20,10 @@ from sqlalchemy.orm import backref, relationship, sessionmaker
 
 # Install listener for connection events to automatically enable foreign key
 # constraint checking by SQLite.
-
-
 @event.listens_for(Engine, "connect")
 def set_sqlite_pragma(dbapi_connection, connection_record):
     """Enable foreign key constraint checking by sqlite."""
-    logging.debug("Enable foreign key database constraints.")
+#    logging.debug("Enable foreign key database constraints.")
     cursor = dbapi_connection.cursor()
     cursor.execute("PRAGMA foreign_keys=ON")
     cursor.close()
@@ -54,6 +52,8 @@ class MetaData(Base):
         orientation(Integer): Orientation of the content considering rotation.
             See repository.RepositoryFile for acceptable values.
         creation_date(DateTime): Creation date of the file content.
+        last_modified(DateTime): Date of last file modification.
+        last_updated(DateTime): Date of last meta data update.
         description(String(255)): Description of the file.
         rating(Integer): Rating of the file content.
         verified(Boolean): Verification flag set during index building. True if
@@ -75,6 +75,8 @@ class MetaData(Base):
     creation_date = Column(DateTime)
     description = Column(String(255))
     rating = Column(Integer)
+    last_modified = Column(DateTime)
+    last_updated = Column(DateTime)
     verified = Column(Boolean)
     tags = relationship("MetaDataTag", secondary="tag_file", backref=backref("files", lazy="dynamic"))
 
@@ -164,11 +166,11 @@ class Index:
         # Create new session since build may be called from different thread.
         session = self._session_factory()
 
-        # Check whether we are asked to rebuild the index.
+        # Delete all meta data for the specified repository.
         if rebuild:
-            logging.info(f"Rebuilding meta data index for repository '{rep.uuid}'")
+            logging.info(f"Rebuilding meta data index for repository '{rep.uuid}'.")
             try:
-                logging.debug(f"Deleting all meta data entries for repository '{rep.uuid}'.")
+                logging.debug(f"Deleting all meta data entries of repository '{rep.uuid}'.")
                 # Delete all file entries for the specified repository.
                 session.query(MetaData).filter(MetaData.rep_uuid == rep.uuid).delete()
                 session.commit()
@@ -180,22 +182,25 @@ class Index:
                         session.delete(tag)
                 session.commit()
             except Exception as e:
-                logging.error(f"An error occurred while deleting meta data for repository {rep.uuid} from index: {e}")
+                logging.error(f"An error occurred while deleting meta data of repository {rep.uuid} from index: {e}")
+        # Mark existing meta data entries for verification.
         else:
-            logging.info(f"Updating meta data index for repository '{rep.uuid}'")
+            logging.info(f"Updating meta data index for repository '{rep.uuid}'.")
             try:
-                logging.debug("Resetting verification flags for all files in index.")
+                logging.debug(f"Resetting verification flags for all meta data entries of repository '{rep.uuid}'.")
                 query = update(MetaData).where(MetaData.rep_uuid == rep.uuid).values(verified=False)
                 session.execute(query)
                 session.commit()
             except Exception as e:
-                logging.error(f"An error occurred while deleting meta data for repository {rep.uuid} from index: {e}")
+                logging.error(f"An error occurred while marking meta data entries of repository '{rep.uuid}' for verification: {e}")
 
         # Iterate through all files in the repository.
         for file in rep.iterator(index_lookup=False):
             try:
-                # Check whether meta data entry for file does not exist yet.
-                if session.query(MetaData).filter(MetaData.rep_uuid == rep.uuid).filter(MetaData.file_uuid == file.uuid).first() is None:
+                # Create new meta data entry for file if not included in the
+                # index yet or outdated.
+                mdata = session.query(MetaData).filter(MetaData.rep_uuid == rep.uuid).filter(MetaData.file_uuid == file.uuid).first()
+                if mdata is None or mdata.last_updated < file.last_modified:
                     # Create all necessary tags in database.
                     tags = list()
                     if file.tags:
@@ -208,10 +213,16 @@ class Index:
                                 tag = MetaDataTag(name=name)
                             tags.append(tag)
 
-                    logging.info(f"Adding meta data of file '{file.uuid}' to index.")
-                    # Create new database entry with file meta data.
+                    if mdata is None:
+                        logging.info(f"Adding meta data of file '{file.uuid}' to index.")
+                    else:
+                        logging.info(f"Updating meta data of file '{file.uuid}' in index.")
+
+                    # Create/update meta data entry with file meta data.
                     mdata = MetaData(rep_uuid=file.rep.uuid, file_uuid=file.uuid, name=file.name, type=file.type, width=file.width, height=file.height, rotation=file.rotation,
-                                     orientation=file.orientation, creation_date=file.creation_date, description=file.description, rating=file.rating,
+                                     orientation=file.orientation, creation_date=file.creation_date,
+                                     last_modified=file.last_modified,
+                                     last_updated=file.last_updated, description=file.description, rating=file.rating,
                                      verified=True, tags=tags)
                     session.add(mdata)
                     # Commit all changes to the database.

@@ -1969,3 +1969,813 @@
 2023-03-02 17:33:25 [Local Photos 1] Skipping file 'Urlaub/IMG_20190828_145905.jpg as already included in index.
 2023-03-02 17:33:25 [Local Photos 1] Indexing of repository 'Local Photos 1' completed after 0.1 seconds.
 2023-03-02 17:33:25 [Local Photos 1] The next indexing run is due at Thu Mar  2 17:34:27 2023.
+2023-03-02 17:53:13 Starting to build meta data index in the background.
+2023-03-02 17:53:13 [Local Photos 1] Updating meta data index for repository 'Local Photos 1'
+2023-03-02 17:53:13 [Local Photos 1] Resetting verification flags for all files in index.
+2023-03-02 17:53:13 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 17:53:13 [Local Photos 1] Extracting meta data of file 'IMG-20220501-WA0010.jpg' from file content.
+2023-03-02 17:53:13 [Local Photos 1] stderr: Exception in thread indexer:
+2023-03-02 17:53:13 [Local Photos 1] stderr: Traceback (most recent call last):
+2023-03-02 17:53:13 [Local Photos 1] stderr:   File "/usr/lib/python3.10/threading.py", line 1016, in _bootstrap_inner
+2023-03-02 17:53:13 [Local Photos 1] stderr:     self.run()
+2023-03-02 17:53:13 [Local Photos 1] stderr:   File "/usr/lib/python3.10/threading.py", line 953, in run
+2023-03-02 17:53:13 [Local Photos 1] stderr:     self._target(*self._args, **self._kwargs)
+2023-03-02 17:53:13 [Local Photos 1] stderr:   File "/home/langweiler/CloudStation/Documents/Projekte/Digitaler Bilderrahmen/Eigenes Projekt/pyframe/pyframe/indexer.py", line 188, in _build
+2023-03-02 17:53:13 [Local Photos 1] stderr:     self._index.build(rep)
+2023-03-02 17:53:13 [Local Photos 1] stderr:   File "/home/langweiler/CloudStation/Documents/Projekte/Digitaler Bilderrahmen/Eigenes Projekt/pyframe/repository/index.py", line 197, in build
+2023-03-02 17:53:13 [Local Photos 1] stderr:     for file in rep.iterator(index_lookup=False):
+2023-03-02 17:53:13 [Local Photos 1] stderr:   File "/home/langweiler/CloudStation/Documents/Projekte/Digitaler Bilderrahmen/Eigenes Projekt/pyframe/repository/local/repository.py", line 127, in __next__
+2023-03-02 17:53:13 [Local Photos 1] stderr:     return self._rep.file_by_uuid(uuid, self._index_lookup)
+2023-03-02 17:53:13 [Local Photos 1] stderr:   File "/home/langweiler/CloudStation/Documents/Projekte/Digitaler Bilderrahmen/Eigenes Projekt/pyframe/repository/local/repository.py", line 78, in file_by_uuid
+2023-03-02 17:53:13 [Local Photos 1] stderr:     return RepositoryFile(uuid, self)
+2023-03-02 17:53:13 [Local Photos 1] stderr:   File "/home/langweiler/CloudStation/Documents/Projekte/Digitaler Bilderrahmen/Eigenes Projekt/pyframe/repository/local/file.py", line 33, in __init__
+2023-03-02 17:53:13 [Local Photos 1] stderr:     self._extract_image_meta_data(self._path)
+2023-03-02 17:53:13 [Local Photos 1] stderr:   File "/home/langweiler/CloudStation/Documents/Projekte/Digitaler Bilderrahmen/Eigenes Projekt/pyframe/repository/file.py", line 132, in _extract_image_meta_data
+2023-03-02 17:53:13 [Local Photos 1] stderr:     self._last_modified = DateTime.fromtimestamp(os.path.getmtime(path))
+2023-03-02 17:53:13 [Local Photos 1] stderr: NameError: name 'DateTime' is not defined. Did you mean: 'datetime'?
+2023-03-02 17:54:06 Starting to build meta data index in the background.
+2023-03-02 17:54:06 [Local Photos 1] Updating meta data index for repository 'Local Photos 1'
+2023-03-02 17:54:06 [Local Photos 1] Resetting verification flags for all files in index.
+2023-03-02 17:54:06 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 17:54:06 [Local Photos 1] Extracting meta data of file 'IMG-20220501-WA0010.jpg' from file content.
+2023-03-02 17:54:06 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 17:54:06 [Local Photos 1] Adding meta data of file 'IMG-20220501-WA0010.jpg' to index.
+2023-03-02 17:54:06 [Local Photos 1] Extracting meta data of file 'photo.png' from file content.
+2023-03-02 17:54:06 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 17:54:06 [Local Photos 1] Adding meta data of file 'photo.png' to index.
+2023-03-02 17:54:06 [Local Photos 1] Extracting meta data of file '02 Landscape.jpg' from file content.
+2023-03-02 17:54:06 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 17:54:06 [Local Photos 1] Adding meta data of file '02 Landscape.jpg' to index.
+2023-03-02 17:54:06 [Local Photos 1] Extracting meta data of file '01 Portrait.jpg' from file content.
+2023-03-02 17:54:06 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 17:54:06 [Local Photos 1] Adding meta data of file '01 Portrait.jpg' to index.
+2023-03-02 17:54:06 [Local Photos 1] Extracting meta data of file '03 Panorama.JPG' from file content.
+2023-03-02 17:54:06 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 17:54:06 [Local Photos 1] Adding meta data of file '03 Panorama.JPG' to index.
+2023-03-02 17:54:06 [Local Photos 1] Extracting meta data of file 'Urlaub/IMG_20190828_145905.jpg' from file content.
+2023-03-02 17:54:06 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 17:54:06 [Local Photos 1] Adding tag 'b'2019-08 S\xc3\xbcdfrankreich''.
+2023-03-02 17:54:06 [Local Photos 1] Adding meta data of file 'Urlaub/IMG_20190828_145905.jpg' to index.
+2023-03-02 17:54:06 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 17:54:06 [Local Photos 1] Indexing of repository 'Local Photos 1' completed after 0.1 seconds.
+2023-03-02 17:54:06 [Local Photos 1] The next indexing run is due at Thu Mar  2 17:55:07 2023.
+2023-03-02 17:54:06 [Local Frankreich] Updating meta data index for repository 'Local Frankreich'
+2023-03-02 17:54:06 [Local Frankreich] Resetting verification flags for all files in index.
+2023-03-02 17:54:06 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 17:54:06 [Local Frankreich] Extracting meta data of file 'IMG_20190828_101327.jpg' from file content.
+2023-03-02 17:54:06 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 17:54:06 [Local Frankreich] Adding meta data of file 'IMG_20190828_101327.jpg' to index.
+2023-03-02 17:54:06 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150150.jpg' from file content.
+2023-03-02 17:54:06 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 17:54:06 [Local Frankreich] Adding meta data of file 'IMG_20190828_150150.jpg' to index.
+2023-03-02 17:54:06 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145839.jpg' from file content.
+2023-03-02 17:54:06 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 17:54:06 [Local Frankreich] Adding meta data of file 'IMG_20190828_145839.jpg' to index.
+2023-03-02 17:54:06 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145422.jpg' from file content.
+2023-03-02 17:54:06 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 17:54:06 [Local Frankreich] Adding meta data of file 'IMG_20190828_145422.jpg' to index.
+2023-03-02 17:54:06 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150209.jpg' from file content.
+2023-03-02 17:54:06 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 17:54:06 [Local Frankreich] Adding meta data of file 'IMG_20190828_150209.jpg' to index.
+2023-03-02 17:54:06 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145917.jpg' from file content.
+2023-03-02 17:54:06 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 17:54:06 [Local Frankreich] Adding meta data of file 'IMG_20190828_145917.jpg' to index.
+2023-03-02 17:54:06 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153521.jpg' from file content.
+2023-03-02 17:54:06 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 17:54:06 [Local Frankreich] Adding meta data of file 'IMG_20190828_153521.jpg' to index.
+2023-03-02 17:54:06 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150137.jpg' from file content.
+2023-03-02 17:54:06 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 17:54:06 [Local Frankreich] Adding meta data of file 'IMG_20190828_150137.jpg' to index.
+2023-03-02 17:54:06 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145426.jpg' from file content.
+2023-03-02 17:54:06 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 17:54:06 [Local Frankreich] Adding meta data of file 'IMG_20190828_145426.jpg' to index.
+2023-03-02 17:54:06 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153229.jpg' from file content.
+2023-03-02 17:54:06 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 17:54:06 [Local Frankreich] Adding meta data of file 'IMG_20190828_153229.jpg' to index.
+2023-03-02 17:54:06 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145816.jpg' from file content.
+2023-03-02 17:54:06 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 17:54:06 [Local Frankreich] Adding meta data of file 'IMG_20190828_145816.jpg' to index.
+2023-03-02 17:54:06 [Local Frankreich] Extracting meta data of file 'IMG_20190826_144332.jpg' from file content.
+2023-03-02 17:54:06 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 17:54:06 [Local Frankreich] Adding meta data of file 'IMG_20190826_144332.jpg' to index.
+2023-03-02 17:54:06 [Local Frankreich] Extracting meta data of file 'IMG_20190826_144710.jpg' from file content.
+2023-03-02 17:54:06 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 17:54:06 [Local Frankreich] Adding meta data of file 'IMG_20190826_144710.jpg' to index.
+2023-03-02 17:54:06 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145014.jpg' from file content.
+2023-03-02 17:54:06 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 17:54:06 [Local Frankreich] Adding meta data of file 'IMG_20190828_145014.jpg' to index.
+2023-03-02 17:54:06 [Local Frankreich] Extracting meta data of file 'IMG_20190828_101450.jpg' from file content.
+2023-03-02 17:54:06 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 17:54:06 [Local Frankreich] Adding meta data of file 'IMG_20190828_101450.jpg' to index.
+2023-03-02 17:54:06 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150258.jpg' from file content.
+2023-03-02 17:54:06 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 17:54:06 [Local Frankreich] Adding meta data of file 'IMG_20190828_150258.jpg' to index.
+2023-03-02 17:54:06 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153657.jpg' from file content.
+2023-03-02 17:54:06 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 17:54:06 [Local Frankreich] Adding meta data of file 'IMG_20190828_153657.jpg' to index.
+2023-03-02 17:54:06 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145820.jpg' from file content.
+2023-03-02 17:54:06 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 17:54:06 [Local Frankreich] Adding meta data of file 'IMG_20190828_145820.jpg' to index.
+2023-03-02 17:54:06 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145905.jpg' from file content.
+2023-03-02 17:54:06 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 17:54:06 [Local Frankreich] Adding meta data of file 'IMG_20190828_145905.jpg' to index.
+2023-03-02 17:54:06 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 17:54:06 [Local Frankreich] Indexing of repository 'Local Frankreich' completed after 0.3 seconds.
+2023-03-02 17:54:06 [Local Frankreich] The next indexing run is due at Thu Mar  2 17:56:09 2023.
+2023-03-02 17:54:06 Sleeping for 1.0 minutes.
+2023-03-02 17:55:28 Starting to build meta data index in the background.
+2023-03-02 17:55:28 [Local Photos 1] Updating meta data index for repository 'Local Photos 1'
+2023-03-02 17:55:28 [Local Photos 1] Resetting verification flags for all files in index.
+2023-03-02 17:55:28 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 17:55:28 [Local Photos 1] Extracting meta data of file 'IMG-20220501-WA0010.jpg' from file content.
+2023-03-02 17:55:28 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 17:55:28 [Local Photos 1] Adding meta data of file 'IMG-20220501-WA0010.jpg' to index.
+2023-03-02 17:55:28 [Local Photos 1] Extracting meta data of file 'photo.png' from file content.
+2023-03-02 17:55:28 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 17:55:28 [Local Photos 1] Adding meta data of file 'photo.png' to index.
+2023-03-02 17:55:28 [Local Photos 1] Extracting meta data of file '02 Landscape.jpg' from file content.
+2023-03-02 17:55:28 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 17:55:28 [Local Photos 1] Adding meta data of file '02 Landscape.jpg' to index.
+2023-03-02 17:55:28 [Local Photos 1] Extracting meta data of file '01 Portrait.jpg' from file content.
+2023-03-02 17:55:28 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 17:55:28 [Local Photos 1] Adding meta data of file '01 Portrait.jpg' to index.
+2023-03-02 17:55:28 [Local Photos 1] Extracting meta data of file '03 Panorama.JPG' from file content.
+2023-03-02 17:55:28 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 17:55:28 [Local Photos 1] Adding meta data of file '03 Panorama.JPG' to index.
+2023-03-02 17:55:28 [Local Photos 1] Extracting meta data of file 'Urlaub/IMG_20190828_145905.jpg' from file content.
+2023-03-02 17:55:28 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 17:55:28 [Local Photos 1] Adding tag 'b'2019-08 S\xc3\xbcdfrankreich''.
+2023-03-02 17:55:28 [Local Photos 1] Adding meta data of file 'Urlaub/IMG_20190828_145905.jpg' to index.
+2023-03-02 17:55:28 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 17:55:28 [Local Photos 1] Indexing of repository 'Local Photos 1' completed after 0.1 seconds.
+2023-03-02 17:55:28 [Local Photos 1] The next indexing run is due at Thu Mar  2 17:56:29 2023.
+2023-03-02 17:55:28 [Local Frankreich] Updating meta data index for repository 'Local Frankreich'
+2023-03-02 17:55:28 [Local Frankreich] Resetting verification flags for all files in index.
+2023-03-02 17:55:28 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 17:55:28 [Local Frankreich] Extracting meta data of file 'IMG_20190828_101327.jpg' from file content.
+2023-03-02 17:55:28 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 17:55:28 [Local Frankreich] Adding meta data of file 'IMG_20190828_101327.jpg' to index.
+2023-03-02 17:55:28 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150150.jpg' from file content.
+2023-03-02 17:55:28 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 17:55:28 [Local Frankreich] Adding meta data of file 'IMG_20190828_150150.jpg' to index.
+2023-03-02 17:55:28 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145839.jpg' from file content.
+2023-03-02 17:55:28 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 17:55:28 [Local Frankreich] Adding meta data of file 'IMG_20190828_145839.jpg' to index.
+2023-03-02 17:55:28 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145422.jpg' from file content.
+2023-03-02 17:55:28 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 17:55:28 [Local Frankreich] Adding meta data of file 'IMG_20190828_145422.jpg' to index.
+2023-03-02 17:55:28 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150209.jpg' from file content.
+2023-03-02 17:55:28 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 17:55:28 [Local Frankreich] Adding meta data of file 'IMG_20190828_150209.jpg' to index.
+2023-03-02 17:55:28 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145917.jpg' from file content.
+2023-03-02 17:55:28 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 17:55:28 [Local Frankreich] Adding meta data of file 'IMG_20190828_145917.jpg' to index.
+2023-03-02 17:55:28 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153521.jpg' from file content.
+2023-03-02 17:55:28 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 17:55:28 [Local Frankreich] Adding meta data of file 'IMG_20190828_153521.jpg' to index.
+2023-03-02 17:55:28 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150137.jpg' from file content.
+2023-03-02 17:55:28 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 17:55:28 [Local Frankreich] Adding meta data of file 'IMG_20190828_150137.jpg' to index.
+2023-03-02 17:55:28 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145426.jpg' from file content.
+2023-03-02 17:55:28 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 17:55:28 [Local Frankreich] Adding meta data of file 'IMG_20190828_145426.jpg' to index.
+2023-03-02 17:55:28 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153229.jpg' from file content.
+2023-03-02 17:55:28 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 17:55:28 [Local Frankreich] Adding meta data of file 'IMG_20190828_153229.jpg' to index.
+2023-03-02 17:55:28 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145816.jpg' from file content.
+2023-03-02 17:55:28 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 17:55:28 [Local Frankreich] Adding meta data of file 'IMG_20190828_145816.jpg' to index.
+2023-03-02 17:55:28 [Local Frankreich] Extracting meta data of file 'IMG_20190826_144332.jpg' from file content.
+2023-03-02 17:55:28 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 17:55:28 [Local Frankreich] Adding meta data of file 'IMG_20190826_144332.jpg' to index.
+2023-03-02 17:55:28 [Local Frankreich] Extracting meta data of file 'IMG_20190826_144710.jpg' from file content.
+2023-03-02 17:55:28 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 17:55:28 [Local Frankreich] Adding meta data of file 'IMG_20190826_144710.jpg' to index.
+2023-03-02 17:55:28 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145014.jpg' from file content.
+2023-03-02 17:55:28 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 17:55:28 [Local Frankreich] Adding meta data of file 'IMG_20190828_145014.jpg' to index.
+2023-03-02 17:55:28 [Local Frankreich] Extracting meta data of file 'IMG_20190828_101450.jpg' from file content.
+2023-03-02 17:55:28 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 17:55:28 [Local Frankreich] Adding meta data of file 'IMG_20190828_101450.jpg' to index.
+2023-03-02 17:55:28 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150258.jpg' from file content.
+2023-03-02 17:55:28 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 17:55:28 [Local Frankreich] Adding meta data of file 'IMG_20190828_150258.jpg' to index.
+2023-03-02 17:55:28 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153657.jpg' from file content.
+2023-03-02 17:55:28 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 17:55:28 [Local Frankreich] Adding meta data of file 'IMG_20190828_153657.jpg' to index.
+2023-03-02 17:55:28 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145820.jpg' from file content.
+2023-03-02 17:55:28 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 17:55:28 [Local Frankreich] Adding meta data of file 'IMG_20190828_145820.jpg' to index.
+2023-03-02 17:55:28 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145905.jpg' from file content.
+2023-03-02 17:55:28 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 17:55:28 [Local Frankreich] Adding meta data of file 'IMG_20190828_145905.jpg' to index.
+2023-03-02 17:55:28 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 17:55:28 [Local Frankreich] Indexing of repository 'Local Frankreich' completed after 0.3 seconds.
+2023-03-02 17:55:28 [Local Frankreich] The next indexing run is due at Thu Mar  2 17:57:30 2023.
+2023-03-02 17:55:28 Sleeping for 1.0 minutes.
+2023-03-02 20:42:23 Starting to build meta data index in the background.
+2023-03-02 20:42:23 [Local Photos 1] Updating meta data index for repository 'Local Photos 1'
+2023-03-02 20:42:23 [Local Photos 1] Resetting verification flags for all files in index.
+2023-03-02 20:42:23 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 20:42:23 [Local Photos 1] Extracting meta data of file 'IMG-20220501-WA0010.jpg' from file content.
+2023-03-02 20:42:23 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 20:42:23 [Local Photos 1] Adding meta data of file 'IMG-20220501-WA0010.jpg' to index.
+2023-03-02 20:42:23 [Local Photos 1] Extracting meta data of file 'photo.png' from file content.
+2023-03-02 20:42:23 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 20:42:23 [Local Photos 1] Adding meta data of file 'photo.png' to index.
+2023-03-02 20:42:23 [Local Photos 1] Extracting meta data of file '02 Landscape.jpg' from file content.
+2023-03-02 20:42:23 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 20:42:23 [Local Photos 1] Adding meta data of file '02 Landscape.jpg' to index.
+2023-03-02 20:42:23 [Local Photos 1] Extracting meta data of file '01 Portrait.jpg' from file content.
+2023-03-02 20:42:23 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 20:42:23 [Local Photos 1] Adding meta data of file '01 Portrait.jpg' to index.
+2023-03-02 20:42:23 [Local Photos 1] Extracting meta data of file '03 Panorama.JPG' from file content.
+2023-03-02 20:42:23 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 20:42:23 [Local Photos 1] Adding meta data of file '03 Panorama.JPG' to index.
+2023-03-02 20:42:23 [Local Photos 1] Extracting meta data of file 'Urlaub/IMG_20190828_145905.jpg' from file content.
+2023-03-02 20:42:23 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 20:42:23 [Local Photos 1] Adding tag 'b'2019-08 S\xc3\xbcdfrankreich''.
+2023-03-02 20:42:23 [Local Photos 1] Adding meta data of file 'Urlaub/IMG_20190828_145905.jpg' to index.
+2023-03-02 20:42:23 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 20:42:23 [Local Photos 1] Indexing of repository 'Local Photos 1' completed after 0.1 seconds.
+2023-03-02 20:42:23 [Local Photos 1] The next indexing run is due at Thu Mar  2 20:43:24 2023.
+2023-03-02 20:42:23 [Local Frankreich] Updating meta data index for repository 'Local Frankreich'
+2023-03-02 20:42:23 [Local Frankreich] Resetting verification flags for all files in index.
+2023-03-02 20:42:23 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 20:42:23 [Local Frankreich] Extracting meta data of file 'IMG_20190828_101327.jpg' from file content.
+2023-03-02 20:42:23 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 20:42:23 [Local Frankreich] Adding meta data of file 'IMG_20190828_101327.jpg' to index.
+2023-03-02 20:42:23 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150150.jpg' from file content.
+2023-03-02 20:42:23 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 20:42:23 [Local Frankreich] Adding meta data of file 'IMG_20190828_150150.jpg' to index.
+2023-03-02 20:42:23 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145839.jpg' from file content.
+2023-03-02 20:42:23 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 20:42:23 [Local Frankreich] Adding meta data of file 'IMG_20190828_145839.jpg' to index.
+2023-03-02 20:42:23 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145422.jpg' from file content.
+2023-03-02 20:42:23 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 20:42:23 [Local Frankreich] Adding meta data of file 'IMG_20190828_145422.jpg' to index.
+2023-03-02 20:42:23 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150209.jpg' from file content.
+2023-03-02 20:42:23 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 20:42:23 [Local Frankreich] Adding meta data of file 'IMG_20190828_150209.jpg' to index.
+2023-03-02 20:42:23 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145917.jpg' from file content.
+2023-03-02 20:42:23 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 20:42:23 [Local Frankreich] Adding meta data of file 'IMG_20190828_145917.jpg' to index.
+2023-03-02 20:42:23 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153521.jpg' from file content.
+2023-03-02 20:42:23 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 20:42:23 [Local Frankreich] Adding meta data of file 'IMG_20190828_153521.jpg' to index.
+2023-03-02 20:42:23 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150137.jpg' from file content.
+2023-03-02 20:42:23 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 20:42:23 [Local Frankreich] Adding meta data of file 'IMG_20190828_150137.jpg' to index.
+2023-03-02 20:42:23 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145426.jpg' from file content.
+2023-03-02 20:42:23 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 20:42:23 [Local Frankreich] Adding meta data of file 'IMG_20190828_145426.jpg' to index.
+2023-03-02 20:42:23 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153229.jpg' from file content.
+2023-03-02 20:42:23 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 20:42:23 [Local Frankreich] Adding meta data of file 'IMG_20190828_153229.jpg' to index.
+2023-03-02 20:42:23 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145816.jpg' from file content.
+2023-03-02 20:42:23 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 20:42:23 [Local Frankreich] Adding meta data of file 'IMG_20190828_145816.jpg' to index.
+2023-03-02 20:42:23 [Local Frankreich] Extracting meta data of file 'IMG_20190826_144332.jpg' from file content.
+2023-03-02 20:42:23 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 20:42:23 [Local Frankreich] Adding meta data of file 'IMG_20190826_144332.jpg' to index.
+2023-03-02 20:42:23 [Local Frankreich] Extracting meta data of file 'IMG_20190826_144710.jpg' from file content.
+2023-03-02 20:42:23 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 20:42:23 [Local Frankreich] Adding meta data of file 'IMG_20190826_144710.jpg' to index.
+2023-03-02 20:42:23 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145014.jpg' from file content.
+2023-03-02 20:42:23 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 20:42:23 [Local Frankreich] Adding meta data of file 'IMG_20190828_145014.jpg' to index.
+2023-03-02 20:42:23 [Local Frankreich] Extracting meta data of file 'IMG_20190828_101450.jpg' from file content.
+2023-03-02 20:42:23 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 20:42:23 [Local Frankreich] Adding meta data of file 'IMG_20190828_101450.jpg' to index.
+2023-03-02 20:42:23 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150258.jpg' from file content.
+2023-03-02 20:42:23 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 20:42:23 [Local Frankreich] Adding meta data of file 'IMG_20190828_150258.jpg' to index.
+2023-03-02 20:42:23 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153657.jpg' from file content.
+2023-03-02 20:42:23 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 20:42:23 [Local Frankreich] Adding meta data of file 'IMG_20190828_153657.jpg' to index.
+2023-03-02 20:42:23 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145820.jpg' from file content.
+2023-03-02 20:42:23 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 20:42:23 [Local Frankreich] Adding meta data of file 'IMG_20190828_145820.jpg' to index.
+2023-03-02 20:42:23 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145905.jpg' from file content.
+2023-03-02 20:42:23 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 20:42:23 [Local Frankreich] Adding meta data of file 'IMG_20190828_145905.jpg' to index.
+2023-03-02 20:42:23 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 20:42:23 [Local Frankreich] Indexing of repository 'Local Frankreich' completed after 0.4 seconds.
+2023-03-02 20:42:23 [Local Frankreich] The next indexing run is due at Thu Mar  2 20:44:26 2023.
+2023-03-02 20:42:23 Sleeping for 1.0 minutes.
+2023-03-02 21:08:08 Starting to build meta data index in the background.
+2023-03-02 21:08:08 [Local Photos 1] Updating meta data index for repository 'Local Photos 1'.
+2023-03-02 21:08:08 [Local Photos 1] Resetting verification flags for all meta data entries of repository '{rep.uuid}'.
+2023-03-02 21:08:08 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 21:08:08 [Local Photos 1] Extracting meta data of file 'IMG-20220501-WA0010.jpg' from file content.
+2023-03-02 21:08:08 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 21:08:08 [Local Photos 1] An error occurred while building the meta data index: '<' not supported between instances of 'NoneType' and 'datetime.datetime'
+2023-03-02 21:08:08 [Local Photos 1] Extracting meta data of file 'photo.png' from file content.
+2023-03-02 21:08:08 [Local Photos 1] An error occurred while building the meta data index: '<' not supported between instances of 'NoneType' and 'datetime.datetime'
+2023-03-02 21:08:08 [Local Photos 1] Extracting meta data of file '02 Landscape.jpg' from file content.
+2023-03-02 21:08:08 [Local Photos 1] An error occurred while building the meta data index: '<' not supported between instances of 'NoneType' and 'datetime.datetime'
+2023-03-02 21:08:08 [Local Photos 1] Extracting meta data of file '01 Portrait.jpg' from file content.
+2023-03-02 21:08:08 [Local Photos 1] An error occurred while building the meta data index: '<' not supported between instances of 'NoneType' and 'datetime.datetime'
+2023-03-02 21:08:08 [Local Photos 1] Extracting meta data of file '03 Panorama.JPG' from file content.
+2023-03-02 21:08:08 [Local Photos 1] An error occurred while building the meta data index: '<' not supported between instances of 'NoneType' and 'datetime.datetime'
+2023-03-02 21:08:08 [Local Photos 1] Extracting meta data of file 'Urlaub/IMG_20190828_145905.jpg' from file content.
+2023-03-02 21:08:08 [Local Photos 1] An error occurred while building the meta data index: '<' not supported between instances of 'NoneType' and 'datetime.datetime'
+2023-03-02 21:08:08 [Local Photos 1] Indexing of repository 'Local Photos 1' completed after 0.1 seconds.
+2023-03-02 21:08:08 [Local Photos 1] The next indexing run is due at Thu Mar  2 21:09:09 2023.
+2023-03-02 21:08:08 [Local Frankreich] Updating meta data index for repository 'Local Frankreich'.
+2023-03-02 21:08:08 [Local Frankreich] Resetting verification flags for all meta data entries of repository '{rep.uuid}'.
+2023-03-02 21:08:08 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 21:08:08 [Local Frankreich] Extracting meta data of file 'IMG_20190828_101327.jpg' from file content.
+2023-03-02 21:08:08 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 21:08:08 [Local Frankreich] An error occurred while building the meta data index: '<' not supported between instances of 'NoneType' and 'datetime.datetime'
+2023-03-02 21:08:08 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150150.jpg' from file content.
+2023-03-02 21:08:08 [Local Frankreich] An error occurred while building the meta data index: '<' not supported between instances of 'NoneType' and 'datetime.datetime'
+2023-03-02 21:08:08 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145839.jpg' from file content.
+2023-03-02 21:08:08 [Local Frankreich] An error occurred while building the meta data index: '<' not supported between instances of 'NoneType' and 'datetime.datetime'
+2023-03-02 21:08:08 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145422.jpg' from file content.
+2023-03-02 21:08:08 [Local Frankreich] An error occurred while building the meta data index: '<' not supported between instances of 'NoneType' and 'datetime.datetime'
+2023-03-02 21:08:08 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150209.jpg' from file content.
+2023-03-02 21:08:08 [Local Frankreich] An error occurred while building the meta data index: '<' not supported between instances of 'NoneType' and 'datetime.datetime'
+2023-03-02 21:08:08 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145917.jpg' from file content.
+2023-03-02 21:08:08 [Local Frankreich] An error occurred while building the meta data index: '<' not supported between instances of 'NoneType' and 'datetime.datetime'
+2023-03-02 21:08:08 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153521.jpg' from file content.
+2023-03-02 21:08:08 [Local Frankreich] An error occurred while building the meta data index: '<' not supported between instances of 'NoneType' and 'datetime.datetime'
+2023-03-02 21:08:08 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150137.jpg' from file content.
+2023-03-02 21:08:08 [Local Frankreich] An error occurred while building the meta data index: '<' not supported between instances of 'NoneType' and 'datetime.datetime'
+2023-03-02 21:08:08 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145426.jpg' from file content.
+2023-03-02 21:08:08 [Local Frankreich] An error occurred while building the meta data index: '<' not supported between instances of 'NoneType' and 'datetime.datetime'
+2023-03-02 21:08:08 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153229.jpg' from file content.
+2023-03-02 21:08:08 [Local Frankreich] An error occurred while building the meta data index: '<' not supported between instances of 'NoneType' and 'datetime.datetime'
+2023-03-02 21:08:08 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145816.jpg' from file content.
+2023-03-02 21:08:08 [Local Frankreich] An error occurred while building the meta data index: '<' not supported between instances of 'NoneType' and 'datetime.datetime'
+2023-03-02 21:08:08 [Local Frankreich] Extracting meta data of file 'IMG_20190826_144332.jpg' from file content.
+2023-03-02 21:08:08 [Local Frankreich] An error occurred while building the meta data index: '<' not supported between instances of 'NoneType' and 'datetime.datetime'
+2023-03-02 21:08:08 [Local Frankreich] Extracting meta data of file 'IMG_20190826_144710.jpg' from file content.
+2023-03-02 21:08:08 [Local Frankreich] An error occurred while building the meta data index: '<' not supported between instances of 'NoneType' and 'datetime.datetime'
+2023-03-02 21:08:08 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145014.jpg' from file content.
+2023-03-02 21:08:08 [Local Frankreich] An error occurred while building the meta data index: '<' not supported between instances of 'NoneType' and 'datetime.datetime'
+2023-03-02 21:08:08 [Local Frankreich] Extracting meta data of file 'IMG_20190828_101450.jpg' from file content.
+2023-03-02 21:08:08 [Local Frankreich] An error occurred while building the meta data index: '<' not supported between instances of 'NoneType' and 'datetime.datetime'
+2023-03-02 21:08:08 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150258.jpg' from file content.
+2023-03-02 21:08:08 [Local Frankreich] An error occurred while building the meta data index: '<' not supported between instances of 'NoneType' and 'datetime.datetime'
+2023-03-02 21:08:08 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153657.jpg' from file content.
+2023-03-02 21:08:08 [Local Frankreich] An error occurred while building the meta data index: '<' not supported between instances of 'NoneType' and 'datetime.datetime'
+2023-03-02 21:08:08 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145820.jpg' from file content.
+2023-03-02 21:08:08 [Local Frankreich] An error occurred while building the meta data index: '<' not supported between instances of 'NoneType' and 'datetime.datetime'
+2023-03-02 21:08:08 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145905.jpg' from file content.
+2023-03-02 21:08:08 [Local Frankreich] An error occurred while building the meta data index: '<' not supported between instances of 'NoneType' and 'datetime.datetime'
+2023-03-02 21:08:08 [Local Frankreich] Indexing of repository 'Local Frankreich' completed after 0.1 seconds.
+2023-03-02 21:08:08 [Local Frankreich] The next indexing run is due at Thu Mar  2 21:10:11 2023.
+2023-03-02 21:08:08 Sleeping for 1.0 minutes.
+2023-03-02 21:12:27 Starting to build meta data index in the background.
+2023-03-02 21:12:27 [Local Photos 1] Updating meta data index for repository 'Local Photos 1'.
+2023-03-02 21:12:27 [Local Photos 1] Resetting verification flags for all meta data entries of repository '{rep.uuid}'.
+2023-03-02 21:12:27 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 21:12:27 [Local Photos 1] Extracting meta data of file 'IMG-20220501-WA0010.jpg' from file content.
+2023-03-02 21:12:27 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 21:12:27 [Local Photos 1] Adding meta data of file 'IMG-20220501-WA0010.jpg' to index.
+2023-03-02 21:12:27 [Local Photos 1] An error occurred while building the meta data index: 'last_update' is an invalid keyword argument for MetaData
+2023-03-02 21:12:27 [Local Photos 1] Extracting meta data of file 'photo.png' from file content.
+2023-03-02 21:12:27 [Local Photos 1] Adding meta data of file 'photo.png' to index.
+2023-03-02 21:12:27 [Local Photos 1] An error occurred while building the meta data index: 'last_update' is an invalid keyword argument for MetaData
+2023-03-02 21:12:27 [Local Photos 1] Extracting meta data of file '02 Landscape.jpg' from file content.
+2023-03-02 21:12:27 [Local Photos 1] Adding meta data of file '02 Landscape.jpg' to index.
+2023-03-02 21:12:27 [Local Photos 1] An error occurred while building the meta data index: 'last_update' is an invalid keyword argument for MetaData
+2023-03-02 21:12:27 [Local Photos 1] Extracting meta data of file '01 Portrait.jpg' from file content.
+2023-03-02 21:12:27 [Local Photos 1] Adding meta data of file '01 Portrait.jpg' to index.
+2023-03-02 21:12:27 [Local Photos 1] An error occurred while building the meta data index: 'last_update' is an invalid keyword argument for MetaData
+2023-03-02 21:12:27 [Local Photos 1] Extracting meta data of file '03 Panorama.JPG' from file content.
+2023-03-02 21:12:27 [Local Photos 1] Adding meta data of file '03 Panorama.JPG' to index.
+2023-03-02 21:12:27 [Local Photos 1] An error occurred while building the meta data index: 'last_update' is an invalid keyword argument for MetaData
+2023-03-02 21:12:27 [Local Photos 1] Extracting meta data of file 'Urlaub/IMG_20190828_145905.jpg' from file content.
+2023-03-02 21:12:27 [Local Photos 1] Adding tag 'b'2019-08 S\xc3\xbcdfrankreich''.
+2023-03-02 21:12:27 [Local Photos 1] Adding meta data of file 'Urlaub/IMG_20190828_145905.jpg' to index.
+2023-03-02 21:12:27 [Local Photos 1] An error occurred while building the meta data index: 'last_update' is an invalid keyword argument for MetaData
+2023-03-02 21:12:27 [Local Photos 1] Indexing of repository 'Local Photos 1' completed after 0.1 seconds.
+2023-03-02 21:12:27 [Local Photos 1] The next indexing run is due at Thu Mar  2 21:13:29 2023.
+2023-03-02 21:12:27 [Local Frankreich] Updating meta data index for repository 'Local Frankreich'.
+2023-03-02 21:12:27 [Local Frankreich] Resetting verification flags for all meta data entries of repository '{rep.uuid}'.
+2023-03-02 21:12:27 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 21:12:28 [Local Frankreich] Extracting meta data of file 'IMG_20190828_101327.jpg' from file content.
+2023-03-02 21:12:28 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 21:12:28 [Local Frankreich] Adding tag 'b'2019-08 S\xc3\xbcdfrankreich''.
+2023-03-02 21:12:28 [Local Frankreich] Adding meta data of file 'IMG_20190828_101327.jpg' to index.
+2023-03-02 21:12:28 [Local Frankreich] An error occurred while building the meta data index: 'last_update' is an invalid keyword argument for MetaData
+2023-03-02 21:12:28 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150150.jpg' from file content.
+2023-03-02 21:12:28 [Local Frankreich] Adding tag 'b'2019-08 S\xc3\xbcdfrankreich''.
+2023-03-02 21:12:28 [Local Frankreich] Adding meta data of file 'IMG_20190828_150150.jpg' to index.
+2023-03-02 21:12:28 [Local Frankreich] An error occurred while building the meta data index: 'last_update' is an invalid keyword argument for MetaData
+2023-03-02 21:12:28 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145839.jpg' from file content.
+2023-03-02 21:12:28 [Local Frankreich] Adding tag 'b'2019-08 S\xc3\xbcdfrankreich''.
+2023-03-02 21:12:28 [Local Frankreich] Adding meta data of file 'IMG_20190828_145839.jpg' to index.
+2023-03-02 21:12:28 [Local Frankreich] An error occurred while building the meta data index: 'last_update' is an invalid keyword argument for MetaData
+2023-03-02 21:12:28 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145422.jpg' from file content.
+2023-03-02 21:12:28 [Local Frankreich] Adding tag 'b'2019-08 S\xc3\xbcdfrankreich''.
+2023-03-02 21:12:28 [Local Frankreich] Adding meta data of file 'IMG_20190828_145422.jpg' to index.
+2023-03-02 21:12:28 [Local Frankreich] An error occurred while building the meta data index: 'last_update' is an invalid keyword argument for MetaData
+2023-03-02 21:12:28 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150209.jpg' from file content.
+2023-03-02 21:12:28 [Local Frankreich] Adding tag 'b'2019-08 S\xc3\xbcdfrankreich''.
+2023-03-02 21:12:28 [Local Frankreich] Adding meta data of file 'IMG_20190828_150209.jpg' to index.
+2023-03-02 21:12:28 [Local Frankreich] An error occurred while building the meta data index: 'last_update' is an invalid keyword argument for MetaData
+2023-03-02 21:12:28 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145917.jpg' from file content.
+2023-03-02 21:12:28 [Local Frankreich] Adding tag 'b'2019-08 S\xc3\xbcdfrankreich''.
+2023-03-02 21:12:28 [Local Frankreich] Adding meta data of file 'IMG_20190828_145917.jpg' to index.
+2023-03-02 21:12:28 [Local Frankreich] An error occurred while building the meta data index: 'last_update' is an invalid keyword argument for MetaData
+2023-03-02 21:12:28 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153521.jpg' from file content.
+2023-03-02 21:12:28 [Local Frankreich] Adding tag 'b'2019-08 S\xc3\xbcdfrankreich''.
+2023-03-02 21:12:28 [Local Frankreich] Adding meta data of file 'IMG_20190828_153521.jpg' to index.
+2023-03-02 21:12:28 [Local Frankreich] An error occurred while building the meta data index: 'last_update' is an invalid keyword argument for MetaData
+2023-03-02 21:12:28 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150137.jpg' from file content.
+2023-03-02 21:12:28 [Local Frankreich] Adding tag 'b'2019-08 S\xc3\xbcdfrankreich''.
+2023-03-02 21:12:28 [Local Frankreich] Adding meta data of file 'IMG_20190828_150137.jpg' to index.
+2023-03-02 21:12:28 [Local Frankreich] An error occurred while building the meta data index: 'last_update' is an invalid keyword argument for MetaData
+2023-03-02 21:12:28 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145426.jpg' from file content.
+2023-03-02 21:12:28 [Local Frankreich] Adding tag 'b'2019-08 S\xc3\xbcdfrankreich''.
+2023-03-02 21:12:28 [Local Frankreich] Adding meta data of file 'IMG_20190828_145426.jpg' to index.
+2023-03-02 21:12:28 [Local Frankreich] An error occurred while building the meta data index: 'last_update' is an invalid keyword argument for MetaData
+2023-03-02 21:12:28 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153229.jpg' from file content.
+2023-03-02 21:12:28 [Local Frankreich] Adding tag 'b'2019-08 S\xc3\xbcdfrankreich''.
+2023-03-02 21:12:28 [Local Frankreich] Adding meta data of file 'IMG_20190828_153229.jpg' to index.
+2023-03-02 21:12:28 [Local Frankreich] An error occurred while building the meta data index: 'last_update' is an invalid keyword argument for MetaData
+2023-03-02 21:12:28 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145816.jpg' from file content.
+2023-03-02 21:12:28 [Local Frankreich] Adding tag 'b'2019-08 S\xc3\xbcdfrankreich''.
+2023-03-02 21:12:28 [Local Frankreich] Adding meta data of file 'IMG_20190828_145816.jpg' to index.
+2023-03-02 21:12:28 [Local Frankreich] An error occurred while building the meta data index: 'last_update' is an invalid keyword argument for MetaData
+2023-03-02 21:12:28 [Local Frankreich] Extracting meta data of file 'IMG_20190826_144332.jpg' from file content.
+2023-03-02 21:12:28 [Local Frankreich] Adding tag 'b'2019-08 S\xc3\xbcdfrankreich''.
+2023-03-02 21:12:28 [Local Frankreich] Adding meta data of file 'IMG_20190826_144332.jpg' to index.
+2023-03-02 21:12:28 [Local Frankreich] An error occurred while building the meta data index: 'last_update' is an invalid keyword argument for MetaData
+2023-03-02 21:12:28 [Local Frankreich] Extracting meta data of file 'IMG_20190826_144710.jpg' from file content.
+2023-03-02 21:12:28 [Local Frankreich] Adding tag 'b'2019-08 S\xc3\xbcdfrankreich''.
+2023-03-02 21:12:28 [Local Frankreich] Adding meta data of file 'IMG_20190826_144710.jpg' to index.
+2023-03-02 21:12:28 [Local Frankreich] An error occurred while building the meta data index: 'last_update' is an invalid keyword argument for MetaData
+2023-03-02 21:12:28 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145014.jpg' from file content.
+2023-03-02 21:12:28 [Local Frankreich] Adding tag 'b'2019-08 S\xc3\xbcdfrankreich''.
+2023-03-02 21:12:28 [Local Frankreich] Adding meta data of file 'IMG_20190828_145014.jpg' to index.
+2023-03-02 21:12:28 [Local Frankreich] An error occurred while building the meta data index: 'last_update' is an invalid keyword argument for MetaData
+2023-03-02 21:12:28 [Local Frankreich] Extracting meta data of file 'IMG_20190828_101450.jpg' from file content.
+2023-03-02 21:12:28 [Local Frankreich] Adding tag 'b'2019-08 S\xc3\xbcdfrankreich''.
+2023-03-02 21:12:28 [Local Frankreich] Adding meta data of file 'IMG_20190828_101450.jpg' to index.
+2023-03-02 21:12:28 [Local Frankreich] An error occurred while building the meta data index: 'last_update' is an invalid keyword argument for MetaData
+2023-03-02 21:12:28 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150258.jpg' from file content.
+2023-03-02 21:12:28 [Local Frankreich] Adding tag 'b'2019-08 S\xc3\xbcdfrankreich''.
+2023-03-02 21:12:28 [Local Frankreich] Adding meta data of file 'IMG_20190828_150258.jpg' to index.
+2023-03-02 21:12:28 [Local Frankreich] An error occurred while building the meta data index: 'last_update' is an invalid keyword argument for MetaData
+2023-03-02 21:12:28 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153657.jpg' from file content.
+2023-03-02 21:12:28 [Local Frankreich] Adding tag 'b'2019-08 S\xc3\xbcdfrankreich''.
+2023-03-02 21:12:28 [Local Frankreich] Adding meta data of file 'IMG_20190828_153657.jpg' to index.
+2023-03-02 21:12:28 [Local Frankreich] An error occurred while building the meta data index: 'last_update' is an invalid keyword argument for MetaData
+2023-03-02 21:12:28 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145820.jpg' from file content.
+2023-03-02 21:12:28 [Local Frankreich] Adding tag 'b'2019-08 S\xc3\xbcdfrankreich''.
+2023-03-02 21:12:28 [Local Frankreich] Adding meta data of file 'IMG_20190828_145820.jpg' to index.
+2023-03-02 21:12:28 [Local Frankreich] An error occurred while building the meta data index: 'last_update' is an invalid keyword argument for MetaData
+2023-03-02 21:12:28 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145905.jpg' from file content.
+2023-03-02 21:12:28 [Local Frankreich] Adding tag 'b'2019-08 S\xc3\xbcdfrankreich''.
+2023-03-02 21:12:28 [Local Frankreich] Adding meta data of file 'IMG_20190828_145905.jpg' to index.
+2023-03-02 21:12:28 [Local Frankreich] An error occurred while building the meta data index: 'last_update' is an invalid keyword argument for MetaData
+2023-03-02 21:12:28 [Local Frankreich] Indexing of repository 'Local Frankreich' completed after 0.1 seconds.
+2023-03-02 21:12:28 [Local Frankreich] The next indexing run is due at Thu Mar  2 21:14:30 2023.
+2023-03-02 21:12:28 Sleeping for 1.0 minutes.
+2023-03-02 21:13:38 Starting to build meta data index in the background.
+2023-03-02 21:13:38 [Local Photos 1] Updating meta data index for repository 'Local Photos 1'.
+2023-03-02 21:13:38 [Local Photos 1] Resetting verification flags for all meta data entries of repository '{rep.uuid}'.
+2023-03-02 21:13:38 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 21:13:38 [Local Photos 1] Extracting meta data of file 'IMG-20220501-WA0010.jpg' from file content.
+2023-03-02 21:13:38 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 21:13:38 [Local Photos 1] Adding meta data of file 'IMG-20220501-WA0010.jpg' to index.
+2023-03-02 21:13:38 [Local Photos 1] Extracting meta data of file 'photo.png' from file content.
+2023-03-02 21:13:38 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 21:13:38 [Local Photos 1] Adding meta data of file 'photo.png' to index.
+2023-03-02 21:13:38 [Local Photos 1] Extracting meta data of file '02 Landscape.jpg' from file content.
+2023-03-02 21:13:38 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 21:13:38 [Local Photos 1] Adding meta data of file '02 Landscape.jpg' to index.
+2023-03-02 21:13:38 [Local Photos 1] Extracting meta data of file '01 Portrait.jpg' from file content.
+2023-03-02 21:13:38 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 21:13:38 [Local Photos 1] Adding meta data of file '01 Portrait.jpg' to index.
+2023-03-02 21:13:38 [Local Photos 1] Extracting meta data of file '03 Panorama.JPG' from file content.
+2023-03-02 21:13:38 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 21:13:38 [Local Photos 1] Adding meta data of file '03 Panorama.JPG' to index.
+2023-03-02 21:13:38 [Local Photos 1] Extracting meta data of file 'Urlaub/IMG_20190828_145905.jpg' from file content.
+2023-03-02 21:13:38 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 21:13:38 [Local Photos 1] Adding tag 'b'2019-08 S\xc3\xbcdfrankreich''.
+2023-03-02 21:13:38 [Local Photos 1] Adding meta data of file 'Urlaub/IMG_20190828_145905.jpg' to index.
+2023-03-02 21:13:38 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 21:13:38 [Local Photos 1] Indexing of repository 'Local Photos 1' completed after 0.1 seconds.
+2023-03-02 21:13:38 [Local Photos 1] The next indexing run is due at Thu Mar  2 21:14:40 2023.
+2023-03-02 21:13:38 [Local Frankreich] Updating meta data index for repository 'Local Frankreich'.
+2023-03-02 21:13:38 [Local Frankreich] Resetting verification flags for all meta data entries of repository '{rep.uuid}'.
+2023-03-02 21:13:38 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 21:13:38 [Local Frankreich] Extracting meta data of file 'IMG_20190828_101327.jpg' from file content.
+2023-03-02 21:13:38 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 21:13:38 [Local Frankreich] Adding meta data of file 'IMG_20190828_101327.jpg' to index.
+2023-03-02 21:13:38 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150150.jpg' from file content.
+2023-03-02 21:13:38 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 21:13:38 [Local Frankreich] Adding meta data of file 'IMG_20190828_150150.jpg' to index.
+2023-03-02 21:13:38 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145839.jpg' from file content.
+2023-03-02 21:13:38 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 21:13:38 [Local Frankreich] Adding meta data of file 'IMG_20190828_145839.jpg' to index.
+2023-03-02 21:13:38 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145422.jpg' from file content.
+2023-03-02 21:13:38 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 21:13:38 [Local Frankreich] Adding meta data of file 'IMG_20190828_145422.jpg' to index.
+2023-03-02 21:13:38 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150209.jpg' from file content.
+2023-03-02 21:13:38 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 21:13:38 [Local Frankreich] Adding meta data of file 'IMG_20190828_150209.jpg' to index.
+2023-03-02 21:13:38 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145917.jpg' from file content.
+2023-03-02 21:13:38 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 21:13:38 [Local Frankreich] Adding meta data of file 'IMG_20190828_145917.jpg' to index.
+2023-03-02 21:13:38 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153521.jpg' from file content.
+2023-03-02 21:13:38 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 21:13:38 [Local Frankreich] Adding meta data of file 'IMG_20190828_153521.jpg' to index.
+2023-03-02 21:13:38 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150137.jpg' from file content.
+2023-03-02 21:13:38 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 21:13:38 [Local Frankreich] Adding meta data of file 'IMG_20190828_150137.jpg' to index.
+2023-03-02 21:13:38 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145426.jpg' from file content.
+2023-03-02 21:13:38 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 21:13:38 [Local Frankreich] Adding meta data of file 'IMG_20190828_145426.jpg' to index.
+2023-03-02 21:13:39 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153229.jpg' from file content.
+2023-03-02 21:13:39 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 21:13:39 [Local Frankreich] Adding meta data of file 'IMG_20190828_153229.jpg' to index.
+2023-03-02 21:13:39 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145816.jpg' from file content.
+2023-03-02 21:13:39 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 21:13:39 [Local Frankreich] Adding meta data of file 'IMG_20190828_145816.jpg' to index.
+2023-03-02 21:13:39 [Local Frankreich] Extracting meta data of file 'IMG_20190826_144332.jpg' from file content.
+2023-03-02 21:13:39 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 21:13:39 [Local Frankreich] Adding meta data of file 'IMG_20190826_144332.jpg' to index.
+2023-03-02 21:13:39 [Local Frankreich] Extracting meta data of file 'IMG_20190826_144710.jpg' from file content.
+2023-03-02 21:13:39 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 21:13:39 [Local Frankreich] Adding meta data of file 'IMG_20190826_144710.jpg' to index.
+2023-03-02 21:13:39 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145014.jpg' from file content.
+2023-03-02 21:13:39 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 21:13:39 [Local Frankreich] Adding meta data of file 'IMG_20190828_145014.jpg' to index.
+2023-03-02 21:13:39 [Local Frankreich] Extracting meta data of file 'IMG_20190828_101450.jpg' from file content.
+2023-03-02 21:13:39 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 21:13:39 [Local Frankreich] Adding meta data of file 'IMG_20190828_101450.jpg' to index.
+2023-03-02 21:13:39 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150258.jpg' from file content.
+2023-03-02 21:13:39 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 21:13:39 [Local Frankreich] Adding meta data of file 'IMG_20190828_150258.jpg' to index.
+2023-03-02 21:13:39 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153657.jpg' from file content.
+2023-03-02 21:13:39 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 21:13:39 [Local Frankreich] Adding meta data of file 'IMG_20190828_153657.jpg' to index.
+2023-03-02 21:13:39 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145820.jpg' from file content.
+2023-03-02 21:13:39 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 21:13:39 [Local Frankreich] Adding meta data of file 'IMG_20190828_145820.jpg' to index.
+2023-03-02 21:13:39 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145905.jpg' from file content.
+2023-03-02 21:13:39 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 21:13:39 [Local Frankreich] Adding meta data of file 'IMG_20190828_145905.jpg' to index.
+2023-03-02 21:13:39 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 21:13:39 [Local Frankreich] Indexing of repository 'Local Frankreich' completed after 0.4 seconds.
+2023-03-02 21:13:39 [Local Frankreich] The next indexing run is due at Thu Mar  2 21:15:41 2023.
+2023-03-02 21:13:39 Sleeping for 1.0 minutes.
+2023-03-02 21:14:40 [Local Photos 1] Updating meta data index for repository 'Local Photos 1'.
+2023-03-02 21:14:40 [Local Photos 1] Resetting verification flags for all meta data entries of repository '{rep.uuid}'.
+2023-03-02 21:14:40 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 21:14:40 [Local Photos 1] Extracting meta data of file 'IMG-20220501-WA0010.jpg' from file content.
+2023-03-02 21:14:40 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 21:14:40 [Local Photos 1] Updating meta data of file 'IMG-20220501-WA0010.jpg' in index.
+2023-03-02 21:14:40 [Local Photos 1] Extracting meta data of file 'photo.png' from file content.
+2023-03-02 21:14:40 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 21:14:40 [Local Photos 1] Updating meta data of file 'photo.png' in index.
+2023-03-02 21:14:40 [Local Photos 1] Extracting meta data of file '02 Landscape.jpg' from file content.
+2023-03-02 21:14:40 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 21:14:40 [Local Photos 1] Updating meta data of file '02 Landscape.jpg' in index.
+2023-03-02 21:14:40 [Local Photos 1] Extracting meta data of file '01 Portrait.jpg' from file content.
+2023-03-02 21:14:40 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 21:14:40 [Local Photos 1] Updating meta data of file '01 Portrait.jpg' in index.
+2023-03-02 21:14:40 [Local Photos 1] Extracting meta data of file '03 Panorama.JPG' from file content.
+2023-03-02 21:14:40 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 21:14:40 [Local Photos 1] Updating meta data of file '03 Panorama.JPG' in index.
+2023-03-02 21:14:40 [Local Photos 1] Extracting meta data of file 'Urlaub/IMG_20190828_145905.jpg' from file content.
+2023-03-02 21:14:40 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 21:14:40 [Local Photos 1] Updating meta data of file 'Urlaub/IMG_20190828_145905.jpg' in index.
+2023-03-02 21:14:40 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 21:14:40 [Local Photos 1] Indexing of repository 'Local Photos 1' completed after 0.1 seconds.
+2023-03-02 21:14:40 [Local Photos 1] The next indexing run is due at Thu Mar  2 21:15:41 2023.
+2023-03-02 21:15:41 [Local Photos 1] Updating meta data index for repository 'Local Photos 1'.
+2023-03-02 21:15:41 [Local Photos 1] Resetting verification flags for all meta data entries of repository '{rep.uuid}'.
+2023-03-02 21:15:41 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 21:15:41 [Local Photos 1] Extracting meta data of file 'IMG-20220501-WA0010.jpg' from file content.
+2023-03-02 21:15:41 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 21:15:41 [Local Photos 1] Updating meta data of file 'IMG-20220501-WA0010.jpg' in index.
+2023-03-02 21:15:41 [Local Photos 1] Extracting meta data of file 'photo.png' from file content.
+2023-03-02 21:15:41 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 21:15:41 [Local Photos 1] Updating meta data of file 'photo.png' in index.
+2023-03-02 21:15:41 [Local Photos 1] Extracting meta data of file '02 Landscape.jpg' from file content.
+2023-03-02 21:15:41 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 21:15:41 [Local Photos 1] Updating meta data of file '02 Landscape.jpg' in index.
+2023-03-02 21:15:41 [Local Photos 1] Extracting meta data of file '01 Portrait.jpg' from file content.
+2023-03-02 21:15:41 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 21:15:41 [Local Photos 1] Updating meta data of file '01 Portrait.jpg' in index.
+2023-03-02 21:15:41 [Local Photos 1] Extracting meta data of file '03 Panorama.JPG' from file content.
+2023-03-02 21:15:41 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 21:15:41 [Local Photos 1] Updating meta data of file '03 Panorama.JPG' in index.
+2023-03-02 21:15:41 [Local Photos 1] Extracting meta data of file 'Urlaub/IMG_20190828_145905.jpg' from file content.
+2023-03-02 21:15:41 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 21:15:41 [Local Photos 1] Updating meta data of file 'Urlaub/IMG_20190828_145905.jpg' in index.
+2023-03-02 21:15:41 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 21:15:41 [Local Photos 1] Indexing of repository 'Local Photos 1' completed after 0.1 seconds.
+2023-03-02 21:15:41 [Local Photos 1] The next indexing run is due at Thu Mar  2 21:16:42 2023.
+2023-03-02 21:15:41 [Local Frankreich] Updating meta data index for repository 'Local Frankreich'.
+2023-03-02 21:15:41 [Local Frankreich] Resetting verification flags for all meta data entries of repository '{rep.uuid}'.
+2023-03-02 21:15:41 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 21:15:41 [Local Frankreich] Extracting meta data of file 'IMG_20190828_101327.jpg' from file content.
+2023-03-02 21:15:41 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 21:15:41 [Local Frankreich] Updating meta data of file 'IMG_20190828_101327.jpg' in index.
+2023-03-02 21:15:41 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150150.jpg' from file content.
+2023-03-02 21:15:41 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 21:15:41 [Local Frankreich] Updating meta data of file 'IMG_20190828_150150.jpg' in index.
+2023-03-02 21:15:41 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145839.jpg' from file content.
+2023-03-02 21:15:41 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 21:15:41 [Local Frankreich] Updating meta data of file 'IMG_20190828_145839.jpg' in index.
+2023-03-02 21:15:41 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145422.jpg' from file content.
+2023-03-02 21:15:41 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 21:15:41 [Local Frankreich] Updating meta data of file 'IMG_20190828_145422.jpg' in index.
+2023-03-02 21:15:41 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150209.jpg' from file content.
+2023-03-02 21:15:41 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 21:15:41 [Local Frankreich] Updating meta data of file 'IMG_20190828_150209.jpg' in index.
+2023-03-02 21:15:41 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145917.jpg' from file content.
+2023-03-02 21:15:41 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 21:15:41 [Local Frankreich] Updating meta data of file 'IMG_20190828_145917.jpg' in index.
+2023-03-02 21:15:41 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153521.jpg' from file content.
+2023-03-02 21:15:41 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 21:15:41 [Local Frankreich] Updating meta data of file 'IMG_20190828_153521.jpg' in index.
+2023-03-02 21:15:41 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150137.jpg' from file content.
+2023-03-02 21:15:41 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 21:15:41 [Local Frankreich] Updating meta data of file 'IMG_20190828_150137.jpg' in index.
+2023-03-02 21:15:41 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145426.jpg' from file content.
+2023-03-02 21:15:41 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 21:15:41 [Local Frankreich] Updating meta data of file 'IMG_20190828_145426.jpg' in index.
+2023-03-02 21:15:41 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153229.jpg' from file content.
+2023-03-02 21:15:41 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 21:15:41 [Local Frankreich] Updating meta data of file 'IMG_20190828_153229.jpg' in index.
+2023-03-02 21:15:41 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145816.jpg' from file content.
+2023-03-02 21:15:41 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 21:15:41 [Local Frankreich] Updating meta data of file 'IMG_20190828_145816.jpg' in index.
+2023-03-02 21:15:41 [Local Frankreich] Extracting meta data of file 'IMG_20190826_144332.jpg' from file content.
+2023-03-02 21:15:41 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 21:15:41 [Local Frankreich] Updating meta data of file 'IMG_20190826_144332.jpg' in index.
+2023-03-02 21:15:41 [Local Frankreich] Extracting meta data of file 'IMG_20190826_144710.jpg' from file content.
+2023-03-02 21:15:41 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 21:15:41 [Local Frankreich] Updating meta data of file 'IMG_20190826_144710.jpg' in index.
+2023-03-02 21:15:41 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145014.jpg' from file content.
+2023-03-02 21:15:41 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 21:15:41 [Local Frankreich] Updating meta data of file 'IMG_20190828_145014.jpg' in index.
+2023-03-02 21:15:41 [Local Frankreich] Extracting meta data of file 'IMG_20190828_101450.jpg' from file content.
+2023-03-02 21:15:41 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 21:15:41 [Local Frankreich] Updating meta data of file 'IMG_20190828_101450.jpg' in index.
+2023-03-02 21:15:41 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150258.jpg' from file content.
+2023-03-02 21:15:41 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 21:15:41 [Local Frankreich] Updating meta data of file 'IMG_20190828_150258.jpg' in index.
+2023-03-02 21:15:41 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153657.jpg' from file content.
+2023-03-02 21:15:41 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 21:15:41 [Local Frankreich] Updating meta data of file 'IMG_20190828_153657.jpg' in index.
+2023-03-02 21:15:41 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145820.jpg' from file content.
+2023-03-02 21:15:41 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 21:15:41 [Local Frankreich] Updating meta data of file 'IMG_20190828_145820.jpg' in index.
+2023-03-02 21:15:41 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145905.jpg' from file content.
+2023-03-02 21:15:41 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 21:15:41 [Local Frankreich] Updating meta data of file 'IMG_20190828_145905.jpg' in index.
+2023-03-02 21:15:41 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 21:15:41 [Local Frankreich] Indexing of repository 'Local Frankreich' completed after 0.4 seconds.
+2023-03-02 21:15:41 [Local Frankreich] The next indexing run is due at Thu Mar  2 21:17:44 2023.
+2023-03-02 21:17:08 Starting to build meta data index in the background.
+2023-03-02 21:17:08 [Local Photos 1] Updating meta data index for repository 'Local Photos 1'.
+2023-03-02 21:17:08 [Local Photos 1] Resetting verification flags for all meta data entries of repository 'Local Photos 1'.
+2023-03-02 21:17:08 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 21:17:08 [Local Photos 1] Extracting meta data of file 'IMG-20220501-WA0010.jpg' from file content.
+2023-03-02 21:17:08 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 21:17:08 [Local Photos 1] Skipping file 'IMG-20220501-WA0010.jpg as already included in index.
+2023-03-02 21:17:08 [Local Photos 1] Extracting meta data of file 'photo.png' from file content.
+2023-03-02 21:17:08 [Local Photos 1] Skipping file 'photo.png as already included in index.
+2023-03-02 21:17:08 [Local Photos 1] Extracting meta data of file '02 Landscape.jpg' from file content.
+2023-03-02 21:17:08 [Local Photos 1] Skipping file '02 Landscape.jpg as already included in index.
+2023-03-02 21:17:08 [Local Photos 1] Extracting meta data of file '01 Portrait.jpg' from file content.
+2023-03-02 21:17:08 [Local Photos 1] Skipping file '01 Portrait.jpg as already included in index.
+2023-03-02 21:17:08 [Local Photos 1] Extracting meta data of file '03 Panorama.JPG' from file content.
+2023-03-02 21:17:08 [Local Photos 1] Skipping file '03 Panorama.JPG as already included in index.
+2023-03-02 21:17:08 [Local Photos 1] Extracting meta data of file 'Urlaub/IMG_20190828_145905.jpg' from file content.
+2023-03-02 21:17:08 [Local Photos 1] Skipping file 'Urlaub/IMG_20190828_145905.jpg as already included in index.
+2023-03-02 21:17:08 [Local Photos 1] Indexing of repository 'Local Photos 1' completed after 0.2 seconds.
+2023-03-02 21:17:08 [Local Photos 1] The next indexing run is due at Thu Mar  2 21:18:09 2023.
+2023-03-02 21:17:08 [Local Frankreich] Updating meta data index for repository 'Local Frankreich'.
+2023-03-02 21:17:08 [Local Frankreich] Resetting verification flags for all meta data entries of repository 'Local Frankreich'.
+2023-03-02 21:17:08 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 21:17:08 [Local Frankreich] Extracting meta data of file 'IMG_20190828_101327.jpg' from file content.
+2023-03-02 21:17:08 [Local Frankreich] Enable foreign key database constraints.
+2023-03-02 21:17:08 [Local Frankreich] Skipping file 'IMG_20190828_101327.jpg as already included in index.
+2023-03-02 21:17:08 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150150.jpg' from file content.
+2023-03-02 21:17:08 [Local Frankreich] Skipping file 'IMG_20190828_150150.jpg as already included in index.
+2023-03-02 21:17:08 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145839.jpg' from file content.
+2023-03-02 21:17:08 [Local Frankreich] Skipping file 'IMG_20190828_145839.jpg as already included in index.
+2023-03-02 21:17:08 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145422.jpg' from file content.
+2023-03-02 21:17:08 [Local Frankreich] Skipping file 'IMG_20190828_145422.jpg as already included in index.
+2023-03-02 21:17:08 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150209.jpg' from file content.
+2023-03-02 21:17:08 [Local Frankreich] Skipping file 'IMG_20190828_150209.jpg as already included in index.
+2023-03-02 21:17:08 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145917.jpg' from file content.
+2023-03-02 21:17:08 [Local Frankreich] Skipping file 'IMG_20190828_145917.jpg as already included in index.
+2023-03-02 21:17:08 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153521.jpg' from file content.
+2023-03-02 21:17:08 [Local Frankreich] Skipping file 'IMG_20190828_153521.jpg as already included in index.
+2023-03-02 21:17:08 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150137.jpg' from file content.
+2023-03-02 21:17:08 [Local Frankreich] Skipping file 'IMG_20190828_150137.jpg as already included in index.
+2023-03-02 21:17:08 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145426.jpg' from file content.
+2023-03-02 21:17:08 [Local Frankreich] Skipping file 'IMG_20190828_145426.jpg as already included in index.
+2023-03-02 21:17:08 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153229.jpg' from file content.
+2023-03-02 21:17:08 [Local Frankreich] Skipping file 'IMG_20190828_153229.jpg as already included in index.
+2023-03-02 21:17:08 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145816.jpg' from file content.
+2023-03-02 21:17:08 [Local Frankreich] Skipping file 'IMG_20190828_145816.jpg as already included in index.
+2023-03-02 21:17:08 [Local Frankreich] Extracting meta data of file 'IMG_20190826_144332.jpg' from file content.
+2023-03-02 21:17:08 [Local Frankreich] Skipping file 'IMG_20190826_144332.jpg as already included in index.
+2023-03-02 21:17:08 [Local Frankreich] Extracting meta data of file 'IMG_20190826_144710.jpg' from file content.
+2023-03-02 21:17:08 [Local Frankreich] Skipping file 'IMG_20190826_144710.jpg as already included in index.
+2023-03-02 21:17:08 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145014.jpg' from file content.
+2023-03-02 21:17:08 [Local Frankreich] Skipping file 'IMG_20190828_145014.jpg as already included in index.
+2023-03-02 21:17:08 [Local Frankreich] Extracting meta data of file 'IMG_20190828_101450.jpg' from file content.
+2023-03-02 21:17:08 [Local Frankreich] Skipping file 'IMG_20190828_101450.jpg as already included in index.
+2023-03-02 21:17:08 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150258.jpg' from file content.
+2023-03-02 21:17:08 [Local Frankreich] Skipping file 'IMG_20190828_150258.jpg as already included in index.
+2023-03-02 21:17:08 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153657.jpg' from file content.
+2023-03-02 21:17:08 [Local Frankreich] Skipping file 'IMG_20190828_153657.jpg as already included in index.
+2023-03-02 21:17:08 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145820.jpg' from file content.
+2023-03-02 21:17:08 [Local Frankreich] Skipping file 'IMG_20190828_145820.jpg as already included in index.
+2023-03-02 21:17:08 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145905.jpg' from file content.
+2023-03-02 21:17:08 [Local Frankreich] Skipping file 'IMG_20190828_145905.jpg as already included in index.
+2023-03-02 21:17:08 [Local Frankreich] Indexing of repository 'Local Frankreich' completed after 0.3 seconds.
+2023-03-02 21:17:08 [Local Frankreich] The next indexing run is due at Thu Mar  2 21:19:11 2023.
+2023-03-02 21:17:08 Sleeping for 1.0 minutes.
+2023-03-02 21:18:09 [Local Photos 1] Updating meta data index for repository 'Local Photos 1'.
+2023-03-02 21:18:09 [Local Photos 1] Resetting verification flags for all meta data entries of repository 'Local Photos 1'.
+2023-03-02 21:18:09 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 21:18:09 [Local Photos 1] Extracting meta data of file 'IMG-20220501-WA0010.jpg' from file content.
+2023-03-02 21:18:09 [Local Photos 1] Enable foreign key database constraints.
+2023-03-02 21:18:09 [Local Photos 1] Skipping file 'IMG-20220501-WA0010.jpg as already included in index.
+2023-03-02 21:18:09 [Local Photos 1] Extracting meta data of file 'photo.png' from file content.
+2023-03-02 21:18:09 [Local Photos 1] Skipping file 'photo.png as already included in index.
+2023-03-02 21:18:09 [Local Photos 1] Extracting meta data of file '02 Landscape.jpg' from file content.
+2023-03-02 21:18:09 [Local Photos 1] Skipping file '02 Landscape.jpg as already included in index.
+2023-03-02 21:18:09 [Local Photos 1] Extracting meta data of file '01 Portrait.jpg' from file content.
+2023-03-02 21:18:09 [Local Photos 1] Skipping file '01 Portrait.jpg as already included in index.
+2023-03-02 21:18:09 [Local Photos 1] Extracting meta data of file '03 Panorama.JPG' from file content.
+2023-03-02 21:18:09 [Local Photos 1] Skipping file '03 Panorama.JPG as already included in index.
+2023-03-02 21:18:09 [Local Photos 1] Extracting meta data of file 'Urlaub/IMG_20190828_145905.jpg' from file content.
+2023-03-02 21:18:09 [Local Photos 1] Skipping file 'Urlaub/IMG_20190828_145905.jpg as already included in index.
+2023-03-02 21:18:10 [Local Photos 1] Indexing of repository 'Local Photos 1' completed after 0.1 seconds.
+2023-03-02 21:18:10 [Local Photos 1] The next indexing run is due at Thu Mar  2 21:19:11 2023.
+2023-03-02 21:19:14 Starting to build meta data index in the background.
+2023-03-02 21:19:14 [Local Photos 1] Updating meta data index for repository 'Local Photos 1'.
+2023-03-02 21:19:14 [Local Photos 1] Resetting verification flags for all meta data entries of repository 'Local Photos 1'.
+2023-03-02 21:19:14 [Local Photos 1] Extracting meta data of file 'IMG-20220501-WA0010.jpg' from file content.
+2023-03-02 21:19:14 [Local Photos 1] Skipping file 'IMG-20220501-WA0010.jpg as already included in index.
+2023-03-02 21:19:14 [Local Photos 1] Extracting meta data of file 'photo.png' from file content.
+2023-03-02 21:19:14 [Local Photos 1] Skipping file 'photo.png as already included in index.
+2023-03-02 21:19:14 [Local Photos 1] Extracting meta data of file '02 Landscape.jpg' from file content.
+2023-03-02 21:19:14 [Local Photos 1] Skipping file '02 Landscape.jpg as already included in index.
+2023-03-02 21:19:14 [Local Photos 1] Extracting meta data of file '01 Portrait.jpg' from file content.
+2023-03-02 21:19:14 [Local Photos 1] Skipping file '01 Portrait.jpg as already included in index.
+2023-03-02 21:19:14 [Local Photos 1] Extracting meta data of file '03 Panorama.JPG' from file content.
+2023-03-02 21:19:14 [Local Photos 1] Skipping file '03 Panorama.JPG as already included in index.
+2023-03-02 21:19:14 [Local Photos 1] Extracting meta data of file 'Urlaub/IMG_20190828_145905.jpg' from file content.
+2023-03-02 21:19:14 [Local Photos 1] Skipping file 'Urlaub/IMG_20190828_145905.jpg as already included in index.
+2023-03-02 21:19:14 [Local Photos 1] Indexing of repository 'Local Photos 1' completed after 0.2 seconds.
+2023-03-02 21:19:14 [Local Photos 1] The next indexing run is due at Thu Mar  2 21:20:15 2023.
+2023-03-02 21:19:14 [Local Frankreich] Updating meta data index for repository 'Local Frankreich'.
+2023-03-02 21:19:14 [Local Frankreich] Resetting verification flags for all meta data entries of repository 'Local Frankreich'.
+2023-03-02 21:19:14 [Local Frankreich] Extracting meta data of file 'IMG_20190828_101327.jpg' from file content.
+2023-03-02 21:19:14 [Local Frankreich] Skipping file 'IMG_20190828_101327.jpg as already included in index.
+2023-03-02 21:19:14 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150150.jpg' from file content.
+2023-03-02 21:19:14 [Local Frankreich] Skipping file 'IMG_20190828_150150.jpg as already included in index.
+2023-03-02 21:19:14 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145839.jpg' from file content.
+2023-03-02 21:19:14 [Local Frankreich] Skipping file 'IMG_20190828_145839.jpg as already included in index.
+2023-03-02 21:19:14 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145422.jpg' from file content.
+2023-03-02 21:19:14 [Local Frankreich] Skipping file 'IMG_20190828_145422.jpg as already included in index.
+2023-03-02 21:19:14 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150209.jpg' from file content.
+2023-03-02 21:19:14 [Local Frankreich] Skipping file 'IMG_20190828_150209.jpg as already included in index.
+2023-03-02 21:19:14 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145917.jpg' from file content.
+2023-03-02 21:19:14 [Local Frankreich] Skipping file 'IMG_20190828_145917.jpg as already included in index.
+2023-03-02 21:19:14 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153521.jpg' from file content.
+2023-03-02 21:19:14 [Local Frankreich] Skipping file 'IMG_20190828_153521.jpg as already included in index.
+2023-03-02 21:19:14 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150137.jpg' from file content.
+2023-03-02 21:19:14 [Local Frankreich] Skipping file 'IMG_20190828_150137.jpg as already included in index.
+2023-03-02 21:19:14 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145426.jpg' from file content.
+2023-03-02 21:19:14 [Local Frankreich] Skipping file 'IMG_20190828_145426.jpg as already included in index.
+2023-03-02 21:19:14 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153229.jpg' from file content.
+2023-03-02 21:19:14 [Local Frankreich] Skipping file 'IMG_20190828_153229.jpg as already included in index.
+2023-03-02 21:19:14 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145816.jpg' from file content.
+2023-03-02 21:19:14 [Local Frankreich] Skipping file 'IMG_20190828_145816.jpg as already included in index.
+2023-03-02 21:19:14 [Local Frankreich] Extracting meta data of file 'IMG_20190826_144332.jpg' from file content.
+2023-03-02 21:19:14 [Local Frankreich] Skipping file 'IMG_20190826_144332.jpg as already included in index.
+2023-03-02 21:19:14 [Local Frankreich] Extracting meta data of file 'IMG_20190826_144710.jpg' from file content.
+2023-03-02 21:19:14 [Local Frankreich] Skipping file 'IMG_20190826_144710.jpg as already included in index.
+2023-03-02 21:19:14 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145014.jpg' from file content.
+2023-03-02 21:19:14 [Local Frankreich] Skipping file 'IMG_20190828_145014.jpg as already included in index.
+2023-03-02 21:19:14 [Local Frankreich] Extracting meta data of file 'IMG_20190828_101450.jpg' from file content.
+2023-03-02 21:19:14 [Local Frankreich] Skipping file 'IMG_20190828_101450.jpg as already included in index.
+2023-03-02 21:19:14 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150258.jpg' from file content.
+2023-03-02 21:19:14 [Local Frankreich] Skipping file 'IMG_20190828_150258.jpg as already included in index.
+2023-03-02 21:19:14 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153657.jpg' from file content.
+2023-03-02 21:19:14 [Local Frankreich] Skipping file 'IMG_20190828_153657.jpg as already included in index.
+2023-03-02 21:19:14 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145820.jpg' from file content.
+2023-03-02 21:19:14 [Local Frankreich] Skipping file 'IMG_20190828_145820.jpg as already included in index.
+2023-03-02 21:19:14 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145905.jpg' from file content.
+2023-03-02 21:19:14 [Local Frankreich] Skipping file 'IMG_20190828_145905.jpg as already included in index.
+2023-03-02 21:19:14 [Local Frankreich] Indexing of repository 'Local Frankreich' completed after 0.2 seconds.
+2023-03-02 21:19:14 [Local Frankreich] The next indexing run is due at Thu Mar  2 21:21:16 2023.
+2023-03-02 21:19:14 Sleeping for 1.0 minutes.

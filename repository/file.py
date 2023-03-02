@@ -4,6 +4,7 @@ import exifread
 import ffmpeg
 import fnmatch
 import logging
+import os
 
 
 from datetime import datetime
@@ -37,8 +38,9 @@ class RepositoryFile:
             Default is None. If set the following values may be returned:
             ORIENTATION_LANDSCAPE: Content wider than high (default)
             ORIENTATION_PORTRAIT: Content heigher than wide
-        creation_date (DateTime): Creation date of file content. Default is
-            None.
+        creation_date (datetime): Creation date of file content.
+        last_modified (datetime): Date of last file modification.
+        last_update (datetime): Date of last meta data update.
         description (str): Description of the file content. Default is None.
         rating (int): Rating of the file content. Default is None.
         source (str): Source of the file (e.g. full path or URL).
@@ -77,6 +79,8 @@ class RepositoryFile:
         self._rotation = 0
         self._orientation = RepositoryFile.ORIENTATION_LANDSCAPE
         self._creation_date = datetime.today()
+        self._last_modified = datetime.today()
+        self._last_update = datetime.today()
         self._description = str()
         self._rating = 0
         self._tags = list()
@@ -98,6 +102,8 @@ class RepositoryFile:
             self._rotation = mdata.rotation
             self._orientation = mdata.orientation
             self._creation_date = mdata.creation_date
+            self._last_modified = mdata.last_modified
+            self._last_updated = mdata.last_updated
             self._description = mdata.description
             self._rating = mdata.rating
             self._tags = [tag.name for tag in mdata.tags]
@@ -124,6 +130,11 @@ class RepositoryFile:
         Note the star rating tag is not yet supported by exifread and therefore
         always remains at the default.
         """
+
+        # Determine file creation and last modified date
+        self._last_modified = datetime.fromtimestamp(os.path.getmtime(path))
+        self._creation_date = datetime.fromtimestamp(os.path.getctime(path))
+        self._last_updated = datetime.today()
 
         # Open image file for reading (binary mode)
         file = open(path, 'rb')
@@ -333,6 +344,24 @@ class RepositoryFile:
         :rtype: DateTime
         """
         return self._creation_date
+
+    @property
+    def last_modified(self):
+        """Return date of last file modification.
+
+        :return: Date of last file modification.
+        :rtype: DateTime
+        """
+        return self._last_modified
+
+    @property
+    def last_updated(self):
+        """Return date of last meta data update.
+
+        :return: Date of last meta data update.
+        :rtype: DateTime
+        """
+        return self._last_updated
 
     @property
     def description(self):
