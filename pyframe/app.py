@@ -114,9 +114,9 @@ class App(kivy.app.App):
         Creates configured repositories and builds an index across the latter.
         """
         # Set log level of default python Logger. This logger is used by non-kivy dependent components.
-        logging.basicConfig(level=logging.INFO)
+        logging.basicConfig(level=logging.DEBUG)
         # Set log level of kivy logger.
-        Logger.setLevel(LOG_LEVELS["info"])
+        Logger.setLevel(LOG_LEVELS["debug"])
         # Reduce logging by SQLAlchemy to errors.
         logging.getLogger("sqlalchemy").setLevel(logging.ERROR)
 

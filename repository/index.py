@@ -12,7 +12,7 @@ References;
 import logging
 
 from repository import RepositoryFile, InvalidUuidError, Repository
-from sqlalchemy import create_engine, desc, event, func, Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy import create_engine, desc, event, func, update, delete, Column, DateTime, ForeignKey, Integer, String, Boolean
 from sqlalchemy.engine import Engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import backref, relationship, sessionmaker
@@ -20,6 +20,8 @@ from sqlalchemy.orm import backref, relationship, sessionmaker
 
 # Install listener for connection events to automatically enable foreign key
 # constraint checking by SQLite.
+
+
 @event.listens_for(Engine, "connect")
 def set_sqlite_pragma(dbapi_connection, connection_record):
     """Enable foreign key constraint checking by sqlite."""
@@ -54,6 +56,8 @@ class MetaData(Base):
         creation_date(DateTime): Creation date of the file content.
         description(String(255)): Description of the file.
         rating(Integer): Rating of the file content.
+        verified(Boolean): Verification flag set during index building. True if
+            file exists. False if not yet verified or does not exist.
     """
 
     __tablename__ = "files"
@@ -71,6 +75,7 @@ class MetaData(Base):
     creation_date = Column(DateTime)
     description = Column(String(255))
     rating = Column(Integer)
+    verified = Column(Boolean)
     tags = relationship("MetaDataTag", secondary="tag_file", backref=backref("files", lazy="dynamic"))
 
 
@@ -139,7 +144,7 @@ class Index:
             # Close database session and dispose engine
             if self._session:
                 self._session.close()
-            #if self._engine: self._engine.dispose()
+#            if self._engine: self._engine.dispose()
         except Exception as e:
             logging.error(f"An error ocurred while closing the index database '{self._dbname}': {e}")
 
@@ -163,7 +168,7 @@ class Index:
         if rebuild:
             logging.info(f"Rebuilding meta data index for repository '{rep.uuid}'")
             try:
-                logging.info(f"Deleting all meta data entries for repository '{rep.uuid}'.")
+                logging.debug(f"Deleting all meta data entries for repository '{rep.uuid}'.")
                 # Delete all file entries for the specified repository.
                 session.query(MetaData).filter(MetaData.rep_uuid == rep.uuid).delete()
                 session.commit()
@@ -178,6 +183,13 @@ class Index:
                 logging.error(f"An error occurred while deleting meta data for repository {rep.uuid} from index: {e}")
         else:
             logging.info(f"Updating meta data index for repository '{rep.uuid}'")
+            try:
+                logging.debug("Resetting verification flags for all files in index.")
+                query = update(MetaData).where(MetaData.rep_uuid == rep.uuid).values(verified=False)
+                session.execute(query)
+                session.commit()
+            except Exception as e:
+                logging.error(f"An error occurred while deleting meta data for repository {rep.uuid} from index: {e}")
 
         # Iterate through all files in the repository.
         for file in rep.iterator(index_lookup=False):
@@ -199,14 +211,27 @@ class Index:
                     logging.info(f"Adding meta data of file '{file.uuid}' to index.")
                     # Create new database entry with file meta data.
                     mdata = MetaData(rep_uuid=file.rep.uuid, file_uuid=file.uuid, name=file.name, type=file.type, width=file.width, height=file.height, rotation=file.rotation,
-                                     orientation=file.orientation, creation_date=file.creation_date, description=file.description, rating=file.rating, tags=tags)
+                                     orientation=file.orientation, creation_date=file.creation_date, description=file.description, rating=file.rating,
+                                     verified=True, tags=tags)
                     session.add(mdata)
                     # Commit all changes to the database.
                     session.commit()
-                # Close session
-                session.close()
+                else:
+                    logging.debug(f"Skipping file '{file.uuid} as already included in index.")
+                    # Mark entry as verified.
+                    query = update(MetaData).where(MetaData.rep_uuid == rep.uuid).where(MetaData.file_uuid == file.uuid).values(verified=True)
+                    session.execute(query)
+                    # Do not immediately commit update for performance reasons.
+#                    session.commit()
             except Exception as e:
                 logging.error(f"An error occurred while building the meta data index: {e}")
+
+        # Delete entries which have not been successfulyy verified.
+        query = delete(MetaData).where(MetaData.verified == False)
+        session.execute(query)
+        # Commit pending changes and close session
+        session.commit()
+        session.close()
 
     def lookup(self, file, rep):
         """Lookup file meta data.
