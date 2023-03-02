@@ -18,7 +18,7 @@ class Repository(repository.Repository):
 
         :param uuid: UUID of the repository.
         :type name: str
-        :param index: Optional file meta data index. Default is None.
+        :param index: Optional file metadata index. Default is None.
         :type index: repository.Index
         :param config: Dictionary with repository Configuration
         :type config: dict
@@ -92,47 +92,53 @@ class Repository(repository.Repository):
         """
         return self._root
 
-    def iterator(self, index_lookup=True):
+    def iterator(self, index_lookup=True, extract_metadata=True):
         """Provide iterator which allows to traverse through all files in the repository.
 
         :param index_lookup: True if file metadata shall be looked up from index.
         :type index_lookup: bool
+        :param extract_metadata: True if file metadata shall be extracted from
+            file if not available from index.
         :return: File iterator.
         :return type: repository.FileIterator
         """
-        return FileIterator(self, index_lookup)
+        return FileIterator(self, index_lookup, extract_metadata)
 
-    def file_by_uuid(self, uuid, index_lookup=True):
+    def file_by_uuid(self, uuid, index_lookup=True, extract_metadata=True):
         """Return a file within the repository by its UUID.
 
         :param uuid: UUID of the file.
         :type uuid: str
         :param index_lookup: True if file metadata shall be looked up from index.
         :type index_lookup: bool
+        :param extract_metadata: True if file metadata shall be extracted from
+            file if not available from index.
+        :type extract_metadata: bool
         :return: File with matching UUID.
         :rtype: repository.RepositoryFile
         :raises: InvalidUuirError
         """
-        if index_lookup:
-            return RepositoryFile(uuid, self, self._index)
-        else:
-            return RepositoryFile(uuid, self)
+        return RepositoryFile(uuid, self, self._index, index_lookup, extract_metadata)
 
 
 class FileIterator(repository.FileIterator):
     """Iterator which can be used to traverse through files in a webdav repository."""
 
-    def __init__(self, rep, index_lookup=True):
+    def __init__(self, rep, index_lookup=True, extract_metadata=True):
         """Initialize file iterator.
 
         :param root: Webdav repository.
         :type root: repository.webdav.repository
         :param index_lookup: True if file metadata shall be looked up from index.
         :type index_lookup: bool
+        :param extract_metadata: True if file metadata shall be extracted from
+            file if not available from index.
+        :type extract_metadata: bool
         """
         # Basic initialization.
         self._rep = rep
         self._index_lookup = index_lookup
+        self._extract_metadata = extract_metadata
         self._dir_list = []
 
         # Create iterator for list of root directory.
@@ -149,19 +155,19 @@ class FileIterator(repository.FileIterator):
         try:
             # Retrieve the next directory entry.
             entry = self._iterator.__next__()
-            logging.info(f"Current entry {entry}")
+            logging.debug(f"Current webdav directory entry: {entry}")
             # Continue to retrieve entries if not a file.
             while entry['isdir']:
                 # Save all sub-directories for later.
                 self._dir_list.append(entry['path'])
                 entry = self._iterator.__next__()
-                logging.info(f"Current entry {entry}")
+                logging.debug(f"Current webdav directory entry: {entry}")
 
             # Construct relative path to root directory of the repository.
             uuid = entry['path']
-            logging.info(f"Creating webdav repository file {uuid}.")
             # Return the next file.
-            return self._rep.file_by_uuid(uuid, self._index_lookup)
+            logging.debug(f"Creating next webdav repository file {uuid}.")
+            return self._rep.file_by_uuid(uuid, self._index_lookup, self._extract_metadata)
 
         except StopIteration:
             if len(self._dir_list) > 0:

@@ -21,10 +21,11 @@ References;
 4. https://pypi.org/project/webdavclient3/
 """
 
-
 import logging
 import repository
 import tempfile
+
+from datetime import datetime
 
 
 class RepositoryFile(repository.RepositoryFile):
@@ -34,25 +35,37 @@ class RepositoryFile(repository.RepositoryFile):
     EXT_IMAGE = ("*.jpg", "*.jpeg", "*.png")
     EXT_VIDEO = ("*.mp4", "*.mv4")
 
-    def __init__(self, uuid, rep, index=None):
+    def __init__(self, uuid, rep, index=None, index_lookup=True, extract_metadata=True):
         """Initialize file."""
         # Call constructor of parent class.
-        repository.RepositoryFile.__init__(self, uuid, rep, index)
+        repository.RepositoryFile.__init__(self, uuid, rep, index, index_lookup)
 
         # Basic initialization.
         self._cache_file = None
         self._path = None
 
-        # Attempt to extract meta data from file content.
+        # Attempt to determine last modification and file creation date.
         if not self._in_index:
-            logging.info(f"Extracting meta data of file '{self.uuid}' from file content.")
-            # If image try to extract meta data from EXIF tag.
-            if self._type == repository.RepositoryFile.TYPE_IMAGE:
-                self._download()
-                self._extract_image_meta_data(self._path)
-            elif self._type == repository.RepositoryFile.TYPE_VIDEO:
-                self._download()
-                self._extract_video_meta_data(self._path)
+            info = self._rep.client.info(self.uuid)
+            logging.debug(f"Webdav info record of file '{self.uuid}': {info}")
+            try:
+                modified = info.get('modified', None)
+                if modified is not None:
+                    self._last_modified = datetime.strptime(modified, "%a, %d %b %Y %H:%M:%S %Z")
+            except (ValueError, TypeError):
+                logging.warn(f"Failed to convert last modified date string '{modified}' to datetime. Using current datetime instead.")
+                self._last_modified = datetime.now()
+            try:
+                created = info.get('created', None)
+                if created is not None:
+                    self._creation_date = datetime.strptime(created, "%a, %d %b %Y %H:%M:%S %Z")
+            except (ValueError, TypeError):
+                logging.warn(f"Failed to convert created date string '{created}' to datetime. Using current datetime instead.")
+                self._last_modified = datetime.now()
+
+        # Attempt to extract metadata from file content.
+        if not self._in_index and extract_metadata:
+            self.extract_metadata()
 
     def __del__(self):
         """Delete the file."""
@@ -73,11 +86,24 @@ class RepositoryFile(repository.RepositoryFile):
             # of the WebDav repository.
             self._cache_file = tempfile.NamedTemporaryFile(dir=self._rep.cache_dir)
             self._path = self._cache_file.name
-            logging.info(f"Local cache file '{self._path}' created.")
+            logging.debug(f"Local cache file '{self._path}' created.")
 
             # Download file from WebDav repository.
-            logging.info(f"Downloading file '{self.uuid}' from webdav repository.")
+            logging.info(f"Downloading file '{self.uuid}' from webdav repository to local cache file.")
             self._rep.client.download_from(self._cache_file, self._uuid)
+
+    def extract_metadata(self):
+        """Extract metadata from file content."""
+        # Download file if file type is supported.
+        if self.type in (repository.RepositoryFile.TYPE_IMAGE, repository.RepositoryFile.TYPE_VIDEO):
+            self._download()
+        # Attempt to extract metadata from file content.
+        logging.info(f"Extracting metadata of file '{self.uuid}' from file content.")
+        if self._type == repository.RepositoryFile.TYPE_IMAGE:
+            self._extract_image_metadata(self._path)
+        elif self._type == repository.RepositoryFile.TYPE_VIDEO:
+            self._download()
+            self._extract_video_metadata(self._path)
 
     @property
     def source(self):

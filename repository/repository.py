@@ -41,7 +41,7 @@ class Repository(ABC):
         :type uuid: str
         :param config: Repository configuration from the configuration file.
         :type config: dict
-        :param index: Optional file meta data index. Default is None.
+        :param index: Optional file metadata index. Default is None.
         :type index: repository.Index
         :raises: InvalidUuidError
         """
@@ -68,7 +68,7 @@ class Repository(ABC):
             del Repository._repositories[self.uuid]
 
     @abstractmethod
-    def iterator(self, index_lookup=True):
+    def iterator(self, index_lookup=True, extract_meta_data=True):
         """Provide iterator which allows to traverse through all files in the repository.
 
         :param index_lookup: True if file metadata shall be looked up from index.
@@ -115,15 +115,18 @@ class Repository(ABC):
             raise InvalidUuidError(f"There is no repository with UUID '{uuid}'", uuid)
 
     @abstractmethod
-    def file_by_uuid(self, uuid, index_lookup=True):
+    def file_by_uuid(self, uuid, index_lookup=True, extract_metadata=True):
         """Return a file within the repository by its UUID. Raises an
         InvalidUuidError if the repository does not contain a file with the
         specified UUID.
 
         :param uuid: UUID of the file.
         :type uuid: str
-        :param index_lookup: True if file metadata shall be looked up from index.
+        :param index_lookup: True if metadata shall be looked up from index.
         :type index_lookup: bool
+        :param extract_metadata: True if metadata shall be extracted from the
+          file if not available from the index.
+        :type extract_metadata: bool
         :return: File with matching UUID.
         :rtype: repository.RepositoryFile
         :raises: InvalidUuidError
@@ -132,9 +135,9 @@ class Repository(ABC):
 
     @property
     def index(self):
-        """Return meta data index of the repository.
+        """Return metadata index of the repository.
 
-        :return: Meta data index of the repository. May return None if no index
+        :return: Metadata index of the repository. May return None if no index
             was specified.
         :rtype: repository.Index
         """
@@ -142,9 +145,9 @@ class Repository(ABC):
 
     @index.setter
     def index(self, index):
-        """Set meta data index of the repository.
+        """Set metadata index of the repository.
 
-        :param index: Meta data index of the repository.
+        :param index: Metadata index of the repository.
         :type index: repository.Index
         """
         self._index = index

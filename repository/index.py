@@ -1,4 +1,4 @@
-"""Module providing meta data index class.
+"""Module providing metadata index class.
 
 The following test script is based on the tutorial by Philipp Wagner [1]. The
 script depends on the following debian packages:
@@ -33,9 +33,9 @@ Base = declarative_base()
 
 
 class MetaData(Base):
-    """Database model for file meta data.
+    """Database model for file metadata.
 
-    Database representation of file meta data using SQLAlchemy object relational
+    Database representation of file metadata using SQLAlchemy object relational
     mapper. Properties resemble properties of class repository.RepositoryFile.
 
     Properties:
@@ -53,7 +53,7 @@ class MetaData(Base):
             See repository.RepositoryFile for acceptable values.
         creation_date(DateTime): Creation date of the file content.
         last_modified(DateTime): Date of last file modification.
-        last_updated(DateTime): Date of last meta data update.
+        last_updated(DateTime): Date of last metadata update.
         description(String(255)): Description of the file.
         rating(Integer): Rating of the file content.
         verified(Boolean): Verification flag set during index building. True if
@@ -82,10 +82,10 @@ class MetaData(Base):
 
 
 class MetaDataTag(Base):
-    """Database model for tags in file meta data.
+    """Database model for tags in file metadata.
 
-    Database representation of tags in file meta data using SQLAlchemy object
-    relational mapper. Tags and meta data are connected via a separate table
+    Database representation of tags in file metadata using SQLAlchemy object
+    relational mapper. Tags and metadata are connected via a separate table
     'tag_file' in the database.
 
     Properties:
@@ -99,7 +99,7 @@ class MetaDataTag(Base):
 
 
 class Link(Base):
-    """Association table for file meta data and tags."""
+    """Association table for file metadata and tags."""
 
     __tablename__ = "tag_file"
     tag_id = Column(Integer, ForeignKey('tags.id', ondelete="CASCADE"), primary_key=True)
@@ -107,13 +107,13 @@ class Link(Base):
 
 
 class Index:
-    """File meta data index.
+    """File metadata index.
 
-    Enables quick lookup and filtering of files based on their meta data. Index
+    Enables quick lookup and filtering of files based on their metadata. Index
     may span multiple repositories. Files and repositories are referenced via
     there universal unique identifiers.
 
-    Use method build() to build meta data index. Method build() may be run in
+    Use method build() to build metadata index. Method build() may be run in
     the background from a different thread.
     """
 
@@ -151,11 +151,11 @@ class Index:
             logging.error(f"An error ocurred while closing the index database '{self._dbname}': {e}")
 
     def build(self, rep, rebuild=False):
-        """Build meta data index.
+        """Build metadata index.
 
         Build method may be called from a different thread to build the index in
         the background. The method thus creates its own session and prevents
-        files from looking up meta data from the index.
+        files from looking up metadata from the index.
 
         :param rep: Repository for which to build the index.
         :type rep: repository.Repository
@@ -166,11 +166,11 @@ class Index:
         # Create new session since build may be called from different thread.
         session = self._session_factory()
 
-        # Delete all meta data for the specified repository.
+        # Delete all metadata for the specified repository.
         if rebuild:
-            logging.info(f"Rebuilding meta data index for repository '{rep.uuid}'.")
+            logging.info(f"Rebuilding metadata index for repository '{rep.uuid}'.")
             try:
-                logging.debug(f"Deleting all meta data entries of repository '{rep.uuid}'.")
+                logging.debug(f"Deleting all metadata entries of repository '{rep.uuid}'.")
                 # Delete all file entries for the specified repository.
                 session.query(MetaData).filter(MetaData.rep_uuid == rep.uuid).delete()
                 session.commit()
@@ -182,25 +182,28 @@ class Index:
                         session.delete(tag)
                 session.commit()
             except Exception as e:
-                logging.error(f"An error occurred while deleting meta data of repository {rep.uuid} from index: {e}")
-        # Mark existing meta data entries for verification.
+                logging.error(f"An error occurred while deleting metadata of repository {rep.uuid} from index: {e}")
+        # Mark existing metadata entries for verification.
         else:
-            logging.info(f"Updating meta data index for repository '{rep.uuid}'.")
+            logging.info(f"Updating metadata index for repository '{rep.uuid}'.")
             try:
-                logging.debug(f"Resetting verification flags for all meta data entries of repository '{rep.uuid}'.")
+                logging.debug(f"Resetting verification flags for all metadata entries of repository '{rep.uuid}'.")
                 query = update(MetaData).where(MetaData.rep_uuid == rep.uuid).values(verified=False)
                 session.execute(query)
                 session.commit()
             except Exception as e:
-                logging.error(f"An error occurred while marking meta data entries of repository '{rep.uuid}' for verification: {e}")
+                logging.error(f"An error occurred while marking metadata entries of repository '{rep.uuid}' for verification: {e}")
 
         # Iterate through all files in the repository.
-        for file in rep.iterator(index_lookup=False):
+        for file in rep.iterator(index_lookup=False, extract_metadata=False):
             try:
-                # Create new meta data entry for file if not included in the
+                # Create new metadata entry for file if not included in the
                 # index yet or outdated.
                 mdata = session.query(MetaData).filter(MetaData.rep_uuid == rep.uuid).filter(MetaData.file_uuid == file.uuid).first()
                 if mdata is None or mdata.last_updated < file.last_modified:
+                    # Extract metadata from file.
+                    file.extract_metadata()
+
                     # Create all necessary tags in database.
                     tags = list()
                     if file.tags:
@@ -213,12 +216,11 @@ class Index:
                                 tag = MetaDataTag(name=name)
                             tags.append(tag)
 
+                    # Create/update metadata entry with file metadata.
                     if mdata is None:
-                        logging.info(f"Adding meta data of file '{file.uuid}' to index.")
+                        logging.info(f"Adding metadata of file '{file.uuid}' to index.")
                     else:
-                        logging.info(f"Updating meta data of file '{file.uuid}' in index.")
-
-                    # Create/update meta data entry with file meta data.
+                        logging.info(f"Updating metadata of file '{file.uuid}' in index.")
                     mdata = MetaData(rep_uuid=file.rep.uuid, file_uuid=file.uuid, name=file.name, type=file.type, width=file.width, height=file.height, rotation=file.rotation,
                                      orientation=file.orientation, creation_date=file.creation_date,
                                      last_modified=file.last_modified,
@@ -235,7 +237,7 @@ class Index:
                     # Do not immediately commit update for performance reasons.
 #                    session.commit()
             except Exception as e:
-                logging.error(f"An error occurred while building the meta data index: {e}")
+                logging.error(f"An error occurred while building the metadata index: {e}")
 
         # Delete entries which have not been successfulyy verified.
         query = delete(MetaData).where(MetaData.verified == False)
@@ -245,13 +247,13 @@ class Index:
         session.close()
 
     def lookup(self, file, rep):
-        """Lookup file meta data.
+        """Lookup file metadata.
 
-        :param file: File for which to lookup meta data.
+        :param file: File for which to lookup metadata.
         :type file: repository.Index
         :param rep: Repository containing the file.
         :type rep: repository.Repository
-        :return: Returns a meta data object for the file if available. Returns
+        :return: Returns a metadata object for the file if available. Returns
             None otherwise.
         :return type: repository.MetaData
         """
@@ -259,7 +261,7 @@ class Index:
             mdata = self._session.query(MetaData).filter(MetaData.rep_uuid == rep.uuid).filter(MetaData.file_uuid == file.uuid).first()
             return mdata
         except Exception as e:
-            logging.error(f"An error ocurred while looking up meta data from index for file '{file.uuid}' in repository '{rep.uuid}': {e}")
+            logging.error(f"An error ocurred while looking up metadata from index for file '{file.uuid}' in repository '{rep.uuid}': {e}")
             return None
 
     def count(self):
@@ -388,7 +390,7 @@ class SelectiveIndexIterator:
             else:
                 __raise()
 
-        # Query data and save iterator for list with meta data objects.
+        # Query data and save iterator for list with metadata objects.
         self._count = query.count()
         self._iterator = query.all().__iter__()
 
@@ -409,9 +411,9 @@ class SelectiveIndexIterator:
         """
         # Repeat until we have a valid file or end of iteration is reached. Note
         # that StopIteration is not raised explicitly, but raised implicitly as
-        # the end of the list with meta data objects is reached.
+        # the end of the list with metadata objects is reached.
         while True:
-            # Retrieve next meta data object in iteration.
+            # Retrieve next metadata object in iteration.
             mdata = self._iterator.__next__()
             self._count = self._count - 1
             # Try to obtain corresponding file.

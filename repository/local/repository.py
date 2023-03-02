@@ -20,7 +20,7 @@ class Repository(repository.Repository):
         :type name: str
         :param root: Root directory of the repository.
         :type root: str
-        :param index: Optional file meta data index. Default is None.
+        :param index: Optional file metadata index. Default is None.
         :type index: repository.Index
         :raises: InvalidUuidError
         """
@@ -30,15 +30,17 @@ class Repository(repository.Repository):
         # Basic initialization.
         self._root = config['root']
 
-    def iterator(self, index_lookup=True):
+    def iterator(self, index_lookup=True, extract_metadata=True):
         """Provide iterator which allows to traverse through all files in the repository.
 
         :param index_lookup: True if file metadata shall be looked up from index.
         :type index_lookup: bool
+        :param extract_metadata: True if file metadata shall be extracted from
+            file if not available from index.
         :return: File iterator.
         :return type: repository.FileIterator
         """
-        return FileIterator(self, index_lookup)
+        return FileIterator(self, index_lookup, extract_metadata)
 
     def _check_config(self, config):
         """Check the configuration for the repository from the configuration file.
@@ -61,21 +63,21 @@ class Repository(repository.Repository):
             if not keys.issubset(allowed_keys):
                 logging.warn(f"Configuration for repository '{self.uuid}' contains additional, unused parameters.")
 
-    def file_by_uuid(self, uuid, index_lookup=True):
+    def file_by_uuid(self, uuid, index_lookup=True, extract_metadata=True):
         """Return a file within the repository by its UUID.
 
         :param uuid: UUID of the file.
         :type uuid: str
         :param index_lookup: True if file metadata shall be looked up from index.
         :type index_lookup: bool
+        :param extract_metadata: True if file metadata shall be extracted from
+            file if not available from index.
+        :type extract_metadata: bool
         :return: File with matching UUID.
         :rtype: repository.RepositoryFile
         :raises: InvalidUuidError
         """
-        if index_lookup:
-            return RepositoryFile(uuid, self, self._index)
-        else:
-            return RepositoryFile(uuid, self)
+        return RepositoryFile(uuid, self, self._index, index_lookup, extract_metadata)
 
     @property
     def root(self):
@@ -90,16 +92,20 @@ class Repository(repository.Repository):
 class FileIterator(repository.FileIterator):
     """Iterator which can be used to traverse through files in a repository with local file base."""
 
-    def __init__(self, rep, index_lookup=True):
+    def __init__(self, rep, index_lookup=True, extract_metadata=True):
         """Initialize file iterator.
 
         :param root: Repository with local file base.
         :type root: repository.local.repository
         :param index_lookup: True if file metadata shall be looked up from index.
         :type index_lookup: bool
+        :param extract_metadata: True if file metadata shall be extracted from
+            file if not available from index.
+        :type extract_metadata: bool
         """
         self._rep = rep
         self._index_lookup = index_lookup
+        self._extract_metadata = extract_metadata
         self._dir_list = []
         # Create scandir iterator for provided root directory
         self._iterator = os.scandir(self._rep.root)
@@ -124,7 +130,8 @@ class FileIterator(repository.FileIterator):
             # Construct relative path to root directory of the repository.
             uuid = os.path.relpath(entry.path, start=self._rep.root)
             # Return the next file.
-            return self._rep.file_by_uuid(uuid, self._index_lookup)
+            logging.debug(f"Creating next local repository file {uuid}.")
+            return self._rep.file_by_uuid(uuid, self._index_lookup, self._extract_metadata)
 
         except StopIteration:
             if len(self._dir_list) > 0:

@@ -21,7 +21,7 @@ class RepositoryFile:
             the full path of the file within the repository.
         rep (repository.Repository): Repository containing the file.
         name (str): Name of the file. Default is None.
-        index (repository.Index): Optional file meta data index. Default is
+        index (repository.Index): Optional file metadata index. Default is
             None.
         type (int): Type of the file. Default is None. If set the following
             values may be returend:
@@ -39,7 +39,7 @@ class RepositoryFile:
             ORIENTATION_PORTRAIT: Content heigher than wide
         creation_date (datetime): Creation date of file content.
         last_modified (datetime): Date of last file modification.
-        last_update (datetime): Date of last meta data update.
+        last_update (datetime): Date of last metadata update.
         description (str): Description of the file content. Default is None.
         rating (int): Rating of the file content. Default is None.
         source (str): Source of the file (e.g. full path or URL).
@@ -56,14 +56,16 @@ class RepositoryFile:
     ORIENTATION_LANDSCAPE = 0
     ORIENTATION_PORTRAIT = 1
 
-    def __init__(self, uuid, rep, index=None):
+    def __init__(self, uuid, rep, index=None, index_lookup=True):
         """Initialize file instance.
 
         :param uuid: UUID of the file.
         :type uuid: str
         :param rep: Repository containing file
         :type rep: repository.Repository
-        :param index: Optional file meta data index. Default is None.
+        :param index: Optional file metadata index. Default is None.
+        :param index_lookup: True if file metadata shall be looked up from index.
+        :type index_lookup: bool
         :type index: repository.Index
         """
         # Basic initialization.
@@ -87,13 +89,13 @@ class RepositoryFile:
         # Attempt to determine type from extension.
         self._type_from_extension()
 
-        # Try to retrieve meta data from index if available.
+        # Try to retrieve metadata from index if available.
         mdata = None
-        if index is not None:
+        if index is not None and index_lookup is True:
             mdata = index.lookup(self, rep)
 
         if mdata is not None:
-            logging.info(f"Assigning meta data of file '{self._uuid}' from index.")
+            logging.info(f"Assigning metadata of file '{self._uuid}' from index.")
             self._in_index = True
             self._type = mdata.type
             self._width = mdata.width
@@ -119,11 +121,11 @@ class RepositoryFile:
     EXT_IMAGE = ("*.jpg", "*.jpeg", "*.png")
     EXT_VIDEO = ("*.mp4", "*.mv4")
 
-    def _extract_image_meta_data(self, path):
-        """Extract image meta data from file content.
+    def _extract_image_metadata(self, path):
+        """Extract image metadata from file content.
 
-        Uses the exifread library to extract EXIF meta data and IPTCInfo3
-        library to extract IPTC meta data from the image file. Meta data is
+        Uses the exifread library to extract EXIF metadata and IPTCInfo3
+        library to extract IPTC metadata from the image file. Metadata is
         stored in the corresponding object properties.
 
         Note the star rating tag is not yet supported by exifread and therefore
@@ -137,15 +139,15 @@ class RepositoryFile:
         # Return Exif tags
         tags = exifread.process_file(file)
 
-        # Obtain width from meta data if available
+        # Obtain width from metadata if available
         if "EXIF ExifImageWidth" in tags:
             self._width = tags["EXIF ExifImageWidth"].values[0]
 
-        # Obtain height from meta data if available
+        # Obtain height from metadata if available
         if "EXIF ExifImageLength" in tags:
             self._height = tags["EXIF ExifImageLength"].values[0]
 
-        # Obtain rotation from meta data if available
+        # Obtain rotation from metadata if available
         if "Image Orientation" in tags:
             orientation = tags["Image Orientation"].values[0]
             if orientation == 8:
@@ -182,25 +184,25 @@ class RepositoryFile:
         info = IPTCInfo(path, force=True)
         self._tags = info["keywords"]
 
-    def _extract_video_meta_data(self, path):
-        """Extract video meta data from file content.
+    def _extract_video_metadata(self, path):
+        """Extract video metadata from file content.
 
-        Uses the ffmpeg ffprobe command to extract video meta data from the
-        video file and stores meta data in corresponding object properties.
+        Uses the ffmpeg ffprobe command to extract video metadata from the
+        video file and stores metadata in corresponding object properties.
         """
         # Save current datetime in property last_updated.
         self._last_updated = datetime.today()
 
         data = ffmpeg.probe(path)['streams'][0]
-        logging.debug(data)
+#        logging.debug(data)
 
-        # Try to obtain image dimensions from meta data.
+        # Try to obtain image dimensions from metadata.
         if data.get('width') is not None:
             self._width = int(data.get('width'))
         if data.get('height') is not None:
             self._height = int(data.get('height'))
 
-        # Try to obtain rotation from meta data.
+        # Try to obtain rotation from metadata.
         rotate = data['tags'].get('rotate')
         if rotate is not None:
             if rotate == "0":
@@ -218,7 +220,7 @@ class RepositoryFile:
         else:
             self._orientation = RepositoryFile.ORIENTATION_LANDSCAPE
 
-        # Try to extract creation time from meta data.
+        # Try to extract creation time from metadata.
         creation_date = data['tags'].get('creation_time')
         if creation_date is not None:
             try:
@@ -355,9 +357,9 @@ class RepositoryFile:
 
     @property
     def last_updated(self):
-        """Return date of last meta data update.
+        """Return date of last metadata update.
 
-        :return: Date of last meta data update.
+        :return: Date of last metadata update.
         :rtype: DateTime
         """
         return self._last_updated
