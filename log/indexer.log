@@ -342,3 +342,301 @@
 2023-03-01 22:10:51 [Local Photos 1] Indexing of repository 'Local Photos 1' completed after 0.1 seconds.
 2023-03-01 22:10:51 Removing repository 'Local Photos 1' from queue.
 2023-03-01 22:10:51 Stopping to build meta data index in the background.
+2023-03-02 14:56:12 Starting to build meta data index in the background.
+2023-03-02 14:56:12 [Local Photos 1] Updating meta data index for repository 'Local Photos 1'
+2023-03-02 14:56:12 [Local Photos 1] Extracting meta data of file 'IMG-20220501-WA0010.jpg' from file content.
+2023-03-02 14:56:12 [Local Photos 1] Extracting meta data of file 'photo.png' from file content.
+2023-03-02 14:56:41 Starting to build meta data index in the background.
+2023-03-02 14:56:41 [Local Photos 1] Updating meta data index for repository 'Local Photos 1'
+2023-03-02 14:56:41 [Local Photos 1] Extracting meta data of file 'IMG-20220501-WA0010.jpg' from file content.
+2023-03-02 14:56:42 [Local Photos 1] Extracting meta data of file 'photo.png' from file content.
+2023-03-02 14:59:49 Starting to build meta data index in the background.
+2023-03-02 14:59:49 [Local Photos 1] Updating meta data index for repository 'Local Photos 1'
+2023-03-02 14:59:49 [Local Photos 1] Extracting meta data of file 'IMG-20220501-WA0010.jpg' from file content.
+2023-03-02 14:59:49 [Local Photos 1] Extracting meta data of file 'photo.png' from file content.
+2023-03-02 14:59:49 [Local Photos 1] Extracting meta data of file '02 Landscape.jpg' from file content.
+2023-03-02 14:59:49 [Local Photos 1] Extracting meta data of file '01 Portrait.jpg' from file content.
+2023-03-02 14:59:49 [Local Photos 1] Extracting meta data of file '03 Panorama.JPG' from file content.
+2023-03-02 14:59:49 [Local Photos 1] Extracting meta data of file 'Urlaub/IMG_20190828_145905.jpg' from file content.
+2023-03-02 14:59:49 [Local Photos 1] Indexing of repository 'Local Photos 1' completed after 0.1 seconds.
+2023-03-02 14:59:49 Removing repository 'Local Photos 1' from queue.
+2023-03-02 14:59:49 Stopping to build meta data index in the background.
+2023-03-02 15:02:05 Starting to build meta data index in the background.
+2023-03-02 15:02:05 [Local Photos 1] Updating meta data index for repository 'Local Photos 1'
+2023-03-02 15:02:05 [Local Photos 1] Extracting meta data of file 'IMG-20220501-WA0010.jpg' from file content.
+2023-03-02 15:02:05 [Local Photos 1] Extracting meta data of file 'photo.png' from file content.
+2023-03-02 15:02:05 [Local Photos 1] Extracting meta data of file '02 Landscape.jpg' from file content.
+2023-03-02 15:02:05 [Local Photos 1] Extracting meta data of file '01 Portrait.jpg' from file content.
+2023-03-02 15:02:05 [Local Photos 1] Extracting meta data of file '03 Panorama.JPG' from file content.
+2023-03-02 15:02:05 [Local Photos 1] Extracting meta data of file 'Urlaub/IMG_20190828_145905.jpg' from file content.
+2023-03-02 15:02:05 [Local Photos 1] Indexing of repository 'Local Photos 1' completed after 0.1 seconds.
+2023-03-02 15:02:05 Removing repository 'Local Photos 1' from queue.
+2023-03-02 15:02:05 Stopping to build meta data index in the background.
+2023-03-02 15:07:03 Starting to build meta data index in the background.
+2023-03-02 15:07:03 [Local Photos 1] Updating meta data index for repository 'Local Photos 1'
+2023-03-02 15:07:03 [Local Photos 1] Extracting meta data of file 'IMG-20220501-WA0010.jpg' from file content.
+2023-03-02 15:07:03 [Local Photos 1] Extracting meta data of file 'photo.png' from file content.
+2023-03-02 15:07:03 [Local Photos 1] Extracting meta data of file '02 Landscape.jpg' from file content.
+2023-03-02 15:07:03 [Local Photos 1] Extracting meta data of file '01 Portrait.jpg' from file content.
+2023-03-02 15:07:03 [Local Photos 1] Extracting meta data of file '03 Panorama.JPG' from file content.
+2023-03-02 15:07:03 [Local Photos 1] Extracting meta data of file 'Urlaub/IMG_20190828_145905.jpg' from file content.
+2023-03-02 15:07:03 [Local Photos 1] Indexing of repository 'Local Photos 1' completed after 0.1 seconds.
+2023-03-02 15:07:03 Sleeping for 1.0 minutes.
+2023-03-02 15:08:00 Starting to build meta data index in the background.
+2023-03-02 15:08:00 [Local Photos 1] Updating meta data index for repository 'Local Photos 1'
+2023-03-02 15:08:00 [Local Photos 1] Extracting meta data of file 'IMG-20220501-WA0010.jpg' from file content.
+2023-03-02 15:08:00 [Local Photos 1] Extracting meta data of file 'photo.png' from file content.
+2023-03-02 15:08:00 [Local Photos 1] Extracting meta data of file '02 Landscape.jpg' from file content.
+2023-03-02 15:08:00 [Local Photos 1] Extracting meta data of file '01 Portrait.jpg' from file content.
+2023-03-02 15:08:00 [Local Photos 1] Extracting meta data of file '03 Panorama.JPG' from file content.
+2023-03-02 15:08:00 [Local Photos 1] Extracting meta data of file 'Urlaub/IMG_20190828_145905.jpg' from file content.
+2023-03-02 15:08:00 [Local Photos 1] Indexing of repository 'Local Photos 1' completed after 0.1 seconds.
+2023-03-02 15:08:00 [Local Frankreich] Updating meta data index for repository 'Local Frankreich'
+2023-03-02 15:08:00 [Local Frankreich] Extracting meta data of file 'IMG_20190828_101327.jpg' from file content.
+2023-03-02 15:08:00 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150150.jpg' from file content.
+2023-03-02 15:08:00 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145839.jpg' from file content.
+2023-03-02 15:08:00 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145422.jpg' from file content.
+2023-03-02 15:08:00 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150209.jpg' from file content.
+2023-03-02 15:08:00 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145917.jpg' from file content.
+2023-03-02 15:08:00 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153521.jpg' from file content.
+2023-03-02 15:08:00 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150137.jpg' from file content.
+2023-03-02 15:08:00 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145426.jpg' from file content.
+2023-03-02 15:08:00 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153229.jpg' from file content.
+2023-03-02 15:08:00 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145816.jpg' from file content.
+2023-03-02 15:08:00 [Local Frankreich] Extracting meta data of file 'IMG_20190826_144332.jpg' from file content.
+2023-03-02 15:08:00 [Local Frankreich] Extracting meta data of file 'IMG_20190826_144710.jpg' from file content.
+2023-03-02 15:08:00 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145014.jpg' from file content.
+2023-03-02 15:08:00 [Local Frankreich] Extracting meta data of file 'IMG_20190828_101450.jpg' from file content.
+2023-03-02 15:08:00 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150258.jpg' from file content.
+2023-03-02 15:08:00 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153657.jpg' from file content.
+2023-03-02 15:08:00 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145820.jpg' from file content.
+2023-03-02 15:08:00 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145905.jpg' from file content.
+2023-03-02 15:08:00 [Local Frankreich] Indexing of repository 'Local Frankreich' completed after 0.2 seconds.
+2023-03-02 15:08:00 Sleeping for 2.0 minutes.
+2023-03-02 15:13:54 Starting to build meta data index in the background.
+2023-03-02 15:13:54 [Local Photos 1] Updating meta data index for repository 'Local Photos 1'
+2023-03-02 15:13:54 [Local Photos 1] Extracting meta data of file 'IMG-20220501-WA0010.jpg' from file content.
+2023-03-02 15:13:54 [Local Photos 1] Extracting meta data of file 'photo.png' from file content.
+2023-03-02 15:13:54 [Local Photos 1] Extracting meta data of file '02 Landscape.jpg' from file content.
+2023-03-02 15:13:54 [Local Photos 1] Extracting meta data of file '01 Portrait.jpg' from file content.
+2023-03-02 15:13:54 [Local Photos 1] Extracting meta data of file '03 Panorama.JPG' from file content.
+2023-03-02 15:13:54 [Local Photos 1] Extracting meta data of file 'Urlaub/IMG_20190828_145905.jpg' from file content.
+2023-03-02 15:13:54 [Local Photos 1] Indexing of repository 'Local Photos 1' completed after 0.1 seconds.
+2023-03-02 15:13:54 [Local Frankreich] Updating meta data index for repository 'Local Frankreich'
+2023-03-02 15:13:54 [Local Frankreich] Extracting meta data of file 'IMG_20190828_101327.jpg' from file content.
+2023-03-02 15:13:54 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150150.jpg' from file content.
+2023-03-02 15:13:54 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145839.jpg' from file content.
+2023-03-02 15:13:54 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145422.jpg' from file content.
+2023-03-02 15:13:54 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150209.jpg' from file content.
+2023-03-02 15:13:54 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145917.jpg' from file content.
+2023-03-02 15:13:54 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153521.jpg' from file content.
+2023-03-02 15:13:54 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150137.jpg' from file content.
+2023-03-02 15:13:54 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145426.jpg' from file content.
+2023-03-02 15:13:54 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153229.jpg' from file content.
+2023-03-02 15:13:54 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145816.jpg' from file content.
+2023-03-02 15:13:54 [Local Frankreich] Extracting meta data of file 'IMG_20190826_144332.jpg' from file content.
+2023-03-02 15:13:54 [Local Frankreich] Extracting meta data of file 'IMG_20190826_144710.jpg' from file content.
+2023-03-02 15:13:54 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145014.jpg' from file content.
+2023-03-02 15:13:54 [Local Frankreich] Extracting meta data of file 'IMG_20190828_101450.jpg' from file content.
+2023-03-02 15:13:54 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150258.jpg' from file content.
+2023-03-02 15:13:54 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153657.jpg' from file content.
+2023-03-02 15:13:54 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145820.jpg' from file content.
+2023-03-02 15:13:54 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145905.jpg' from file content.
+2023-03-02 15:13:54 [Local Frankreich] Indexing of repository 'Local Frankreich' completed after 0.1 seconds.
+2023-03-02 15:17:01 Starting to build meta data index in the background.
+2023-03-02 15:17:01 [Local Photos 1] Updating meta data index for repository 'Local Photos 1'
+2023-03-02 15:17:01 [Local Photos 1] Extracting meta data of file 'IMG-20220501-WA0010.jpg' from file content.
+2023-03-02 15:17:01 [Local Photos 1] Extracting meta data of file 'photo.png' from file content.
+2023-03-02 15:17:01 [Local Photos 1] Extracting meta data of file '02 Landscape.jpg' from file content.
+2023-03-02 15:17:01 [Local Photos 1] Extracting meta data of file '01 Portrait.jpg' from file content.
+2023-03-02 15:17:01 [Local Photos 1] Extracting meta data of file '03 Panorama.JPG' from file content.
+2023-03-02 15:17:01 [Local Photos 1] Extracting meta data of file 'Urlaub/IMG_20190828_145905.jpg' from file content.
+2023-03-02 15:17:01 [Local Photos 1] Indexing of repository 'Local Photos 1' completed after 0.1 seconds.
+2023-03-02 15:17:01 [Local Frankreich] Updating meta data index for repository 'Local Frankreich'
+2023-03-02 15:17:01 [Local Frankreich] Extracting meta data of file 'IMG_20190828_101327.jpg' from file content.
+2023-03-02 15:17:01 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150150.jpg' from file content.
+2023-03-02 15:17:01 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145839.jpg' from file content.
+2023-03-02 15:17:01 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145422.jpg' from file content.
+2023-03-02 15:17:01 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150209.jpg' from file content.
+2023-03-02 15:17:01 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145917.jpg' from file content.
+2023-03-02 15:17:01 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153521.jpg' from file content.
+2023-03-02 15:17:01 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150137.jpg' from file content.
+2023-03-02 15:17:01 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145426.jpg' from file content.
+2023-03-02 15:17:01 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153229.jpg' from file content.
+2023-03-02 15:17:01 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145816.jpg' from file content.
+2023-03-02 15:17:01 [Local Frankreich] Extracting meta data of file 'IMG_20190826_144332.jpg' from file content.
+2023-03-02 15:17:01 [Local Frankreich] Extracting meta data of file 'IMG_20190826_144710.jpg' from file content.
+2023-03-02 15:17:01 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145014.jpg' from file content.
+2023-03-02 15:17:01 [Local Frankreich] Extracting meta data of file 'IMG_20190828_101450.jpg' from file content.
+2023-03-02 15:17:01 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150258.jpg' from file content.
+2023-03-02 15:17:01 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153657.jpg' from file content.
+2023-03-02 15:17:02 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145820.jpg' from file content.
+2023-03-02 15:17:02 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145905.jpg' from file content.
+2023-03-02 15:17:02 [Local Frankreich] Indexing of repository 'Local Frankreich' completed after 0.1 seconds.
+2023-03-02 15:17:02 Sleeping for 1.0 minutes.
+2023-03-02 15:18:03 [Local Photos 1] Updating meta data index for repository 'Local Photos 1'
+2023-03-02 15:18:03 [Local Photos 1] Extracting meta data of file 'IMG-20220501-WA0010.jpg' from file content.
+2023-03-02 15:18:03 [Local Photos 1] Extracting meta data of file 'photo.png' from file content.
+2023-03-02 15:18:03 [Local Photos 1] Extracting meta data of file '02 Landscape.jpg' from file content.
+2023-03-02 15:18:03 [Local Photos 1] Extracting meta data of file '01 Portrait.jpg' from file content.
+2023-03-02 15:18:03 [Local Photos 1] Extracting meta data of file '03 Panorama.JPG' from file content.
+2023-03-02 15:18:03 [Local Photos 1] Extracting meta data of file 'Urlaub/IMG_20190828_145905.jpg' from file content.
+2023-03-02 15:18:03 [Local Photos 1] Indexing of repository 'Local Photos 1' completed after 0.0 seconds.
+2023-03-02 15:24:22 Starting to build meta data index in the background.
+2023-03-02 15:24:22 [Local Photos 1] Updating meta data index for repository 'Local Photos 1'
+2023-03-02 15:24:22 [Local Photos 1] Extracting meta data of file 'IMG-20220501-WA0010.jpg' from file content.
+2023-03-02 15:24:22 [Local Photos 1] Extracting meta data of file 'photo.png' from file content.
+2023-03-02 15:24:22 [Local Photos 1] Extracting meta data of file '02 Landscape.jpg' from file content.
+2023-03-02 15:24:22 [Local Photos 1] Extracting meta data of file '01 Portrait.jpg' from file content.
+2023-03-02 15:24:22 [Local Photos 1] Extracting meta data of file '03 Panorama.JPG' from file content.
+2023-03-02 15:24:22 [Local Photos 1] Extracting meta data of file 'Urlaub/IMG_20190828_145905.jpg' from file content.
+2023-03-02 15:24:22 [Local Photos 1] Indexing of repository 'Local Photos 1' completed after 0.1 seconds.
+2023-03-02 15:24:22 [Local Frankreich] Updating meta data index for repository 'Local Frankreich'
+2023-03-02 15:24:22 [Local Frankreich] Extracting meta data of file 'IMG_20190828_101327.jpg' from file content.
+2023-03-02 15:24:22 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150150.jpg' from file content.
+2023-03-02 15:24:22 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145839.jpg' from file content.
+2023-03-02 15:24:22 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145422.jpg' from file content.
+2023-03-02 15:24:22 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150209.jpg' from file content.
+2023-03-02 15:24:22 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145917.jpg' from file content.
+2023-03-02 15:24:22 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153521.jpg' from file content.
+2023-03-02 15:24:22 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150137.jpg' from file content.
+2023-03-02 15:24:22 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145426.jpg' from file content.
+2023-03-02 15:24:22 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153229.jpg' from file content.
+2023-03-02 15:24:22 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145816.jpg' from file content.
+2023-03-02 15:24:22 [Local Frankreich] Extracting meta data of file 'IMG_20190826_144332.jpg' from file content.
+2023-03-02 15:24:22 [Local Frankreich] Extracting meta data of file 'IMG_20190826_144710.jpg' from file content.
+2023-03-02 15:24:22 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145014.jpg' from file content.
+2023-03-02 15:24:22 [Local Frankreich] Extracting meta data of file 'IMG_20190828_101450.jpg' from file content.
+2023-03-02 15:24:22 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150258.jpg' from file content.
+2023-03-02 15:24:22 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153657.jpg' from file content.
+2023-03-02 15:24:22 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145820.jpg' from file content.
+2023-03-02 15:24:22 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145905.jpg' from file content.
+2023-03-02 15:24:22 [Local Frankreich] Indexing of repository 'Local Frankreich' completed after 0.2 seconds.
+2023-03-02 15:24:22 Sleeping for 1.0 minutes.
+2023-03-02 15:25:23 [Local Photos 1] Updating meta data index for repository 'Local Photos 1'
+2023-03-02 15:25:23 [Local Photos 1] Extracting meta data of file 'IMG-20220501-WA0010.jpg' from file content.
+2023-03-02 15:25:23 [Local Photos 1] Extracting meta data of file 'photo.png' from file content.
+2023-03-02 15:25:23 [Local Photos 1] Extracting meta data of file '02 Landscape.jpg' from file content.
+2023-03-02 15:25:23 [Local Photos 1] Extracting meta data of file '01 Portrait.jpg' from file content.
+2023-03-02 15:25:23 [Local Photos 1] Extracting meta data of file '03 Panorama.JPG' from file content.
+2023-03-02 15:25:23 [Local Photos 1] Extracting meta data of file 'Urlaub/IMG_20190828_145905.jpg' from file content.
+2023-03-02 15:25:23 [Local Photos 1] Indexing of repository 'Local Photos 1' completed after 0.1 seconds.
+2023-03-02 15:26:25 [Local Photos 1] Updating meta data index for repository 'Local Photos 1'
+2023-03-02 15:26:25 [Local Photos 1] Extracting meta data of file 'IMG-20220501-WA0010.jpg' from file content.
+2023-03-02 15:26:25 [Local Photos 1] Extracting meta data of file 'photo.png' from file content.
+2023-03-02 15:26:25 [Local Photos 1] Extracting meta data of file '02 Landscape.jpg' from file content.
+2023-03-02 15:26:25 [Local Photos 1] Extracting meta data of file '01 Portrait.jpg' from file content.
+2023-03-02 15:26:25 [Local Photos 1] Extracting meta data of file '03 Panorama.JPG' from file content.
+2023-03-02 15:26:25 [Local Photos 1] Extracting meta data of file 'Urlaub/IMG_20190828_145905.jpg' from file content.
+2023-03-02 15:26:25 [Local Photos 1] Indexing of repository 'Local Photos 1' completed after 0.0 seconds.
+2023-03-02 15:26:25 [Local Frankreich] Updating meta data index for repository 'Local Frankreich'
+2023-03-02 15:26:25 [Local Frankreich] Extracting meta data of file 'IMG_20190828_101327.jpg' from file content.
+2023-03-02 15:26:25 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150150.jpg' from file content.
+2023-03-02 15:26:25 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145839.jpg' from file content.
+2023-03-02 15:26:25 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145422.jpg' from file content.
+2023-03-02 15:26:25 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150209.jpg' from file content.
+2023-03-02 15:26:25 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145917.jpg' from file content.
+2023-03-02 15:26:25 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153521.jpg' from file content.
+2023-03-02 15:26:25 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150137.jpg' from file content.
+2023-03-02 15:26:25 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145426.jpg' from file content.
+2023-03-02 15:26:25 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153229.jpg' from file content.
+2023-03-02 15:26:25 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145816.jpg' from file content.
+2023-03-02 15:26:25 [Local Frankreich] Extracting meta data of file 'IMG_20190826_144332.jpg' from file content.
+2023-03-02 15:26:25 [Local Frankreich] Extracting meta data of file 'IMG_20190826_144710.jpg' from file content.
+2023-03-02 15:26:25 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145014.jpg' from file content.
+2023-03-02 15:26:25 [Local Frankreich] Extracting meta data of file 'IMG_20190828_101450.jpg' from file content.
+2023-03-02 15:26:25 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150258.jpg' from file content.
+2023-03-02 15:26:25 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153657.jpg' from file content.
+2023-03-02 15:26:25 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145820.jpg' from file content.
+2023-03-02 15:26:25 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145905.jpg' from file content.
+2023-03-02 15:26:25 [Local Frankreich] Indexing of repository 'Local Frankreich' completed after 0.1 seconds.
+2023-03-02 15:27:26 [Local Photos 1] Updating meta data index for repository 'Local Photos 1'
+2023-03-02 15:27:26 [Local Photos 1] Extracting meta data of file 'IMG-20220501-WA0010.jpg' from file content.
+2023-03-02 15:27:26 [Local Photos 1] Extracting meta data of file 'photo.png' from file content.
+2023-03-02 15:27:26 [Local Photos 1] Extracting meta data of file '02 Landscape.jpg' from file content.
+2023-03-02 15:27:26 [Local Photos 1] Extracting meta data of file '01 Portrait.jpg' from file content.
+2023-03-02 15:27:26 [Local Photos 1] Extracting meta data of file '03 Panorama.JPG' from file content.
+2023-03-02 15:27:26 [Local Photos 1] Extracting meta data of file 'Urlaub/IMG_20190828_145905.jpg' from file content.
+2023-03-02 15:27:26 [Local Photos 1] Indexing of repository 'Local Photos 1' completed after 0.0 seconds.
+2023-03-02 15:29:12 Starting to build meta data index in the background.
+2023-03-02 15:29:12 [Local Photos 1] Updating meta data index for repository 'Local Photos 1'
+2023-03-02 15:29:12 [Local Photos 1] Extracting meta data of file 'IMG-20220501-WA0010.jpg' from file content.
+2023-03-02 15:29:12 [Local Photos 1] Extracting meta data of file 'photo.png' from file content.
+2023-03-02 15:29:12 [Local Photos 1] Extracting meta data of file '02 Landscape.jpg' from file content.
+2023-03-02 15:29:12 [Local Photos 1] Extracting meta data of file '01 Portrait.jpg' from file content.
+2023-03-02 15:29:12 [Local Photos 1] Extracting meta data of file '03 Panorama.JPG' from file content.
+2023-03-02 15:29:12 [Local Photos 1] Extracting meta data of file 'Urlaub/IMG_20190828_145905.jpg' from file content.
+2023-03-02 15:29:12 [Local Photos 1] Indexing of repository 'Local Photos 1' completed after 0.1 seconds.
+2023-03-02 15:29:12 [Local Photos 1] The next indexing run is due at Thu Mar  2 15:30:14 2023.
+2023-03-02 15:29:12 [Local Frankreich] Updating meta data index for repository 'Local Frankreich'
+2023-03-02 15:29:12 [Local Frankreich] Extracting meta data of file 'IMG_20190828_101327.jpg' from file content.
+2023-03-02 15:29:12 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150150.jpg' from file content.
+2023-03-02 15:29:12 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145839.jpg' from file content.
+2023-03-02 15:29:12 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145422.jpg' from file content.
+2023-03-02 15:29:12 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150209.jpg' from file content.
+2023-03-02 15:29:12 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145917.jpg' from file content.
+2023-03-02 15:29:12 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153521.jpg' from file content.
+2023-03-02 15:29:12 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150137.jpg' from file content.
+2023-03-02 15:29:12 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145426.jpg' from file content.
+2023-03-02 15:29:12 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153229.jpg' from file content.
+2023-03-02 15:29:12 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145816.jpg' from file content.
+2023-03-02 15:29:12 [Local Frankreich] Extracting meta data of file 'IMG_20190826_144332.jpg' from file content.
+2023-03-02 15:29:12 [Local Frankreich] Extracting meta data of file 'IMG_20190826_144710.jpg' from file content.
+2023-03-02 15:29:12 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145014.jpg' from file content.
+2023-03-02 15:29:12 [Local Frankreich] Extracting meta data of file 'IMG_20190828_101450.jpg' from file content.
+2023-03-02 15:29:12 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150258.jpg' from file content.
+2023-03-02 15:29:12 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153657.jpg' from file content.
+2023-03-02 15:29:12 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145820.jpg' from file content.
+2023-03-02 15:29:12 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145905.jpg' from file content.
+2023-03-02 15:29:12 [Local Frankreich] Indexing of repository 'Local Frankreich' completed after 0.1 seconds.
+2023-03-02 15:29:12 [Local Frankreich] The next indexing run is due at Thu Mar  2 15:31:15 2023.
+2023-03-02 15:29:12 Sleeping for 1.0 minutes.
+2023-03-02 15:30:14 [Local Photos 1] Updating meta data index for repository 'Local Photos 1'
+2023-03-02 15:30:14 [Local Photos 1] Extracting meta data of file 'IMG-20220501-WA0010.jpg' from file content.
+2023-03-02 15:30:14 [Local Photos 1] Extracting meta data of file 'photo.png' from file content.
+2023-03-02 15:30:14 [Local Photos 1] Extracting meta data of file '02 Landscape.jpg' from file content.
+2023-03-02 15:30:14 [Local Photos 1] Extracting meta data of file '01 Portrait.jpg' from file content.
+2023-03-02 15:30:14 [Local Photos 1] Extracting meta data of file '03 Panorama.JPG' from file content.
+2023-03-02 15:30:14 [Local Photos 1] Extracting meta data of file 'Urlaub/IMG_20190828_145905.jpg' from file content.
+2023-03-02 15:30:14 [Local Photos 1] Indexing of repository 'Local Photos 1' completed after 0.0 seconds.
+2023-03-02 15:30:14 [Local Photos 1] The next indexing run is due at Thu Mar  2 15:31:15 2023.
+2023-03-02 15:31:15 [Local Photos 1] Updating meta data index for repository 'Local Photos 1'
+2023-03-02 15:31:15 [Local Photos 1] Extracting meta data of file 'IMG-20220501-WA0010.jpg' from file content.
+2023-03-02 15:31:15 [Local Photos 1] Extracting meta data of file 'photo.png' from file content.
+2023-03-02 15:31:15 [Local Photos 1] Extracting meta data of file '02 Landscape.jpg' from file content.
+2023-03-02 15:31:15 [Local Photos 1] Extracting meta data of file '01 Portrait.jpg' from file content.
+2023-03-02 15:31:15 [Local Photos 1] Extracting meta data of file '03 Panorama.JPG' from file content.
+2023-03-02 15:31:15 [Local Photos 1] Extracting meta data of file 'Urlaub/IMG_20190828_145905.jpg' from file content.
+2023-03-02 15:31:15 [Local Photos 1] Indexing of repository 'Local Photos 1' completed after 0.0 seconds.
+2023-03-02 15:31:15 [Local Photos 1] The next indexing run is due at Thu Mar  2 15:32:16 2023.
+2023-03-02 15:31:15 [Local Frankreich] Updating meta data index for repository 'Local Frankreich'
+2023-03-02 15:31:15 [Local Frankreich] Extracting meta data of file 'IMG_20190828_101327.jpg' from file content.
+2023-03-02 15:31:15 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150150.jpg' from file content.
+2023-03-02 15:31:15 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145839.jpg' from file content.
+2023-03-02 15:31:15 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145422.jpg' from file content.
+2023-03-02 15:31:15 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150209.jpg' from file content.
+2023-03-02 15:31:15 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145917.jpg' from file content.
+2023-03-02 15:31:15 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153521.jpg' from file content.
+2023-03-02 15:31:15 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150137.jpg' from file content.
+2023-03-02 15:31:15 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145426.jpg' from file content.
+2023-03-02 15:31:15 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153229.jpg' from file content.
+2023-03-02 15:31:15 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145816.jpg' from file content.
+2023-03-02 15:31:15 [Local Frankreich] Extracting meta data of file 'IMG_20190826_144332.jpg' from file content.
+2023-03-02 15:31:15 [Local Frankreich] Extracting meta data of file 'IMG_20190826_144710.jpg' from file content.
+2023-03-02 15:31:15 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145014.jpg' from file content.
+2023-03-02 15:31:15 [Local Frankreich] Extracting meta data of file 'IMG_20190828_101450.jpg' from file content.
+2023-03-02 15:31:15 [Local Frankreich] Extracting meta data of file 'IMG_20190828_150258.jpg' from file content.
+2023-03-02 15:31:15 [Local Frankreich] Extracting meta data of file 'IMG_20190828_153657.jpg' from file content.
+2023-03-02 15:31:15 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145820.jpg' from file content.
+2023-03-02 15:31:15 [Local Frankreich] Extracting meta data of file 'IMG_20190828_145905.jpg' from file content.
+2023-03-02 15:31:15 [Local Frankreich] Indexing of repository 'Local Frankreich' completed after 0.1 seconds.
+2023-03-02 15:31:15 [Local Frankreich] The next indexing run is due at Thu Mar  2 15:33:17 2023.
+2023-03-02 15:32:16 [Local Photos 1] Updating meta data index for repository 'Local Photos 1'
+2023-03-02 15:32:16 [Local Photos 1] Extracting meta data of file 'IMG-20220501-WA0010.jpg' from file content.
+2023-03-02 15:32:16 [Local Photos 1] Extracting meta data of file 'photo.png' from file content.
+2023-03-02 15:32:16 [Local Photos 1] Extracting meta data of file '02 Landscape.jpg' from file content.
+2023-03-02 15:32:16 [Local Photos 1] Extracting meta data of file '01 Portrait.jpg' from file content.
+2023-03-02 15:32:16 [Local Photos 1] Extracting meta data of file '03 Panorama.JPG' from file content.
+2023-03-02 15:32:16 [Local Photos 1] Extracting meta data of file 'Urlaub/IMG_20190828_145905.jpg' from file content.
+2023-03-02 15:32:16 [Local Photos 1] Indexing of repository 'Local Photos 1' completed after 0.0 seconds.
+2023-03-02 15:32:16 [Local Photos 1] The next indexing run is due at Thu Mar  2 15:33:17 2023.

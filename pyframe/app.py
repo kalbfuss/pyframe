@@ -32,26 +32,32 @@ class App(kivy.app.App):
             Logger.critical("Configuration: Exiting application as no repositories have been defined.")
             App.get_running_app().stop()
 
+        # Extract global repository configuration
+        global_config = {key: config[key] for key in ('index_update_interval', 'cache') if key in config}
+
         # Create repositories.
         for uuid, rep_config in config['repositories'].items():
             # Skip disabled repositories.
             if rep_config.get('enabled') is False:
                 Logger.info(f"Configuration: Skipping repository '{uuid}' as it has been disabled.")
                 continue
+            # Combine global and local configuration. Local configuration
+            # settings supersede global settings.
+            combined_config = global_config
+            combined_config.update(rep_config)
             try:
                 # Create repository of the specified type and queue for indexing.
                 if rep_config.get('type') == "local":
                     Logger.info(f"Configuration: Creating local repository '{uuid}' and starting to build index in the background.")
-                    rep = repository.local.Repository(uuid, rep_config, index=index)
-                    interval = rep_config.get('index_update_interval', 0)
+                    rep = repository.local.Repository(uuid, combined_config, index=index)
+                    interval = combined_config.get('index_update_interval', 0)
                     self._indexer.queue(rep, interval)
 
                 if rep_config.get('type') == "webdav":
                     Logger.info(f"Configuration: Creating WebDav repository '{uuid}' and starting to build index in the background.")
-                    rep_config['cache'] = config['cache']
-                    rep = repository.webdav.Repository(uuid, rep_config, index=index)
-                    interval = rep_config.get('index_update_interval', 0)
-                    self._indexer.queue(rep)
+                    rep = repository.webdav.Repository(uuid, combined_config, index=index)
+                    interval = combined_config.get('index_update_interval', 0)
+                    self._indexer.queue(rep, interval)
 
             # Catch any invalid configuration errors
             except InvalidConfigurationError:
@@ -82,13 +88,13 @@ class App(kivy.app.App):
         # Create empty dictionary to collect slideshows
         self._slideshows = dict()
         # Extract global slideshow configuration
-        slideshow_global_config = {key: config[key] for key in ('rotation', 'bgcolor', 'resize')}
+        global_config = {key: config[key] for key in ('rotation', 'bgcolor', 'resize')}
 
         # Create slideshows from configuration.
         for slideshow, slideshow_config in config['slideshows'].items():
             # Combine global and local configuration. Local configuration
             # settings supersede global settings.
-            combined_config = slideshow_global_config
+            combined_config = global_config
             combined_config.update(slideshow_config)
             # Create new slideshow and add to hash
             try:

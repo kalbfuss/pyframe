@@ -8,7 +8,7 @@ from logging import Handler, Formatter
 from logging.handlers import TimedRotatingFileHandler
 from repository import Index
 from threading import Thread
-from time import time, sleep
+from time import asctime, localtime, time, sleep
 
 from kivy.logger import Logger
 
@@ -170,14 +170,16 @@ class Indexer:
                 duration_str = f"{duration:.1f} seconds"
             return duration_str
 
-        pause_until = time()
+        pause_until = 0
         logging.info(f"Starting to build meta data index in the background.")
 
         while True:
             # Iterate through repositories, which have been queued for indexing.
             for rep in list(self._rep_data.keys()):
+
                 cur_time = time()
                 data = self._rep_data[rep]
+
                 # Build index for repository if due, but at least once.
                 if data.last == 0 or (data.interval > 0 and data.next < cur_time):
                     # Set log prefix to uuid of current repository.
@@ -191,14 +193,17 @@ class Indexer:
                     # Record completion time and time for next indexing run.
                     data.last = end_time
                     data.next = end_time + data.interval*3600
+                    # Log time of next indexing run.
+                    logging.info(f"The next indexing run is due at {asctime(localtime(data.next))}.")
                 # Remove repository from queue if it has been indexed at least
                 # once and no update interval has been specified.
                 elif data.last > 0 and data.interval == 0:
                     self._rep_data.pop(rep)
                     logging.info(f"Removing repository '{rep.uuid}' from queue.")
+
                 # Determine time of next, i.e. soonest indexing run in the next
                 # round.
-                elif data.next > pause_until and data.interval > 0:
+                if data.interval > 0 and (pause_until == 0 or data.next < pause_until):
                     pause_until = data.next
 
             # Clear log prefix
@@ -241,5 +246,4 @@ class Indexer:
         """
         Logger.info(f"Indexer: Starting to build meata data index in the background.")
         self._thread = Thread(name="indexer", target=self._build, daemon=True)
-        self._thread.start()
         self._thread.start()
