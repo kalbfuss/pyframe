@@ -219,6 +219,7 @@ class Indexer:
             if pause_until > cur_time:
                 # Log duration until next indexing run is due.
                 duration = (pause_until - cur_time)
+                pause_until = 0
                 logging.info(f"Sleeping for {format_duration(duration)}.")
                 sleep(duration)
 
