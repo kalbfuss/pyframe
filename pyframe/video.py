@@ -59,8 +59,11 @@ class SlideshowVideo(Widget):
         widget_ratio = self.width/self.height
         # We need to rely on the file meta data in this case since the Kivy
         # video class does not have a video_ratio attribute and the
-        # dimensions of the widget have not been adjusted yet.
-        video_ratio = self._file.width/self._file.height
+        # dimensions of the video widget have not been adjusted yet.
+        if self._file.width > 0 and self._file.height > 0:
+            video_ratio = self._file.width/self._file.height
+        else:
+            video_ratio = 16/9
         # Correct image aspect ratio for image rotation. i.e. aspect ratio
         # corresponds to the ratio after rotation.
         if abs(self._rotation) == 90 or abs(self._rotation == 270):
