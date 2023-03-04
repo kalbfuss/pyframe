@@ -1,12 +1,13 @@
 """Module providing slideshow class."""
 
-from repository import Index, RepositoryFile
+from repository import Index, RepositoryFile, IOError
 
 from kivy.app import App
 from kivy.clock import Clock
 from kivy.core.window import Window
 from kivy.logger import Logger
 from kivy.uix.anchorlayout import AnchorLayout
+from kivy.uix.widget import Widget
 
 from pyframe import SlideshowImage, SlideshowVideo
 
@@ -138,7 +139,44 @@ class Slideshow(AnchorLayout):
             # Create temporary iterator otherwise to determine length.
             return self._index.iterator(**self._criteria).count()
 
-    def next_file(self):
+    def _next_widget(self):
+        """Return widget of the next file in the slideshow.
+
+        Catches any exception that occurs during file retrieval and skips the
+        respective file.
+
+        :return: Next file in the slideshow.
+        :rtype: Widget
+        """
+        attempts = 0
+        while True:
+            try:
+                # Attempt to retrieve next file in repository.
+                file = next(self._iterator)
+                widget = self._create_widget(file)
+                # Exit loop if no exception occurred
+                break
+            # Create new iterator if end of iteration has been reached and try
+            # again.
+            except StopIteration:
+                Logger.info("Slideshow: End of iteration. Restarting iteration.")
+                self._iterator = self._index.iterator(**self._criteria)
+                continue
+            # Log error if any other exception occurred and try again.
+            except IOError as e:
+                Logger.error(f"Slideshow: An I/O error occurred while retrieving the next file: {e.exception}.")
+                continue
+            finally:
+                attempts = attempts + 1
+                # Stop slideshow and return empty widget if number of attempts
+                # exceeds limit.
+                if attempts > 5:
+                    Logger.error(f"Slideshow: Stopping slidewhow after {attempts} failed attempts to retrieve next file.")
+                    self.stop()
+                    return Widget()
+        return widget
+
+    def next(self):
         """Display next file in the index."""
         # Remove current widget from layout.
         self.remove_widget(self._currentWidget)
@@ -146,19 +184,15 @@ class Slideshow(AnchorLayout):
         self._currentWidget = self._nextWidget
         # Add current widget to layout.
         self.add_widget(self._currentWidget)
-        # Retrieve next file in repository.
-        try:
-            file = next(self._iterator)
-        # Create new iterator if end of iteration has been reached.
-        except StopIteration:
-            Logger.info("End of iteration. Restarting iteration.")
-            self._iterator = self._index.iterator(**self._criteria)
-            file = next(self._iterator)
         # Create widget for next frame.
-        self._nextWidget = self._create_widget(file)
+        self._nextWidget = self._next_widget()
 
     def play(self):
         """Start playing slideshow."""
+        # Skip if already playing
+        if self._event is not None:
+            return
+
         # Create selective index iterator with sorting/filter criteria from the
         # slideshow configuration.
         self._iterator = self._index.iterator(**self._criteria)
@@ -166,22 +200,13 @@ class Slideshow(AnchorLayout):
         self._length = self._iterator.count()
 
         # Create current widget from first file, add to layout and start playing.
-        file = next(self._iterator)
-        self._currentWidget = self._create_widget(file)
+        self._currentWidget = self._next_widget()
         self.add_widget(self._currentWidget)
-
         # Create next widget from second file
-        try:
-            file = next(self._iterator)
-            # Create new iterator if end of iteration has been reached.
-        except StopIteration:
-            self._iterator = self._index.iterator(**self._criteria)
-            file = next(self._iterator)
-        self._nextWidget = self._create_widget(file)
+        self._nextWidget = self._next_widget()
 
-        # Set clock interval and callback function
-        if self._event is None:
-          self._event = Clock.schedule_interval(self._clock_callback, self._config['pause'])
+        # Schedule callback function
+        self._event = Clock.schedule_interval(self._clock_callback, self._config['pause'])
 
     def stop(self):
         """Stop playing slideshow."""
@@ -199,7 +224,7 @@ class Slideshow(AnchorLayout):
     def _clock_callback(self, dt):
         """Clock callback function. Display the next file in the slideshow."""
         # Display next file in repository.
-        self.next_file()
+        self.next()
 
     def _on_keyboard(self, window, key, *args):
         """Handle keyboard events.
@@ -209,7 +234,7 @@ class Slideshow(AnchorLayout):
         - Left arrow: Show previous file (not yet implemented).
         - Escape: Exit application.
         """
-        Logger.info(f"Key '{key}' pressed.")
+        Logger.info(f"Slideshow: Key '{key}' pressed.")
         # Display previous file if left arrow pressed.
         if key == 276:
             # Not yet implemented as index iterators do not (yet) allow to go backwards.
@@ -219,7 +244,7 @@ class Slideshow(AnchorLayout):
             App.get_running_app().stop()
         # Display next file for all other keys
         else:
-            Clock.unschedule(self._clock_callback)
-            self.next_file()
-            Clock.schedule_interval(self._clock_callback, self._config['pause'])
+            Clock.unschedule(self._event)
+            self.next()
+            Clock.schedule_interval(self._event, self._config['pause'])
         return True

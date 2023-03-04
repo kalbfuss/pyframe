@@ -5,7 +5,7 @@ import os
 import os.path
 import repository
 
-from repository import InvalidUuidError
+from repository import InvalidUuidError, IOError
 from datetime import datetime
 
 

@@ -46,7 +46,10 @@ class RepositoryFile(repository.RepositoryFile):
 
         # Attempt to determine last modification and file creation date.
         if not self._in_index:
-            info = self._rep.client.info(self.uuid)
+            try:
+                info = self._rep.client.info(self.uuid)
+            except Exception as e:
+                raise IOError(f"An exception occurred while retrieving webdav file information: {e}", e.exception)
             logging.debug(f"Webdav info record of file '{self.uuid}': {info}")
             try:
                 modified = info.get('modified', None)
@@ -80,7 +83,10 @@ class RepositoryFile(repository.RepositoryFile):
                 pass
 
     def _download(self):
-        """Download file from WebDav repository to local cache file."""
+        """Download file from WebDav repository to local cache file.
+
+        :raises: IOError
+        """
         if self._cache_file is None:
             # Create temporary file for local caching inside cache directory
             # of the WebDav repository.
@@ -90,7 +96,10 @@ class RepositoryFile(repository.RepositoryFile):
 
             # Download file from WebDav repository.
             logging.info(f"Downloading file '{self.uuid}' from webdav repository to local cache file.")
-            self._rep.client.download_from(self._cache_file, self._uuid)
+            try:
+                self._rep.client.download_from(self._cache_file, self._uuid)
+            except Exception as e:
+                raise repository.IOError("An exception occurred while downloading file from webdav repository:", e)
 
     def extract_metadata(self):
         """Extract metadata from file content."""

@@ -6,7 +6,7 @@ import os.path
 import logging
 import repository
 
-from repository import InvalidConfigurationError
+from repository import InvalidConfigurationError, IOError
 from repository.local import RepositoryFile
 
 
@@ -102,13 +102,17 @@ class FileIterator(repository.FileIterator):
         :param extract_metadata: True if file metadata shall be extracted from
             file if not available from index.
         :type extract_metadata: bool
+        :raise: repository.IOError
         """
         self._rep = rep
         self._index_lookup = index_lookup
         self._extract_metadata = extract_metadata
         self._dir_list = []
         # Create scandir iterator for provided root directory
-        self._iterator = os.scandir(self._rep.root)
+        try:
+            self._iterator = os.scandir(self._rep.root)
+        except Exception as e:
+            raise IOError("An exception occurred while scanning directory:", e)
 
     def __next__(self):
         """Provide the next file.
@@ -136,7 +140,10 @@ class FileIterator(repository.FileIterator):
         except StopIteration:
             if len(self._dir_list) > 0:
                 # Start all over with first subdirectory in the list
-                self._iterator = os.scandir(self._dir_list.pop())
+                try:
+                    self._iterator = os.scandir(self._dir_list.pop())
+                except Exception as e:
+                    raise IOError("An exception occurred while scanning directory:", e)
                 return self.__next__()
             else:
                 # Raise exception to indicate end of iteration otherwise

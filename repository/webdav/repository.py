@@ -6,7 +6,7 @@ import repository
 import tempfile
 
 from repository.webdav import RepositoryFile
-from repository import InvalidConfigurationError
+from repository import InvalidConfigurationError, IOError
 from webdav3.client import Client
 
 
@@ -142,7 +142,10 @@ class FileIterator(repository.FileIterator):
         self._dir_list = []
 
         # Create iterator for list of root directory.
-        self._file_list = rep.client.list(rep.root, get_info=True)
+        try:
+            self._file_list = rep.client.list(rep.root, get_info=True)
+        except Exception as e:
+            raise IOError(f"An exception occurred while scanning the webdav directory: {e}", e)
         self._iterator = iter(self._file_list)
 
     def __next__(self):
@@ -172,7 +175,10 @@ class FileIterator(repository.FileIterator):
         except StopIteration:
             if len(self._dir_list) > 0:
                 # Start all over with last subdirectory in the list
-                self._file_list = self._rep.client.list(self._dir_list.pop(), get_info=True)
+                try:
+                    self._file_list = self._rep.client.list(self._dir_list.pop(), get_info=True)
+                except Exception as e:
+                    raise IOError(f"An exception occurred while scanning the webdav directory: {e}", e)
                 self._iterator = iter(self._file_list)
                 return self.__next__()
             else:

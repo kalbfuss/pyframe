@@ -1,5 +1,6 @@
 /cache/
 /local/
+/log/
 __pycache__/
 /index.sqlite
 /config.yaml

@@ -6,7 +6,7 @@ import threading
 
 from logging import Handler, Formatter
 from logging.handlers import TimedRotatingFileHandler
-from repository import Index
+from repository import Index, IOError
 from threading import Thread
 from time import asctime, localtime, time, sleep
 
@@ -185,14 +185,17 @@ class Indexer:
                     # Set log prefix to uuid of current repository.
                     self._handler.setPrefix(rep.uuid)
                     # Build meta data index for current repository.
-                    self._index.build(rep)
+                    try:
+                        self._index.build(rep)
+                    except IOError as e:
+                        logging.error(f"An I/O error occurred while indexing the repository: {e.exception}")
                     # Log duration of indexing run.
                     end_time = time()
                     duration = (end_time - cur_time)
                     logging.info(f"Indexing of repository '{rep.uuid}' completed after {format_duration(duration)}.")
                     # Record completion time and time for next indexing run.
                     data.last = end_time
-                    data.next = end_time + data.interval*3600
+                    data.next = cur_time + data.interval*3600
                     # Log time of next indexing run.
                     logging.info(f"The next indexing run is due at {asctime(localtime(data.next))}.")
                 # Remove repository from queue if it has been indexed at least

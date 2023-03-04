@@ -22,6 +22,14 @@ class InvalidConfigurationError(Exception):
         self.config = config
 
 
+class IOError(Exception):
+    """Input/Outout error."""
+
+    def __init__(self, msg, e):
+        super().__init__(msg)
+        self.exception = e
+
+
 class Repository(ABC):
     """Repository of files.
 
