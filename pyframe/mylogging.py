@@ -7,6 +7,9 @@ from logging import Handler, Formatter
 from logging.handlers import TimedRotatingFileHandler
 
 
+# Global oyframe log handler. Initialized by application build function.
+logHandler = None
+
 class LogHandler(Handler):
     """Log handler for meta data background indexer.
 
@@ -44,11 +47,15 @@ class LogHandler(Handler):
         if type(thread_names) == str:
             thread_names = [thread_names]
 
-        # Create one rotating file handler per thread.
+        # Create one rotating file handler per specified thread.
         formatter = Formatter("%(asctime)s %(message)s", "%Y-%m-%d %H:%M:%S")
         for name in thread_names:
             self._handlers[name] = TimedRotatingFileHandler(os.path.join(dir_name, f"{name}.log"), when="h", interval=24, backupCount=5)
             self._handlers[name].setFormatter(formatter)
+        # Create rotating file handler for main thread
+        name = threading.main_thread().name
+        self._handlers[name] = TimedRotatingFileHandler(os.path.join(dir_name, f"pyframe.log"), when="h", interval=24, backupCount=5)
+        self._handlers[name].setFormatter(formatter)
 
     def emit(self, record):
         """Log the specified logging record."""

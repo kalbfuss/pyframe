@@ -10,10 +10,11 @@ Author: Bernd Kalbfuß
 License: t.b.d.
 """
 
-from . logging import LogHandler
-from . image import SlideshowImage
+
+from . mylogging import LogHandler, logHandler
 from . video import SlideshowVideo
+from . image import SlideshowImage
 from . indexer import Indexer
-from . slideshow import Slideshow, InvalidSlideshowConfigurationError
 from . scheduler import Scheduler
+from . slideshow import Slideshow, InvalidSlideshowConfigurationError
 from . app import App

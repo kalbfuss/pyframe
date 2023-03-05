@@ -11,15 +11,10 @@ import kivy.app
 
 from repository import Index
 from repository import Repository, InvalidConfigurationError, InvalidUuidError
-from . import Indexer, LogHandler, Slideshow, Scheduler, InvalidSlideshowConfigurationError
+from . import Indexer, LogHandler, logHandler, Slideshow, Scheduler, InvalidSlideshowConfigurationError
 
 from kivy.logger import Logger, LOG_LEVELS
 from kivy.core.window import Window
-
-
-def build_index(index, rep):
-    """Build repository index (helper function)."""
-    index.build(rep)
 
 
 class App(kivy.app.App):
@@ -126,8 +121,9 @@ class App(kivy.app.App):
         logging.getLogger("sqlalchemy").setLevel(logging.WARN)
         # Redirect all log messages from the background thread into a rotated
         # log file using a special log handler.
-        self._handler = LogHandler("./log", "indexer")
-        logging.getLogger().addHandler(self._handler)
+        global logHandler
+        logHandler = LogHandler("./log", "indexer")
+        logging.getLogger().addHandler(logHandler)
 
         # Load configuration from yaml file.
         with open('./config.yaml', 'r') as config_file:

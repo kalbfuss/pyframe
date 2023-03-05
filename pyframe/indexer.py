@@ -6,6 +6,8 @@ from repository import IOError
 from threading import Thread
 from time import asctime, localtime, mktime, time, sleep
 
+from . import logHandler
+
 from kivy.logger import Logger
 
 
@@ -100,7 +102,7 @@ class Indexer:
             return duration_str
 
         pause_until = 0
-        logging.info(f"Starting to build meta data index in the background.")
+        logging.info("Starting to build meta data index in the background.")
 
         while True:
             # Iterate through repositories, which have been queued for indexing.
@@ -112,7 +114,8 @@ class Indexer:
                 # Build index for repository if due, but at least once.
                 if data.next < cur_time:
                     # Set log prefix to uuid of current repository.
-#                    self._handler.setPrefix(rep.uuid)
+#                    global logHandler
+#                    logHandler.setPrefix(rep.uuid)
                     # Build meta data index for current repository.
                     try:
                         self._index.build(rep)
@@ -133,7 +136,8 @@ class Indexer:
                         self._rep_data.pop(rep)
 
                     # Clear log prefix
-#                    self._handler.setPrefix()
+#                    global logHandler
+#                    logHandler.setPrefix()
 
                 if pause_until == 0 or (data.next > 0 and data.next < pause_until):
                     pause_until = data.next
