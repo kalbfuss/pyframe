@@ -9,6 +9,8 @@ import logging
 from datetime import datetime
 from iptcinfo3 import IPTCInfo
 
+from abc import ABC, abstractmethod
+
 
 class RepositoryFile:
     """File within a repository.
@@ -246,6 +248,15 @@ class RepositoryFile:
             if fnmatch.fnmatch(fname, pattern.upper()):
                 self._type = RepositoryFile.TYPE_VIDEO
                 return
+
+    @abstractmethod
+    def extract_metadata(self):
+        """Extract metadata from file content.
+
+        Used to enforce the metadata extraction from file content in cases
+        where not done automatically during initiation.
+        """
+        pass
 
     @property
     def uuid(self):

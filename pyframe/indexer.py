@@ -190,7 +190,7 @@ class Indexer:
             """
             if duration > 3600:
                 duration_str = f"{duration/3600:.1f} hours"
-            if duration > 60:
+            elif duration > 60:
                 duration_str = f"{duration/60:.1f} minutes"
             else:
                 duration_str = f"{duration:.1f} seconds"
