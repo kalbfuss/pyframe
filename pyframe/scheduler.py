@@ -92,6 +92,8 @@ class Scheduler:
         """Turns display on and starts playing of slideshow.
         """
         Logger.info("Scheduler: Display on.")
+        # Turn display on. Works only on Linux with X server.
+        subprocess.run("/usr/bin/xset dpms force on", shell=True)
         # Start playing slideshow
         self._app.play_slideshow(slideshow)
         return
