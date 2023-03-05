@@ -144,8 +144,8 @@ class App(kivy.app.App):
         self._create_slideshows(config, index)
 
         # Change to full screen mode.
-#        Window.fullscreen = 'auto'
-        Window.size = (800, 450)
+        Window.fullscreen = 'auto'
+#        Window.size = (800, 450)
         # Disable display of mouse cursor
         Window.show_cursor = False
 

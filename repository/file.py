@@ -10,14 +10,6 @@ from datetime import datetime
 from iptcinfo3 import IPTCInfo
 
 
-class IOError(Exception):
-    """Input/Outout error."""
-
-    def __init__(self, msg, e):
-        super().__init__(msg)
-        self.exception = e
-
-
 class RepositoryFile:
     """File within a repository.
 

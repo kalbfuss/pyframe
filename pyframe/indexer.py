@@ -129,7 +129,7 @@ class RepData:
         if self.at is not None:
             lt = localtime()
             offset = 0
-            if self.at[0] < lt.tm_hour or (self.at[0] >= lt.tm_hour and self.at[1] <= lt.tm_min):
+            if self.at[0] < lt.tm_hour or (self.at[0] == lt.tm_hour and self.at[1] <= lt.tm_min):
                 offset = 24*3600
             nt = (lt[0], lt[1], lt[2], self.at[0], self.at[1], 0, lt[6], lt[7], lt[8])
             self.next = offset + mktime(nt)
@@ -241,11 +241,11 @@ class Indexer:
                 return
 
             # If necessary, sleep until next repository is due for indexing.
-            cur_time=time()
+            cur_time = time()
             if pause_until > cur_time:
                 # Log duration until next indexing run is due.
-                duration=(pause_until - cur_time)
-                pause_until=0
+                duration = (pause_until - cur_time)
+                pause_until = 0
                 logging.info(f"Sleeping for {format_duration(duration)}.")
                 sleep(duration)
 
@@ -262,7 +262,7 @@ class Indexer:
         : type interval: int
         """
         Logger.info(f"Indexer: Queuing repository '{rep.uuid}' for indexing of meta data.")
-        self._rep_data[rep]=RepData(interval, at)
+        self._rep_data[rep] = RepData(interval, at)
 
     def start(self):
         """Start index creation in the background.
@@ -272,5 +272,5 @@ class Indexer:
         repositories after index creation has been started.
         """
         Logger.info(f"Indexer: Starting to build meata data index in the background.")
-        self._thread=Thread(name="indexer", target=self._build, daemon=True)
+        self._thread = Thread(name="indexer", target=self._build, daemon=True)
         self._thread.start()
