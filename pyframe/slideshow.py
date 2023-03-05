@@ -89,7 +89,7 @@ class Slideshow(AnchorLayout):
                     raise InvalidSlideshowConfigurationError(f"Invalid value '{value}' for slideshow parameter 'orientation' specified.", config)
 
             # Filter for file type.
-            if key == "fileType":
+            if key == "fileTypes":
                 if value is None:
                     raise InvalidSlideshowConfigurationError("At least one file type must be specified for slideshow parameter 'fileType'.", config)
                 # Convert to list if single value specified.
@@ -192,19 +192,16 @@ class Slideshow(AnchorLayout):
         # Skip if already playing
         if self._event is not None:
             return
-
         # Create selective index iterator with sorting/filter criteria from the
         # slideshow configuration.
         self._iterator = self._index.iterator(**self._criteria)
         # Save number of images in the slide show
         self._length = self._iterator.count()
-
         # Create current widget from first file, add to layout and start playing.
         self._currentWidget = self._next_widget()
         self.add_widget(self._currentWidget)
         # Create next widget from second file
         self._nextWidget = self._next_widget()
-
         # Schedule callback function
         self._event = Clock.schedule_interval(self._clock_callback, self._config['pause'])
 
@@ -213,6 +210,7 @@ class Slideshow(AnchorLayout):
         # Unschedule callback function
         if self._event is not None:
             self._event.cancel()
+            self._event = None
         # Remove and destroy current widget
         if self._currentWidget is not None:
             self.remove_widget(self._currentWidget)

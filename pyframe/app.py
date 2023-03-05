@@ -90,7 +90,7 @@ class App(kivy.app.App):
         # Create empty dictionary to collect slideshows
         self._slideshows = dict()
         # Extract global slideshow configuration
-        global_config = {key: config[key] for key in ('rotation', 'bgcolor', 'resize')}
+        global_config = {key: config[key] for key in ('rotation', 'bgcolor', 'fileTypes', 'mostRecent', 'order', 'orientation', 'pause', 'resize', 'sequence', 'tags') if key in config}
 
         # Create slideshows from configuration.
         for slideshow, slideshow_config in config['slideshows'].items():
@@ -144,8 +144,8 @@ class App(kivy.app.App):
         self._create_slideshows(config, index)
 
         # Change to full screen mode.
-        Window.fullscreen = 'auto'
-#        Window.size = (800, 450)
+#        Window.fullscreen = 'auto'
+        Window.size = (800, 450)
         # Disable display of mouse cursor
         Window.show_cursor = False
 
