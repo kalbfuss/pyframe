@@ -11,7 +11,7 @@ import kivy.app
 
 from repository import Index
 from repository import Repository, InvalidConfigurationError, InvalidUuidError
-from . import Indexer, Slideshow, Scheduler, InvalidSlideshowConfigurationError
+from . import Indexer, LogHandler, Slideshow, Scheduler, InvalidSlideshowConfigurationError
 
 from kivy.logger import Logger, LOG_LEVELS
 from kivy.core.window import Window
@@ -119,8 +119,15 @@ class App(kivy.app.App):
         logging.basicConfig(level=logging.INFO)
         # Set log level of kivy logger.
         Logger.setLevel(LOG_LEVELS["info"])
+        # Reduce logging by IPTCInfo and exifread to errors.
+        logging.getLogger("iptcinfo").setLevel(logging.ERROR)
+        logging.getLogger("exifread").setLevel(logging.ERROR)
         # Reduce logging by SQLAlchemy to errors.
         logging.getLogger("sqlalchemy").setLevel(logging.WARN)
+        # Redirect all log messages from the background thread into a rotated
+        # log file using a special log handler.
+        self._handler = LogHandler("./log", "indexer")
+        logging.getLogger().addHandler(self._handler)
 
         # Load configuration from yaml file.
         with open('./config.yaml', 'r') as config_file:

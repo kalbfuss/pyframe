@@ -10,6 +10,7 @@ Author: Bernd Kalbfuß
 License: t.b.d.
 """
 
+from . logging import LogHandler
 from . image import SlideshowImage
 from . video import SlideshowVideo
 from . indexer import Indexer
