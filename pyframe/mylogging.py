@@ -72,7 +72,7 @@ class LogHandler(Handler):
         "Ensure all logging output has been flushed."
         name = threading.current_thread().name
         if name in self._handlers:
-            self._handlers[name].handler.flush()
+            self._handlers[name].flush()
 
     def setFormatter(self, formatter):
         "Set the formatter for this handler."
