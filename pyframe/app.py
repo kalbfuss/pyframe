@@ -33,7 +33,7 @@ class App(kivy.app.App):
             App.get_running_app().stop()
 
         # Extract global repository configuration
-        global_config = {key: config[key] for key in ('index_update_interval', 'cache') if key in config}
+        global_config = {key: config[key] for key in ('index_update_interval', 'index_update_at', 'cache') if key in config}
 
         # Create repositories.
         for uuid, rep_config in config['repositories'].items():
@@ -51,13 +51,15 @@ class App(kivy.app.App):
                     Logger.info(f"Configuration: Creating local repository '{uuid}' and starting to build index in the background.")
                     rep = repository.local.Repository(uuid, combined_config, index=index)
                     interval = combined_config.get('index_update_interval', 0)
-                    self._indexer.queue(rep, interval)
+                    at = combined_config.get('index_update_at', None)
+                    self._indexer.queue(rep, interval, at)
 
                 if rep_config.get('type') == "webdav":
                     Logger.info(f"Configuration: Creating WebDav repository '{uuid}' and starting to build index in the background.")
                     rep = repository.webdav.Repository(uuid, combined_config, index=index)
                     interval = combined_config.get('index_update_interval', 0)
-                    self._indexer.queue(rep, interval)
+                    at = combined_config.get('index_update_at', None)
+                    self._indexer.queue(rep, interval, at)
 
             # Catch any invalid configuration errors
             except InvalidConfigurationError:

@@ -8,7 +8,7 @@ from logging import Handler, Formatter
 from logging.handlers import TimedRotatingFileHandler
 from repository import Index, IOError
 from threading import Thread
-from time import asctime, localtime, time, sleep
+from time import asctime, localtime, mktime, time, sleep
 
 from kivy.logger import Logger
 
@@ -104,15 +104,41 @@ class RepData:
     Used by the Idexer class to store information about queued repositories.
     """
 
-    def __init__(self, interval=0):
+    def __init__(self, interval=0, at=None):
         """Initialize RepData instance.
 
         : param interval: Index update interval in hours
         : type interval: int
         """
         self.interval = interval
-        self.next = time()
+        # Convert time string to numeric array.
+        if at is not None:
+            self.at = [int(s) for s in at.split(":")]
+        else:
+            self.at = None
         self.last = 0
+        self.next = 0
+        self.update_next()
+
+    def update_next(self, last=None):
+        """Returns ..."""
+        # Update time of last run if specified.
+        if last is not None:
+            self.last = last
+        # Determine time of next run.
+        if self.at is not None:
+            lt = localtime()
+            offset = 0
+            if self.at[0] < lt.tm_hour or (self.at[0] >= lt.tm_hour and self.at[1] <= lt.tm_min):
+                offset = 24*3600
+            nt = (lt[0], lt[1], lt[2], self.at[0], self.at[1], 0, lt[6], lt[7], lt[8])
+            self.next = offset + mktime(nt)
+        elif self.last == 0:
+            self.next = time()
+        elif self.last > 0 and self.interval > 0:
+            self.next = self.last + self.interval*3600
+        else:
+            self.next = 0
 
 
 class Indexer:
@@ -181,7 +207,7 @@ class Indexer:
                 data = self._rep_data[rep]
 
                 # Build index for repository if due, but at least once.
-                if data.last == 0 or (data.interval > 0 and data.next < cur_time):
+                if data.next < cur_time:
                     # Set log prefix to uuid of current repository.
                     self._handler.setPrefix(rep.uuid)
                     # Build meta data index for current repository.
@@ -193,24 +219,21 @@ class Indexer:
                     end_time = time()
                     duration = (end_time - cur_time)
                     logging.info(f"Indexing of repository '{rep.uuid}' completed after {format_duration(duration)}.")
-                    # Record completion time and time for next indexing run.
-                    data.last = end_time
-                    data.next = cur_time + data.interval*3600
-                    # Log time of next indexing run.
-                    logging.info(f"The next indexing run is due at {asctime(localtime(data.next))}.")
-                # Remove repository from queue if it has been indexed at least
-                # once and no update interval has been specified.
-                elif data.last > 0 and data.interval == 0:
-                    self._rep_data.pop(rep)
-                    logging.info(f"Removing repository '{rep.uuid}' from queue.")
+                    # Record completion time and update time for next indexing
+                    # run.
+                    data.update_next(end_time)
+                    if data.next > 0:
+                        # Log time of next indexing run.
+                        logging.info(f"The next indexing run is due at {asctime(localtime(data.next))}.")
+                    else:
+                        logging.info(f"Removing repository '{rep.uuid}' from queue.")
+                        self._rep_data.pop(rep)
 
-                # Determine time of next, i.e. soonest indexing run in the next
-                # round.
-                if data.interval > 0 and (pause_until == 0 or data.next < pause_until):
+                    # Clear log prefix
+                    self._handler.setPrefix()
+
+                if pause_until == 0 or (data.next > 0 and data.next < pause_until):
                     pause_until = data.next
-
-            # Clear log prefix
-            self._handler.setPrefix()
 
             # Stop building index if there are no more repositories queued.
             if len(self._rep_data) == 0:
@@ -218,15 +241,15 @@ class Indexer:
                 return
 
             # If necessary, sleep until next repository is due for indexing.
-            cur_time = time()
+            cur_time=time()
             if pause_until > cur_time:
                 # Log duration until next indexing run is due.
-                duration = (pause_until - cur_time)
-                pause_until = 0
+                duration=(pause_until - cur_time)
+                pause_until=0
                 logging.info(f"Sleeping for {format_duration(duration)}.")
                 sleep(duration)
 
-    def queue(self, rep, interval=0):
+    def queue(self, rep, interval=0, at=None):
         """Queue repositories for indexing.
 
         Repositories must be queued prior to starting index creation. It is not
@@ -239,7 +262,7 @@ class Indexer:
         : type interval: int
         """
         Logger.info(f"Indexer: Queuing repository '{rep.uuid}' for indexing of meta data.")
-        self._rep_data[rep] = RepData(interval=interval)
+        self._rep_data[rep]=RepData(interval, at)
 
     def start(self):
         """Start index creation in the background.
@@ -249,5 +272,5 @@ class Indexer:
         repositories after index creation has been started.
         """
         Logger.info(f"Indexer: Starting to build meata data index in the background.")
-        self._thread = Thread(name="indexer", target=self._build, daemon=True)
+        self._thread=Thread(name="indexer", target=self._build, daemon=True)
         self._thread.start()
