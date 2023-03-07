@@ -380,13 +380,18 @@ class SelectiveIndexIterator:
 
         # Limit iteration to the n most recent files based on the creation
         # date. Outside of loop since limit must be applied at the very end of
-        # the query prior to filter clauses.
+        # the query prior to all filter clauses.
         if 'mostRecent' in criteria:
             value = criteria['mostRecent']
-            if 'order' in criteria:
-                raise InvalidIterationCriteriaError("Parameter 'mostRecent' cannot be specified in combination with parameter 'order'.", criteria)
             if type(value) is int and value > 0:
-                query = query.order_by(desc(MetaData.creation_date)).limit(value)
+                # Sort relevant entries by creation date in descending order and
+                # limit to n most recent entries. Save the creation date of the
+                # last result to obtain the creation date limit.
+                date_limit = query.order_by(desc(MetaData.creation_date)).limit(value).all()[-1].creation_date
+                # Limit to entries with equal or later creation date to retrieve
+                # n most recent entries in the preferred and previously defined
+                # sequence.
+                query = query.filter(MetaData.creation_date >= date_limit).limit(value)
             else:
                 __raise()
 
