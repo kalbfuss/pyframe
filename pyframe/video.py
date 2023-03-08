@@ -21,8 +21,8 @@ class SlideshowVideo(Widget):
         :type file: repository.File
         :param config: Dictionary with the following entries:
             rotation: Angle in degrees (int) by which the video is rotated clockwise.
-            bgolor: Canvas background color (list(3)) for areas, which are not covered by the image.
-            resize: Mode (str) for resizing of images. Must equal "fit" or "fill".
+            bgolor: Canvas background color (list(3)) for areas, which are not covered by the video.
+            resize: Mode (str) for resizing of videos. Must equal "fit" or "fill".
         :type config: dict
         """
         Widget.__init__(self)
@@ -64,7 +64,7 @@ class SlideshowVideo(Widget):
             video_ratio = self._file.width/self._file.height
         else:
             video_ratio = 16/9
-        # Correct image aspect ratio for image rotation. i.e. aspect ratio
+        # Correct video aspect ratio for video rotation. i.e. aspect ratio
         # corresponds to the ratio after rotation.
         if abs(self._rotation) == 90 or abs(self._rotation == 270):
             video_ratio = 1/video_ratio
@@ -93,7 +93,7 @@ class SlideshowVideo(Widget):
                     # max_dim = self.width
                 elif widget_ratio <= video_ratio and video_ratio >= 1:
                     max_dim = self.width
-                    # max_dim = round(self.height*image_ratio)
+                    # max_dim = round(self.height*video_ratio)
                 elif widget_ratio >= video_ratio and video_ratio <= 1:
                     # max_dim = self.height
                     max_dim = round(self.width/video_ratio)
@@ -101,10 +101,10 @@ class SlideshowVideo(Widget):
                     # max_dim = round(self.width/video_ratio)
                     max_dim = self.height
 
-            # Set size of image widget to square with maximum dimension
+            # Set size of video widget to square with maximum dimension
             self._video.size = (max_dim, max_dim)
-            # Adjust position of image widget within slideshow image widget
-            # to center rotated image.
+            # Adjust position of video widget within slideshow video widget
+            # to center rotated video.
             self._video.x = round(self.x + (self.width - max_dim)/2)
             self._video.y = round(self.y + (self.height - max_dim)/2)
 
@@ -129,13 +129,13 @@ class SlideshowVideo(Widget):
                     max_dim = self.width
                 elif widget_ratio >= video_ratio and video_ratio <= 1:
                     max_dim = self.height
-                else:  # widget_ratio < image_ratio and image_ratio < 1
+                else:  # widget_ratio < video_ratio and video_ratio < 1
                     max_dim = round(self.width/video_ratio)
 
-                # Set size of image widget to square with maximum dimension
+                # Set size video widget to square with maximum dimension
                 self._video.size = (max_dim, max_dim)
-                # Adjust position of image widget within slideshow image widget
-                # to center rotated image.
+                # Adjust position of video widget within slideshow video widget
+                # to center rotated video.
                 self._video.x = round(self.x + (self.width - max_dim)/2)
                 self._video.y = round(self.y + (self.height - max_dim)/2)
 

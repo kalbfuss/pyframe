@@ -85,7 +85,16 @@ To enable playing of videos we further need ffmpeg and the corresponding
 gstreamer plug-in.
 ```
 $ sudo apt install ffmpeg gstreamer1.0-libav
-``
+```
+
+#### ffpyplayer ####
+
+On certain SBC it may be preferable to decode and display videos using
+ffpyplayer instead of gstreamer.
+
+$ sudo apt install ffmpeg libavcodec-dev libavdevice-dev libavfilter-dev libavformat-dev libavutil-dev libswscale-dev libswresample-dev libpostproc-dev libsdl2-dev libsdl2-2.0-0
+libsdl2-mixer-2.0-0 libsdl2-mixer-dev python3-dev
+$ pip install ffpyplayer
 
 ### Netzteil ###
 
