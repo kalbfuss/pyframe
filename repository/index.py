@@ -359,28 +359,14 @@ class SelectiveIndexIterator:
                 else:
                     __raise()
 
-            # Retrieve files in a specific or random order.
-            elif key == "order":
-                if value == Index.ORDER_RANDOM:
-                    query = query.order_by(func.random())
-                elif value == Index.ORDER_DATE_ASC:
-                    query = query.order_by(MetaData.creation_date)
-                elif value == Index.ORDER_DATE_DESC:
-                    query = query.order_by(desc(MetaData.creation_date))
-                elif value == Index.ORDER_NAME_ASC:
-                    query = query.order_by(func.upper(MetaData.name))
-                elif value == Index.ORDER_NAME_DESC:
-                    query = query.order_by(desc(func.upper(MetaData.name)))
-                else:
-                    __raise()
-
             # Limit iteration to files with specified tags.
             elif key == "tags":
                 query = query.filter(Link.tag_id == MetaDataTag.id, Link.file_id == MetaData.id).filter(func.lower(MetaDataTag.name).in_([tag.lower() for tag in value]))
 
-        # Limit iteration to the n most recent files based on the creation
-        # date. Outside of loop since limit must be applied at the very end of
-        # the query prior to all filter clauses.
+        # Determine limiting date to limit iteration to the n most recent files
+        # based on the creation date. Outside of the loop since query needs to
+        # be executed after all filters, but prior to specifying any order
+        # (see below).
         if 'mostRecent' in criteria:
             value = criteria['mostRecent']
             if type(value) is int and value > 0:
@@ -388,12 +374,32 @@ class SelectiveIndexIterator:
                 # limit to n most recent entries. Save the creation date of the
                 # last result to obtain the creation date limit.
                 date_limit = query.order_by(desc(MetaData.creation_date)).limit(value).all()[-1].creation_date
-                # Limit to entries with equal or later creation date to retrieve
-                # n most recent entries in the preferred and previously defined
-                # sequence.
-                query = query.filter(MetaData.creation_date >= date_limit).limit(value)
             else:
                 __raise()
+
+        # Retrieve files in a specific or random order.
+        if 'order' in criteria:
+            value = criteria['order']
+            if value == Index.ORDER_RANDOM:
+                query = query.order_by(func.random())
+            elif value == Index.ORDER_DATE_ASC:
+                query = query.order_by(MetaData.creation_date)
+            elif value == Index.ORDER_DATE_DESC:
+                query = query.order_by(desc(MetaData.creation_date))
+            elif value == Index.ORDER_NAME_ASC:
+                query = query.order_by(func.upper(MetaData.name))
+            elif value == Index.ORDER_NAME_DESC:
+                query = query.order_by(desc(func.upper(MetaData.name)))
+            else:
+                __raise()
+
+        # Limit iteration to the n most recent files based on the creation
+        # date. An additional limit is specified since in theory multiple images
+        # may have the very same creation date. Processed last since limit must
+        # be applied at the very end of the query.
+        if 'mostRecent' in criteria:
+            value = criteria['mostRecent']
+            query = query.filter(MetaData.creation_date >= date_limit).limit(value)
 
         # Query data and save iterator for list with metadata objects.
         self._count = query.count()
