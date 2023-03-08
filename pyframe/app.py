@@ -11,7 +11,7 @@ import kivy.app
 
 from repository import Index
 from repository import Repository, InvalidConfigurationError, InvalidUuidError
-from . import Indexer, LogHandler, logHandler, Slideshow, Scheduler, InvalidSlideshowConfigurationError
+from . import Indexer, Handler, logHandler, Slideshow, Scheduler, InvalidSlideshowConfigurationError
 
 from kivy.logger import Logger, LOG_LEVELS
 from kivy.core.window import Window
@@ -122,7 +122,7 @@ class App(kivy.app.App):
         # Redirect all log messages from the background thread into a rotated
         # log file using a special log handler.
         global logHandler
-        logHandler = LogHandler("./log", "indexer")
+        logHandler = Handler("./log", "indexer")
         logging.getLogger().addHandler(logHandler)
 
         # Load configuration from yaml file.

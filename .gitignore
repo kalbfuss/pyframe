@@ -2,6 +2,6 @@
 /local/
 /log/
 __pycache__/
-/index.sqlite
+/*.sqlite
 /config.yaml
 

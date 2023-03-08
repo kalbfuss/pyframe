@@ -1,19 +1,37 @@
 """Module providing pyframe log handler."""
 
+import logging
 import os
 import threading
 
-from logging import Handler, Formatter
 from logging.handlers import TimedRotatingFileHandler
 
 
 # Global oyframe log handler. Initialized by application build function.
 logHandler = None
 
-class LogHandler(Handler):
-    """Log handler for meta data background indexer.
+class Formatter(logging.Formatter):
+    """Pyframe log formatter."""
 
-    Redirects log messages from selected (background) threads to rotating log
+    def __init__(self, *args):
+        super().__init__(*args)
+
+    def format(self, record):
+        """Apply terminal color code to the record"""
+        # deepcopy so we do not mess up the record for other formatters
+        try:
+            msg = record.msg.split(':', 1)
+            if len(msg) == 2:
+                record.msg = '[%-13s]%s' % (msg[0], msg[1])
+        except:
+            pass
+        return super().format(record)
+
+
+class Handler(logging.Handler):
+    """Pyframe log handler.
+
+    Writes log messages from selected (background) threads to rotating log
     files. Used to separate messages generated during indexing in the background
     from foreground log messages.
     Threads are identified by their names. The handler creates one log file per
@@ -48,25 +66,30 @@ class LogHandler(Handler):
             thread_names = [thread_names]
 
         # Create one rotating file handler per specified thread.
-        formatter = Formatter("%(asctime)s %(message)s", "%Y-%m-%d %H:%M:%S")
+        formatter = Formatter("%(asctime)s [%(levelname)-7s] %(message)s", "%Y-%m-%d %H:%M:%S")
         for name in thread_names:
             self._handlers[name] = TimedRotatingFileHandler(os.path.join(dir_name, f"{name}.log"), when="h", interval=24, backupCount=5)
             self._handlers[name].setFormatter(formatter)
-        # Create rotating file handler for main thread
+        # Create default rotating file handler and associate with name of main
+        # thread.
         name = threading.main_thread().name
         self._handlers[name] = TimedRotatingFileHandler(os.path.join(dir_name, f"pyframe.log"), when="h", interval=24, backupCount=5)
         self._handlers[name].setFormatter(formatter)
 
     def emit(self, record):
         """Log the specified logging record."""
+        # Get name of current thread.
         name = threading.current_thread().name
-        if name in self._handlers:
-            try:
-                self._handlers[name].emit(record)
-            except (KeyboardInterrupt, SystemExit):
-                raise
-            except:
-                self.handleError(record)
+        # Use default handler if no specific handler available.
+        if name not in self._handlers:
+            name = threading.main_thread().name
+        # Emit log message using specific handler.
+        try:
+            self._handlers[name].emit(record)
+        except (KeyboardInterrupt, SystemExit):
+            raise
+        except:
+            self.handleError(record)
 
     def flush(self):
         "Ensure all logging output has been flushed."
