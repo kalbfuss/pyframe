@@ -163,7 +163,8 @@ class App(kivy.app.App):
         'pause': 60,
         'resize': "fill",
         'rotation': 0,
-        'sequence': "name"
+        'sequence': "name",
+        'window_size': [ 800, 450 ]
     }
 
     def __load_config(self):
@@ -202,8 +203,15 @@ class App(kivy.app.App):
         self.__create_slideshows()
 
         # Change to full screen mode.
-#        Window.fullscreen = 'auto'
-        Window.size = (800, 450)
+        value = self._config['window_size']
+        if type(value) is list and len(value) == 2 and value[0] > 0 and value[1] > 0:
+            Window.size = (value)
+        elif value == "full":
+            Window.fullscreen = 'auto'
+        else:
+            Logger.critical(f"Configuration: Invalid value '{value}' for parameter 'window_size' specified. Acceptable values are '[width, height]' and 'full'.")
+            sys.exit(1)
+
         # Disable display of mouse cursor
         Window.show_cursor = False
 
