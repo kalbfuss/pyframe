@@ -397,8 +397,8 @@ class SelectiveIndexIterator:
         # date. An additional limit is specified since in theory multiple images
         # may have the very same creation date. Processed last since limit must
         # be applied at the very end of the query.
-        if 'mostRecent' in criteria:
-            value = criteria['mostRecent']
+        if 'most_recent' in criteria:
+            value = criteria['most_recent']
             query = query.filter(MetaData.creation_date >= date_limit).limit(value)
 
         # Query data and save iterator for list with metadata objects.
