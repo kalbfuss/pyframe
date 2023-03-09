@@ -163,6 +163,7 @@ class App(kivy.app.App):
         'pause': 60,
         'resize': "fill",
         'rotation': 0,
+        'scheduler': "on",
         'sequence': "name",
         'window_size': [ 800, 450 ]
     }
@@ -224,8 +225,8 @@ class App(kivy.app.App):
             Logger.warn("App: Slideshow still empty. Giving more time to build index.")
         Logger.info(f"App: Proceeding with {root.length()} files in slideshow.")
 
-        # Create scheduler if configured.
-        if 'schedule' in self._config:
+        # Create scheduler if configured and activated.
+        if 'schedule' in self._config and (self._config['scheduler'] == "on" or self._config['scheduler'] is True):
             try:
                 self._scheduler = Scheduler(self._config['schedule'], self)
             except Exception as e:
