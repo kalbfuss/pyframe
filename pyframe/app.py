@@ -38,6 +38,7 @@ class App(kivy.app.App):
         numeric_level = LOG_LEVELS[level]
         logging.basicConfig(level=numeric_level)
         Logger.setLevel(numeric_level)
+
         # Reduce logging by IPTCInfo and exifread to errors or specified log
         # level, whatever is higher.
         logging.getLogger("iptcinfo").setLevel(max(logging.ERROR, numeric_level))
@@ -45,14 +46,17 @@ class App(kivy.app.App):
         # Reduce logging by SQLAlchemy to warnings or specified log lever,
         # whatever is higher.
         logging.getLogger("sqlalchemy").setLevel(max(logging.WARN, numeric_level))
-        # Redirect all log messages from the background thread into a rotated
-        # log file using a special log handler.
-        try:
-            self._logHandler = Handler(self._config['log_dir'], "indexer")
-            logging.getLogger().addHandler(self._logHandler)
-        except Exception as e:
-            Logger.critical(f"Configuration: {e}")
-            sys.exit(1)
+
+        # Write all log messages to rotating log files using a special log
+        # handler if file logging is activated. A separate log file is used for
+        # the background indexing thread.
+        if self._config['logging'] == "on" or self._config['logging'] == True:
+            try:
+                self._logHandler = Handler(self._config['log_dir'], "indexer")
+                logging.getLogger().addHandler(self._logHandler)
+            except Exception as e:
+                Logger.critical(f"Configuration: {e}")
+                sys.exit(1)
 
     def __create_repositories(self):
         """Create file repositories from configuration."""
