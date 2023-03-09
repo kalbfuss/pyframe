@@ -28,7 +28,7 @@ class SlideshowImage(Widget):
         Widget.__init__(self)
         self._file = file
         self._rotation = file.rotation - config['rotation']
-        self._bgcolor = config['bgcolor']
+        self._bgcolor = config['bg_color']
         self._resize = config['resize']
         self._image = Image(source=file.source, allow_stretch=True)
         self.add_widget(self._image)

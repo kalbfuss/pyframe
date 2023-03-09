@@ -28,7 +28,7 @@ class SlideshowVideo(Widget):
         Widget.__init__(self)
         self._file = file
         self._rotation = file.rotation - config['rotation']
-        self._bgcolor = config['bgcolor']
+        self._bgcolor = config['bg_color']
         self._resize = config['resize']
         self._video = Video(source=file.source, state='stop', allow_stretch=True, options={'eos': 'loop'})
         self.add_widget(self._video)

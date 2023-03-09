@@ -322,7 +322,7 @@ class SelectiveIndexIterator:
         query = session.query(MetaData)
 
         # Make sure only valid parameters have been specified.
-        valid_keys = {"mostRecent", "order", "orientation", "repository", "tags", "type"}
+        valid_keys = {"most_recent", "order", "orientation", "repository", "tags", "type"}
         keys = set(criteria.keys())
         if not keys.issubset(valid_keys):
             raise InvalidIterationCriteriaError(f"Only the parameters {valid_keys} are accepted, but the additional parameter(s) {keys.difference(valid_keys)} has/have been specified.")
@@ -367,8 +367,8 @@ class SelectiveIndexIterator:
         # based on the creation date. Outside of the loop since query needs to
         # be executed after all filters, but prior to specifying any order
         # (see below).
-        if 'mostRecent' in criteria:
-            value = criteria['mostRecent']
+        if 'most_recent' in criteria:
+            value = criteria['most_recent']
             if type(value) is int and value > 0:
                 # Sort relevant entries by creation date in descending order and
                 # limit to n most recent entries. Save the creation date of the

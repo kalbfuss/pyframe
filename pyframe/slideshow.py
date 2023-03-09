@@ -73,9 +73,9 @@ class Slideshow(AnchorLayout):
 
             # Limit iteration to the n most recent files based on the creation
             # date.
-            if key == "mostRecent":
-                if int(config['mostRecent']) > 0:
-                    self._criteria['mostRecent'] = int(config['mostRecent'])
+            if key == "most_recent":
+                if int(config['most_recent']) > 0:
+                    self._criteria['most_recent'] = int(config['most_recent'])
                 else:
                     raise InvalidSlideshowConfigurationError(f"Invalid value '{value}' for slideshow parameter 'mostRecent' specified.", config)
 
@@ -89,7 +89,7 @@ class Slideshow(AnchorLayout):
                     raise InvalidSlideshowConfigurationError(f"Invalid value '{value}' for slideshow parameter 'orientation' specified.", config)
 
             # Filter for file type.
-            if key == "fileTypes":
+            if key == "file_types":
                 if value is None:
                     raise InvalidSlideshowConfigurationError("At least one file type must be specified for slideshow parameter 'fileType'.", config)
                 # Convert to list if single value specified.

@@ -104,7 +104,7 @@ class App(kivy.app.App):
         # Create empty dictionary to collect slideshows
         self._slideshows = dict()
         # Extract global slideshow configuration
-        global_config = {key: config[key] for key in ('rotation', 'bgcolor', 'fileTypes', 'mostRecent', 'order', 'orientation', 'pause', 'resize', 'sequence', 'tags') if key in config}
+        global_config = {key: config[key] for key in ('rotation', 'bg_color', 'file_types', 'most_recent', 'order', 'orientation', 'pause', 'resize', 'sequence', 'tags') if key in config}
 
         # Create slideshows from configuration.
         for slideshow, slideshow_config in config['slideshows'].items():
@@ -123,17 +123,44 @@ class App(kivy.app.App):
             Logger.critical("Configuration: Exiting application as no valid slideshows have been defined.")
             App.get_running_app().stop()
 
+    # Define default configuration parameter values
+    _config = {
+        'bg_color': [0.9,0.9,0.8],
+        'cache': "./cache",
+        'file_types': [ "images", "videos" ],
+        'index': "./index.sqlite",
+        'index_update_interval': 0,
+        'logging': "on",
+        'log_level': "info",
+        'log_dir': "./log",
+        'order': "ascending",
+        'pause': 60,
+        'resize': "fill",
+        'rotation': 0,
+        'sequence': "name"
+    }
+
+    def _load_config(self):
+        """Load application configuration.
+
+        Loads the application configuration from the default configuration file
+        and applies default values where missing.
+        """
+        # Load configuration from yaml file.
+        with open('./config.yaml', 'r') as config_file:
+            config = yaml.safe_load(config_file)
+        self._config.update(config)
+        Logger.info(f"Configuration: Configuration = {self._config}")
+        return self._config
+
     def build(self):
         """Build Kivy application.
 
         Loads the application configuration from the default configuration file.
         Creates configured repositories and builds an index across the latter.
         """
-        # Load configuration from yaml file.
-        with open('./config.yaml', 'r') as config_file:
-            config = yaml.safe_load(config_file)
-        Logger.debug(f"Configuration: Configuration = {config}")
-
+        # Load configuration.
+        config = self._load_config()
         # Configure logging.
         self._configure_logging(config)
 
@@ -174,7 +201,6 @@ class App(kivy.app.App):
         else:
             # Start playing slideshow immediately otherwise
             root.play()
-
         return root
 
     def play_slideshow(self, slideshow=None):
