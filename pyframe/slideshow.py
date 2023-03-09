@@ -48,6 +48,12 @@ class Slideshow(AnchorLayout):
         self._iterator = None
         self._length = 0
 
+        # Make sure only valid parameters have been specified.
+        valid_keys = {'repositories', 'sequence', 'order', 'most_recent', 'orientation', 'file_types', 'tags', 'rotation', 'bg_color', 'resize', 'pause'}
+        keys = set(config.keys())
+        if not keys.issubset(valid_keys):
+            raise InvalidSlideshowConfigurationError(f"Only the slideshow parameters {valid_keys} are accepted, but the additional parameter(s) {keys.difference(valid_keys)} has/have been specified.", config)
+
         self._criteria = dict()
         # Compile filter criteria from slideshow configuration.
         for key, value in config.items():
@@ -89,17 +95,17 @@ class Slideshow(AnchorLayout):
                     raise InvalidSlideshowConfigurationError(f"Invalid value '{value}' for slideshow parameter 'orientation' specified. Acceptable values are 'landscape' and 'portrait'.", config)
 
             # Filter for file type.
-            if key == "file_type":
+            if key == "file_types":
                 if value is None:
                     raise InvalidSlideshowConfigurationError("At least one file type must be specified for slideshow parameter 'file_type'.", config)
                 # Convert to list if single value specified.
                 if type(value) == str:
                     value = [value]
                 types = list()
-                for fileType in value:
-                    if fileType == "images":
+                for file_type in value:
+                    if file_type == "images":
                         types.append(RepositoryFile.TYPE_IMAGE)
-                    elif fileType == "videos":
+                    elif file_type == "videos":
                         types.append(RepositoryFile.TYPE_VIDEO)
                     else:
                         raise InvalidSlideshowConfigurationError(f"Invalid type '{fileType}' for slideshow parameter 'fileType' specified. Acceptable values are 'images' and 'videos'.", config)
