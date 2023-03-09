@@ -49,19 +49,15 @@ class Repository(repository.Repository):
         :type config: dict
         :raises: InvalidConfigurationError
         """
-        # Extract defined parameters (keys).
         keys = set(config.keys())
-        # Define allowed and required parameters (keys).
-        required_keys = {"root"}
-        allowed_keys = {"type", "root", "enabled"}
-
-        # Raise exception if minimum required parameters have not been defined.
+        required_keys = {'root'}
+        valid_keys = required_keys.union()
+        # Make sure required parameters have been specified.
         if not required_keys.issubset(keys):
-            raise InvalidConfigurationError(f"Configuration for repository '{self.uuid}' is incomplete.", config)
-        else:
-            # Warn if additional, unused parameters have been defined.
-            if not keys.issubset(allowed_keys):
-                logging.warn(f"Configuration for repository '{self.uuid}' contains additional, unused parameters.")
+            raise InvalidConfigurationError(f"The configuration of repository '{self.uuid}' is incomplete. As a minimum, the parameters {required_keys} are required, but only the parameter(s) {keys.intersection(required_keys)} has/have been specified.", config)
+        # Make sure only valid parameters have been specified.
+        if not keys.issubset(valid_keys):
+            logging.warn(f"The configuration of repository '{self.uuid}' includes additional parameters. Only the parameters {valid_keys} are accepted, but the additional parameter(s) {keys.difference(valid_keys)} has/have been specified.", config)
 
     def file_by_uuid(self, uuid, index_lookup=True, extract_metadata=True):
         """Return a file within the repository by its UUID.

@@ -29,9 +29,9 @@ class Repository(repository.Repository):
 
         # Basic initialization.
         self._url = config['url']
-        self._root = config['root']
         self._user = config['user']
         self._password = config['password']
+        self._root = config.get('root', "/")
 
         # Create temporary directory for file caching.
         self._cache_dir = tempfile.TemporaryDirectory(dir=config['cache'], prefix=f"{uuid}-")
@@ -51,19 +51,16 @@ class Repository(repository.Repository):
         :type config: dict
         :raises: InvalidConfigurationError
         """
-        # Extract defined parameters (keys).
-        keys = set(config.keys())
-        # Define allowed and required parameters (keys).
-        required_keys = {"url", "user", "password"}
-        allowed_keys = {"type", "url", "root", "user", "password", "enabled"}
-
         # Raise exception if minimum required parameters have not been defined.
+        keys = set(config.keys())
+        required_keys = {'url', 'user', 'password', 'cache'}
+        valid_keys = required_keys.union({'root'})
+        # Make sure required parameters have been specified.
         if not required_keys.issubset(keys):
-            raise InvalidConfigurationError(f"Configuration for repository '{self.uuid}' is incomplete.", config)
-        else:
-            # Warn if additional, unused parameters have been defined.
-            if not keys.issubset(allowed_keys):
-                logging.warn(f"Configuration for repository '{self.uuid}' contains additional, unused parameters.")
+            raise InvalidConfigurationError(f"The configuration of repository '{self.uuid}' is incomplete. As a minimum, the parameters {required_keys} are required, but only the parameter(s) {keys.intersection(required_keys)} has/have been specified.", config)
+        # Make sure only valid parameters have been specified.
+        if not keys.issubset(valid_keys):
+            logging.warn(f"The configuration of repository '{self.uuid}' includes additional parameters. Only the parameters {valid_keys} are accepted, but the additional parameter(s) {keys.difference(valid_keys)} has/have been specified.", config)
 
     @property
     def cache_dir(self):

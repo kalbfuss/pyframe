@@ -83,7 +83,7 @@ class RepositoryFile:
         self._orientation = RepositoryFile.ORIENTATION_LANDSCAPE
         self._creation_date = datetime.today()
         self._last_modified = datetime.today()
-        self._last_update = datetime.today()
+        self._last_updated = datetime.today()
         self._description = str()
         self._rating = 0
         self._tags = list()

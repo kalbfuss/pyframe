@@ -51,14 +51,14 @@ class Scheduler:
         Logger.info("Scheduler: Building schedule from configuration.")
         for event, event_config in config.items():
 
-            # Make sure only valid parameters have been specified.
-            keys = set(event_config.keys())
-            if not keys.issubset(valid_keys):
-                raise InvalidScheduleConfigurationError(f"Only the parameters {valid_keys} are accepted, but the additional parameter(s) {keys.difference(valid_keys)} has/have been specified in the configuration of event '{event}'.", event_config)
-
             # Make sure all required parameters have been specified.
+            keys = set(event_config.keys())
             if not required_keys.issubset(keys):
-                raise InvalidScheduleConfigurationError(f"The parameters {required_keys} are required, but only the parameter(s) {keys} has/have been specified in the configuration of event '{event}'.", event_config)
+                raise InvalidScheduleConfigurationError(f"As a minimum, the schedule parameters {required_keys} are required, but only the parameter(s) {keys.intersection(required_keys)} has/have been specified in the configuration of event '{event}'.", event_config)
+
+            # Make sure only valid parameters have been specified.
+            if not keys.issubset(valid_keys):
+                raise InvalidScheduleConfigurationError(f"Only the schedule parameters {valid_keys} are accepted, but the additional parameter(s) {keys.difference(valid_keys)} has/have been specified in the configuration of event '{event}'.", event_config)
 
             try:
                 # Schedule job to switch display on and start playing slideshow.

@@ -53,17 +53,22 @@ class Handler(logging.Handler):
         self._handlers = dict()
 
         # Create log directory if it does not exist yet.
-        os.makedirs(dir_name, exist_ok=True)
+        if not os.path.exists(dir_name):
+            try:
+                os.makedirs(dir_name, exist_ok=True)
+            except Exception as e:
+                raise Exception(f"An exception occurred while creating the log directory '{dir_name}': {e}")
+
         # Make sure the directory is writable.
         if not os.access(dir_name, os.W_OK):
-            raise Exception(f"Directory {dir_name} is not writeable. Log files cannot be created.")
+            raise Exception(f"The log directory '{dir_name}' is not writeable.")
 
         # Convert thread_names to list if only single thread name specified.
         if type(thread_names) == str:
             thread_names = [thread_names]
 
         # Create one rotating file handler per specified thread.
-        formatter = Formatter("%(asctime)s [%(levelname)-7s] %(message)s", "%Y-%m-%d %H:%M:%S")
+        formatter = Formatter("%(asctime)s [%(levelname)-8s] %(message)s", "%Y-%m-%d %H:%M:%S")
         for name in thread_names:
             self._handlers[name] = TimedRotatingFileHandler(os.path.join(dir_name, f"{name}.log"), when="h", interval=24, backupCount=5)
             self._handlers[name].setFormatter(formatter)
