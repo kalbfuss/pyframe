@@ -1,7 +1,7 @@
 /cache/
 /local/
 /log/
-/__pycache__
+/__pycache__/
 /*.sqlite
 /config.yaml
 
