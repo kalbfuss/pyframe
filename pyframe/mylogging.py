@@ -7,9 +7,6 @@ import threading
 from logging.handlers import TimedRotatingFileHandler
 
 
-# Global oyframe log handler. Initialized by application build function.
-logHandler = None
-
 class Formatter(logging.Formatter):
     """Pyframe log formatter."""
 

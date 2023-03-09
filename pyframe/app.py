@@ -11,7 +11,7 @@ import kivy.app
 
 from repository import Index
 from repository import Repository, InvalidConfigurationError, InvalidUuidError
-from . import Indexer, Handler, logHandler, Slideshow, Scheduler, InvalidSlideshowConfigurationError
+from . import Indexer, Handler, Slideshow, Scheduler, InvalidSlideshowConfigurationError
 
 from kivy.logger import Logger, LOG_LEVELS
 from kivy.core.window import Window
@@ -19,6 +19,26 @@ from kivy.core.window import Window
 
 class App(kivy.app.App):
     """Pyframe main application."""
+
+    def _configure_logging(self, config):
+        """Configure logging.
+
+        Adjusts log levels based on the application configuration and adds a
+        custom log handler for logging to rotating log files.
+        """
+        # Set log level of default python Logger. This logger is used by non-kivy dependent components.
+        logging.basicConfig(level=logging.INFO)
+        # Set log level of kivy logger.
+        Logger.setLevel(LOG_LEVELS["info"])
+        # Reduce logging by IPTCInfo and exifread to errors.
+        logging.getLogger("iptcinfo").setLevel(logging.ERROR)
+        logging.getLogger("exifread").setLevel(logging.ERROR)
+        # Reduce logging by SQLAlchemy to errors.
+        logging.getLogger("sqlalchemy").setLevel(logging.WARN)
+        # Redirect all log messages from the background thread into a rotated
+        # log file using a special log handler.
+        self._logHandler = Handler("./log", "indexer")
+        logging.getLogger().addHandler(self._logHandler)
 
     def _create_repositories(self, config, index):
         """Create file repositories from configuration."""
@@ -79,7 +99,6 @@ class App(kivy.app.App):
         # Exit application if no slideshow has been defined.
         if 'slideshows' not in config or type(config['slideshows']) is not dict:
             Logger.critical("Configuration: Exiting application as no slideshow has been defined.")
-            exit()
             App.get_running_app().stop()
 
         # Create empty dictionary to collect slideshows
@@ -110,25 +129,13 @@ class App(kivy.app.App):
         Loads the application configuration from the default configuration file.
         Creates configured repositories and builds an index across the latter.
         """
-        # Set log level of default python Logger. This logger is used by non-kivy dependent components.
-        logging.basicConfig(level=logging.INFO)
-        # Set log level of kivy logger.
-        Logger.setLevel(LOG_LEVELS["info"])
-        # Reduce logging by IPTCInfo and exifread to errors.
-        logging.getLogger("iptcinfo").setLevel(logging.ERROR)
-        logging.getLogger("exifread").setLevel(logging.ERROR)
-        # Reduce logging by SQLAlchemy to errors.
-        logging.getLogger("sqlalchemy").setLevel(logging.WARN)
-        # Redirect all log messages from the background thread into a rotated
-        # log file using a special log handler.
-        global logHandler
-        logHandler = Handler("./log", "indexer")
-        logging.getLogger().addHandler(logHandler)
-
         # Load configuration from yaml file.
         with open('./config.yaml', 'r') as config_file:
             config = yaml.safe_load(config_file)
         Logger.debug(f"Configuration: Configuration = {config}")
+
+        # Configure logging.
+        self._configure_logging(config)
 
         # Create/load index.
         if hasattr(config, 'index'):
@@ -158,8 +165,8 @@ class App(kivy.app.App):
         # Wait until index contains at least one entry.
         while root.length() == 0:
             time.sleep(1)
-            Logger.info("Slideshow still empty. Giving more time to build index.")
-        Logger.info(f"Proceeding with {root.length()} files in slideshow.")
+            Logger.info("App: Slideshow still empty. Giving more time to build index.")
+        Logger.info(f"App: Proceeding with {root.length()} files in slideshow.")
 
         # Create scheduler if configured.
         if 'schedule' in config:

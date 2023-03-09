@@ -6,8 +6,6 @@ from repository import IOError
 from threading import Thread
 from time import asctime, localtime, mktime, time, sleep
 
-from . import logHandler
-
 from kivy.logger import Logger
 
 
