@@ -74,8 +74,8 @@ class Scheduler:
                 Logger.info(f"Scheduler: Event '{event}' scheduled at '{event_config['time']}'.")
 
             # Catch all schedule errors.
-            except (TypeError, ScheduleValueError):
-                raise InvalidScheduleConfigurationError(f"The configuration {event_config} for event '{event}' is invalid.", event_config)
+            except (TypeError, ScheduleValueError) as e:
+                raise InvalidScheduleConfigurationError(f"The configuration {event_config} for event '{event}' is invalid: {e}", event_config)
 
         # Turn display off
         self.display_off()
