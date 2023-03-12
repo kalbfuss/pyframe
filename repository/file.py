@@ -140,6 +140,7 @@ class RepositoryFile:
         file = open(path, 'rb')
         # Return Exif tags
         tags = exifread.process_file(file)
+        logging.info(f"{self.uuid}: {tags}")
 
         # Obtain width from metadata if available
         if "EXIF ExifImageWidth" in tags:

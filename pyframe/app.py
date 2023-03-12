@@ -133,17 +133,17 @@ class App(kivy.app.App):
         # Create empty dictionary to collect slideshows
         self._slideshows = dict()
         # Extract global slideshow configuration
-        global_config = {key: config[key] for key in ('rotation', 'bg_color', 'file_types', 'most_recent', 'order', 'orientation', 'pause', 'resize', 'sequence', 'tags') if key in config}
+        global_config = {key: config[key] for key in ('always_excluded_tags', 'bg_color', 'excluded_tags', 'file_types', 'most_recent', 'order', 'orientation', 'pause', 'resize', 'rotation', 'sequence', 'tags') if key in config}
 
         # Create slideshows from configuration.
-        for slideshow, slideshow_config in config['slideshows'].items():
+        for name, config in config['slideshows'].items():
             # Combine global and local configuration. Local configuration
             # settings supersede global settings.
             combined_config = copy.deepcopy(global_config)
-            combined_config.update(slideshow_config)
+            combined_config.update(config)
             # Create new slideshow and add to hash
             try:
-                self._slideshows[slideshow] = Slideshow(index, combined_config)
+                self._slideshows[name] = Slideshow(name, index, combined_config)
             except InvalidSlideshowConfigurationError as e:
                 Logger.critical(f"Configuration: {e}")
                 sys.exit(1)

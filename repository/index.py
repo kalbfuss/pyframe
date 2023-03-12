@@ -12,7 +12,7 @@ References;
 import logging
 
 from repository import RepositoryFile, InvalidUuidError, Repository
-from sqlalchemy import create_engine, desc, event, func, update, delete, Column, DateTime, ForeignKey, Integer, String, Boolean
+from sqlalchemy import create_engine, desc, event, func, update, delete, or_, Column, DateTime, ForeignKey, Integer, String, Boolean
 from sqlalchemy.engine import Engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import backref, relationship, sessionmaker
@@ -322,7 +322,7 @@ class SelectiveIndexIterator:
         query = session.query(MetaData)
 
         # Make sure only valid parameters have been specified.
-        valid_keys = {"most_recent", "order", "orientation", "repository", "tags", "type"}
+        valid_keys = {'excluded_tags', 'most_recent', 'order', 'orientation', 'repository', 'tags', 'type'}
         keys = set(criteria.keys())
         if not keys.issubset(valid_keys):
             raise InvalidIterationCriteriaError(f"Only the parameters {valid_keys} are accepted, but the additional parameter(s) {keys.difference(valid_keys)} has/have been specified.")
@@ -361,7 +361,11 @@ class SelectiveIndexIterator:
 
             # Limit iteration to files with specified tags.
             elif key == "tags":
-                query = query.filter(Link.tag_id == MetaDataTag.id, Link.file_id == MetaData.id).filter(func.lower(MetaDataTag.name).in_([tag.lower() for tag in value]))
+                query = query.filter(MetaData.tags.any(func.lower(MetaDataTag.name).in_([tag.lower() for tag in value])))
+
+            # Exclude files with excluded tags from iteration.
+            elif key == "excluded_tags":
+                query = query.filter(or_(MetaData.tags.any(func.lower(MetaDataTag.name).notin_([tag.lower() for tag in value])), MetaData.tags == None))
 
         # Determine limiting date to limit iteration to the n most recent files
         # based on the creation date. Outside of the loop since query needs to
