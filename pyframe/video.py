@@ -44,6 +44,15 @@ class SlideshowVideo(Widget):
         else:
             self._video.state = 'play'
 
+    @property
+    def file(self):
+        """Return the linked repository file for the slideshow video.
+
+        :return: Linked repository file
+        :rtype: repository.file
+        """
+        return self._file
+
     def update_canvas(self, *args):
         """Update canvas when the size of the widget changes."""
         # Clear before and after groups of video canvas.

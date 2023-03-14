@@ -35,6 +35,15 @@ class SlideshowImage(Widget):
         # Call update_canvas method when the size of the widget changes.
         self.bind(size=self.update_canvas)
 
+    @property
+    def file(self):
+        """Return the linked repository file for the slideshow image.
+
+        :return: Linked repository file
+        :rtype: repository.file
+        """
+        return self._file
+
     def update_canvas(self, *args):
         """Update canvas when the size of the widget changes."""
         # Clear before and after groups of image canvas.

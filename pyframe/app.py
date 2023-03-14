@@ -275,9 +275,7 @@ class App(kivy.app.App, Controller):
             return False
         # Display next file for all other keys
         else:
-            Clock.unschedule(self._event)
             self.next()
-            Clock.schedule_interval(self._event, self._config['pause'])
         return True
 
     def on_stop(self):
@@ -318,21 +316,20 @@ class App(kivy.app.App, Controller):
         # Start playing new slideshow.
         self.root.play()
 
-    def stop_slideshow(self):
-        if self.root is not None:
-            self.root.stop()
-
     def play(self):
         """Start playing the current slideshow."""
-        self.play_slideshow()
+        if self.root is not None:
+            self.root.play()
 
     def pause(self):
-        """Pause the current slideshow."""
-        Logger.warn("App: Function 'pause' has not been implemented yet.")
+        """Pause playing the current slideshow."""
+        if self.root is not None:
+            self.root.pause()
 
     def stop(self):
         """Stop playing the current slideshow."""
-        self.stop_slideshow()
+        if self.root is not None:
+            self.root.stop()
 
     def previous(self):
         """Change to previous file in slideshow."""
@@ -340,7 +337,8 @@ class App(kivy.app.App, Controller):
 
     def next(self):
         """Change to next file in slideshow."""
-        Logger.warn("App: Function 'next' has not been implemented yet.")
+        if self.root is not None:
+            self.root.next()
 
     def touch(self):
         """Touch to prevent screen timeout."""

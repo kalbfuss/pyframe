@@ -277,11 +277,11 @@ class MqttInterface:
             if payload == "ON":
                 Logger.debug("MQTT: 'Stop' button was pressed.")
                 self._controller.stop()
-        elif message.topic == button_topic_head + "_next/set":
+        elif message.topic == button_topic_head + "_previous/set":
             if payload == "ON":
                 Logger.debug("MQTT: 'Previous' button was pressed.")
                 self._controller.previous()
-        if message.topic == button_topic_head + "_previous/set":
+        if message.topic == button_topic_head + "_next/set":
             if payload == "ON":
                 Logger.debug("MQTT: 'Next' button was pressed.")
                 self._controller.next()

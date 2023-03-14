@@ -16,7 +16,7 @@ class Controller(ABC):
 
     @abstractmethod
     def pause(self):
-        """Pause the current slideshow."""
+        """Pause playing the current slideshow."""
         pass
 
     @abstractmethod

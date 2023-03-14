@@ -30,6 +30,11 @@ class Slideshow(AnchorLayout):
     optional parameters, which are passed to the constructor.
     """
 
+    # State definitions
+    STATE_STOPPED = 0
+    STATE_PLAYING = 1
+    STATE_PAUSED = 2
+
     def __init__(self, name, index, config):
         """Initialize Slideshow instance.
 
@@ -45,9 +50,10 @@ class Slideshow(AnchorLayout):
         self._name = name
         self._index = index
         self._config = config
+        self._state = Slideshow.STATE_STOPPED
         self._event = None
-        self._currentWidget = None
-        self._nextWidget = None
+        self._current_widget = None
+        self._next_widget = None
         self._iterator = None
         self._length = 0
 
@@ -171,11 +177,12 @@ class Slideshow(AnchorLayout):
             # Create temporary iterator otherwise to determine length.
             return self._index.iterator(**self._criteria).count()
 
-    def _next_widget(self):
-        """Return widget of the next file in the slideshow.
+    def _create_next_widget(self):
+        """Return widget for the next file in the slideshow.
 
         Catches any exception that occurs during file retrieval and skips the
-        respective file.
+        respective file. An empty widget is returned after 5 failed attempts.
+        If the end of the iteration is reached, the iteration is restarted.
 
         :return: Next file in the slideshow.
         :rtype: Widget
@@ -208,50 +215,94 @@ class Slideshow(AnchorLayout):
                     return Widget()
         return widget
 
-    def next(self):
+    @property
+    def current_file(self):
+        """Return linked repository file for the current content widget.
+
+        :return: Linked repository file
+        :rtype: repository.file
+        """
+        return self._current_widget.file
+
+    @property
+    def stated(self):
+        """Return state of the slideshow.
+
+        Valid states are STATE_STOPPED, STATE_PLAYING, and STATE_PAUSED.
+
+        :return: Slideshow state
+        :rtype: int
+        """
+        return self._state
+
+    def next(self, reschedule=True):
         """Display next file in the index."""
+        # Unschedule and re-schedule callback function
+        if reschedule and self._state == Slideshow.STATE_PLAYING and self._event is not None:
+            self._event.cancel()
+            self._event = Clock.schedule_interval(self._clock_callback, self._config['pause'])
         # Remove current widget from layout.
-        self.remove_widget(self._currentWidget)
+        self.remove_widget(self._current_widget)
         # Make next widget the current widget.
-        self._currentWidget = self._nextWidget
+        self._current_widget = self._next_widget
         # Add current widget to layout.
-        self.add_widget(self._currentWidget)
+        self.add_widget(self._current_widget)
         # Create widget for next frame.
-        self._nextWidget = self._next_widget()
+        self._next_widget = self._create_next_widget()
+
+    def pause(self):
+        """Pause playing slideshow."""
+        # Skip if already paused.
+        if self._state == Slideshow.STATE_PAUSED: return
+        # Unschedule the callback function.
+        if self._event is not None:
+            self._event.cancel()
+            self._event = None
+        # Update state.
+        self._state = Slideshow.STATE_PAUSED
 
     def play(self):
         """Start playing slideshow."""
-        # Skip if already playing
-        if self._event is not None:
-            return
-        # Create selective index iterator with sorting/filter criteria from the
-        # slideshow configuration.
-        self._iterator = self._index.iterator(**self._criteria)
-        # Save number of images in the slide show
-        self._length = self._iterator.count()
-        # Create current widget from first file, add to layout and start playing.
-        self._currentWidget = self._next_widget()
-        self.add_widget(self._currentWidget)
-        # Create next widget from second file
-        self._nextWidget = self._next_widget()
-        # Schedule callback function
+        # Skip if already playing.
+        if self._state == Slideshow.STATE_PLAYING: return
+
+        # Restart iteration if stopped.
+        if self._state == Slideshow.STATE_STOPPED:
+            # Create selective index iterator with sorting/filter criteria from the
+            # slideshow configuration.
+            self._iterator = self._index.iterator(**self._criteria)
+            # Save number of images in the slide show.
+            self._length = self._iterator.count()
+            # Create current widget from first file, add to layout and start playing.
+            self._current_widget = self._create_next_widget()
+            self.add_widget(self._current_widget)
+            # Create next widget from second file.
+            self._next_widget = self._create_next_widget()
+
+        # Schedule callback function to start playing slideshow.
         self._event = Clock.schedule_interval(self._clock_callback, self._config['pause'])
+        # Update state.
+        self._state = Slideshow.STATE_PLAYING
 
     def stop(self):
         """Stop playing slideshow."""
-        # Unschedule callback function
+        # Skip if already stopped.
+        if self._state == Slideshow.STATE_STOPPED: return
+        # Unschedule callback function.
         if self._event is not None:
             self._event.cancel()
             self._event = None
         # Remove and destroy current widget
-        if self._currentWidget is not None:
-            self.remove_widget(self._currentWidget)
-            self._currentWidget = None
-        # Destroy next widget and iterator
-        self._nextWidget = None
+        if self._current_widget is not None:
+            self.remove_widget(self._current_widget)
+            self._current_widget = None
+        # Destroy next widget and iterator.
+        self._next_widget = None
         self._iterator = None
+        # Update state.
+        self._state = Slideshow.STATE_STOPPED
 
     def _clock_callback(self, dt):
         """Clock callback function. Display the next file in the slideshow."""
         # Display next file in repository.
-        self.next()
+        self.next(reschedule=False)
