@@ -1,10 +1,12 @@
 """MQTT interface of picframe."""
 
-import logging
-import time
-import paho.mqtt.client as mqtt
+
 import json
+import logging
 import os
+import paho.mqtt.client as mqtt
+import ssl
+import time
 
 from . import Controller
 from . common import APPLICATION_NAME, APPLICATION_DESCRIPTION, VERSION, PROJECT_NAME
@@ -50,7 +52,7 @@ class MqttInterface:
             self._client = client
             client.username_pw_set(user, password)
             if tls:
-                client.tls_set_context()
+                client.tls_set(cert_reqs=ssl.CERT_OPTIONAL)
                 client.tls_insecure_set(True)
             # Register callback functions.
             client.on_connect = self.on_connect
