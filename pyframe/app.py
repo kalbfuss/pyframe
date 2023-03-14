@@ -13,7 +13,7 @@ import kivy.app
 
 from repository import Index
 from repository import Repository, InvalidConfigurationError, InvalidUuidError
-from . import Indexer, Handler, Slideshow, Scheduler, InvalidSlideshowConfigurationError
+from . import Indexer, Handler, Slideshow, Scheduler, MqttInterface, InvalidSlideshowConfigurationError
 
 from kivy.logger import Logger, LOG_LEVELS
 from kivy.core.window import Window
@@ -157,6 +157,8 @@ class App(kivy.app.App):
     _config = {
         'bg_color': [0.9,0.9,0.8],
         'cache': "./cache",
+        'enable_scheduler': "on",
+        'enable_mqtt': "on",
         'file_types': [ "images", "videos" ],
         'index': "./index.sqlite",
         'index_update_interval': 0,
@@ -167,7 +169,6 @@ class App(kivy.app.App):
         'pause': 60,
         'resize': "fill",
         'rotation': 0,
-        'scheduler': "on",
         'sequence': "name",
         'window_size': [ 800, 450 ]
     }
@@ -229,8 +230,16 @@ class App(kivy.app.App):
             Logger.warn("App: Slideshow still empty. Giving more time to build index.")
         Logger.info(f"App: Proceeding with {root.length()} files in slideshow.")
 
+        # Create mqtt interface if configured and activated.
+        if 'mqtt' in self._config and self._config['enable_mqtt'] == "on" or self._config['enable_mqtt'] is True:
+            try:
+                self._mqtt_interface = MqttInterface(self._config['mqtt'], None)
+            except Exception as e:
+                Logger.critical(f"Configuration: {e}")
+                sys.exit(1)
+
         # Create scheduler if configured and activated.
-        if 'schedule' in self._config and (self._config['scheduler'] == "on" or self._config['scheduler'] is True):
+        if 'schedule' in self._config and (self._config['enable_scheduler'] == "on" or self._config['enable_scheduler'] is True):
             try:
                 self._scheduler = Scheduler(self._config['schedule'], self)
             except Exception as e:
