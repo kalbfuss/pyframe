@@ -200,9 +200,9 @@ class MqttInterface:
         self.__setup_button(client, "_play", "mdi:play", available_topic)
         self.__setup_button(client, "_pause", "mdi:pause", available_topic)
         self.__setup_button(client, "_stop", "mdi:stop", available_topic)
-        self.__setup_button(client, "_next", "mdi:next", available_topic)
-        self.__setup_button(client, "_previous", "mdi:previous", available_topic)
-        self.__setup_button(client, "_touch", "mdi:previous", available_topic)
+        self.__setup_button(client, "_next", "mdi:skip-next", available_topic)
+        self.__setup_button(client, "_previous", "mdi:skip-previous", available_topic)
+        self.__setup_button(client, "_touch", "mdi:gesture-tap", available_topic)
 
         client.subscribe(self._device_id + "/purge_files", qos=0) # close down without killing!
         client.subscribe(self._device_id + "/stop", qos=0) # close down without killing!

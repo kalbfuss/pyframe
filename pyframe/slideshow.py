@@ -225,7 +225,12 @@ class Slideshow(AnchorLayout):
         return self._current_widget.file
 
     @property
-    def stated(self):
+    def name(self):
+        """Return name of the slidshow."""
+        return self._name
+
+    @property
+    def state(self):
         """Return state of the slideshow.
 
         Valid states are STATE_STOPPED, STATE_PLAYING, and STATE_PAUSED.

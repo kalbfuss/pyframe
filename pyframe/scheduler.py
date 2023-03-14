@@ -44,8 +44,8 @@ class Scheduler:
         self._app = app
 
         # Define valid and required keys per event configuration.
-        valid_keys = {"display", "slideshow", "time"}
-        required_keys = {"display", "time"}
+        valid_keys = {"display_mode", "slideshow", "time"}
+        required_keys = {"display_mode", "time"}
 
         # Build schedule from configuration
         Logger.info("Scheduler: Building schedule from configuration.")
@@ -60,50 +60,45 @@ class Scheduler:
             if not keys.issubset(valid_keys):
                 raise InvalidScheduleConfigurationError(f"Only the schedule parameters {valid_keys} are accepted, but the additional parameter(s) {keys.difference(valid_keys)} has/have been specified in the configuration of event '{event}'.", event_config)
 
+            # Check value of parameter display mode.
+            display_mode = event_config['display_mode']
+            if display_mode is True: event_config['display_mode'] = "on"
+            elif display_mode is False: event_config['display_mode'] = "off"
+            elif display_mode == "on": pass
+            elif display_mode == "off": pass
+            elif display_mode == "motion": pass
+            else:
+                raise InvalidScheduleConfigurationError(f"Invalid display mode '{display_mode}' in the configuration of event '{event}'. Valid display modes are 'on', 'off', and 'motion'.", event_config)
+
+            # Check value of parameter slideshow if specified.
+            if 'slideshow' in event_config and event_config['slideshow'] not in self._app.slideshows:
+                raise InvalidScheduleConfigurationError(f"Invalid slideshow  '{event_config['slideshow']}' in the configuration of event '{event}'. Valid slideshows are {self._app.slideshows}.", event_config)                
+
+            # Schedule events.
             try:
-                # Schedule job to switch display on and start playing slideshow.
-                if event_config['display'] == True or event_config['display'] == "on":
-                    schedule.every().day.at(event_config['time']).do(self.display_on, event_config['slideshow'])
-                # Schedule job to switch display off.
-                elif event_config['display'] == False or event_config['display'] == "off":
-                    schedule.every().day.at(event_config['time']).do(self.display_off)
-                # Raise exception due to invalid value for 'display'.
-                else:
-                    raise InvalidScheduleConfigurationError(f"The value '{event_config['display']}' for parameter 'display' in the configuration of event '{event}' is invalid.", event_config)
-
+                schedule.every().day.at(event_config['time']).do(self._on_event, event_config)
                 Logger.info(f"Scheduler: Event '{event}' scheduled at '{event_config['time']}'.")
-
             # Catch all schedule errors.
             except (TypeError, ScheduleValueError) as e:
                 raise InvalidScheduleConfigurationError(f"The configuration {event_config} for event '{event}' is invalid: {e}", event_config)
 
         # Turn display off
-        self.display_off()
-        # Set clock interval and callback function
+        self._app.display_mode = "off"
+        # Set clock interval and callback function.
         self.run_pending(0)
 
     def run_pending(self, dt):
-        """Runs pending schedule jobs.
-        """
+        """Run pending schedule jobs."""
         schedule.run_pending()
         Clock.schedule_once(self.run_pending, schedule.idle_seconds())
 
-    def display_on(self, slideshow=None):
-        """Turns display on and starts playing of slideshow.
-        """
-        Logger.info("Scheduler: Display on.")
-        # Turn display on. Works only on Linux with X server.
-        subprocess.run("/usr/bin/xset dpms force on", shell=True)
-        # Start playing slideshow
-        self._app.play_slideshow(slideshow)
-        return
-
-    def display_off(self):
-        """Stops playing of slideshow and turns display off.
-        """
-        Logger.info("Scheduler: Turn display off.")
-        # Stop playing slideshow_config
-        self._app.stop_slideshow()
-        # Turn display off. Works only on Linux with X server.
-        subprocess.run("/usr/bin/xset dpms force off", shell=True)
-        return
+    def _on_event(self, config):
+        """Handle scheduled events."""
+        # Set slideshow if specified.
+        slideshow = config.get('slideshow')
+        if slideshow is not None:
+            self._app.slideshow = slideshow
+        # Set display mode if specified.
+        display_mode = config.get('display_mode')
+        if display_mode is not None:
+            self._app.display_mode = display_mode

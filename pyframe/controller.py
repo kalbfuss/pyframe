@@ -50,11 +50,40 @@ class Controller(ABC):
         """Change to previous file in slideshow."""
         pass
 
+    @property
+    @abstractmethod
+    def slideshow(self):
+        """Return name of the current slideshow.
+
+        :return: slideshow name
+        :rtype: str
+        """
+        pass
+
+    @slideshow.setter
+    @abstractmethod
+    def slideshow(self, name):
+        """Set current slideshow by its name.
+
+        :param name: slideshow name
+        :type name: str
+        """
+        pass
+
+    @property
+    @abstractmethod
+    def slideshows(self):
+        """Return names of all slideshows.
+
+        :return: list of slideshow names
+        :rtype: list of str
+        """
+        pass
+
     @abstractmethod
     def stop(self):
         """Stop playing the current slideshow."""
         pass
-
 
     @abstractmethod
     def touch(self):

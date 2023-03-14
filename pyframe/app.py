@@ -21,12 +21,14 @@ from kivy.logger import Logger, LOG_LEVELS
 def display_on():
     """Turn the display on."""
     # Turn display off on Linux with X server.
-    subprocess.run("/usr/bin/xset dpms force on", shell=True)
+    subprocess.run("/usr/bin/xset dpms force on", shell=True,  stdout=subprocess.DEVNULL,
+    stderr=subprocess.DEVNULL)
 
 def display_off():
     """Turn the display off."""
     # Turn display on Linux with X server.
-    subprocess.run("/usr/bin/xset dpms force off", shell=True)
+    subprocess.run("/usr/bin/xset dpms force off", shell=True, stdout=subprocess.DEVNULL,
+    stderr=subprocess.DEVNULL)
 
 
 class App(kivy.app.App, Controller):
@@ -166,8 +168,26 @@ class App(kivy.app.App, Controller):
     def __init_display(self):
         """Initialize display and window."""
 
+        # Check value of parameter display mode.
+        display_mode = self._config['display_mode']
+        if display_mode is True: self._config['display_mode'] = "on"
+        elif display_mode is False: self._config['display_mode'] = "off"
+        elif display_mode == "on": pass
+        elif display_mode == "off": pass
+        elif display_mode == "motion": pass
+        else:
+            Logger.critical(f"Configuration: Invalid display mode '{display_mode}' specified. Valid display modes are 'on', 'off', and 'motion'.")
+            sys.exit(1)
+
+        # Check value of parameter display timeout
+        display_timeout = self._config['display_timeout']
+        if type(display_timeout) is not int or display_timeout < 0:
+            Logger.critical(f"Configuration: Invalid value '{display_timeout}' for parameter display timeout specified. Timeout needs to be a positive integer.")
+            sys.exit(1)
+
         # Set display mode.
         self._display_timeout = self._config['display_timeout']
+        self._display_event = None
         self._display_mode = ""
         self.display_mode = self._config['display_mode']
 
@@ -201,7 +221,7 @@ class App(kivy.app.App, Controller):
         'bg_color': [0.9,0.9,0.8],
         'cache': "./cache",
         'display_mode': "on",
-        'display_timeout': 60,
+        'display_timeout': 300,
         'enable_scheduler': "on",
         'enable_mqtt': "on",
         'file_types': [ "images", "videos" ],
@@ -226,7 +246,6 @@ class App(kivy.app.App, Controller):
         """
         self._scheduler = None
         self._mqtt_interface = None
-        self._screen_event = None
 
         # Load configuration.
         self.__load_config()
@@ -313,31 +332,8 @@ class App(kivy.app.App, Controller):
             Logger.debug("App: Stopping scheduler.")
             pass
         # Stop current slideshow.
-        self.stop_slideshow()
-        Logger.debug("App: Stopping slideshow.")
+        self.stop()
         return True
-
-    def play_slideshow(self, slideshow=None):
-        """Start playing the specified slideshow.
-
-        :param slideshow: Name of the slideshow to be played. The name is
-            optional. If no name is specified or no slideshow with the specified
-            name exists, the current slideshow is used.
-        :type slideshow: str
-        """
-        # Stop playing current slideshow.
-        self.stop_slideshow()
-        # Switch to new slideshow if specified. Continue to use current
-        # slideshow if new slideshow does not exist.
-        if slideshow is not None:
-            new_root = self._slideshows.get(slideshow, self.root)
-            if new_root is not self.root:
-                Window.add_widget(new_root)
-                Window.remove_widget(self.root)
-                self.root = new_root
-
-        # Start playing new slideshow.
-        self.root.play()
 
     @property
     def display_mode(self):
@@ -357,6 +353,9 @@ class App(kivy.app.App, Controller):
         """
         # Return if already in the right mode.
         if mode == self._display_mode: return
+        # Cancel previously scheduled timeout event.
+        if self._display_event is not None:
+            self._display_event.cancel()
         # Turn display on and start playing slideshow.
         if mode == "on":
             Logger.info("Controller: Turning display on.")
@@ -416,6 +415,42 @@ class App(kivy.app.App, Controller):
             Logger.info("Controller: Changing to next file in slideshow.")
             self.root.next()
 
+    @property
+    def slideshow(self):
+        """Return name of the current slideshow.
+
+        :return: slideshow name
+        :rtype: str
+        """
+        if self.root is not None:
+            return self.root.Name
+        else:
+            return ""
+
+    @slideshow.setter
+    def slideshow(self, name):
+        """Set current slideshow by its name.
+
+        :param name: slideshow name
+        :type name: str
+        """
+        new_root = self._slideshows.get(name, self.root)
+        if new_root is not self.root:
+            Logger.debug(f"Controller: Selecting slideshow '{name}'.")
+            self.stop()
+            Window.add_widget(new_root)
+            Window.remove_widget(self.root)
+            self.root = new_root
+
+    @property
+    def slideshows(self):
+        """Return names of all slideshows.
+
+        :return: list of slideshow names
+        :rtype: list of str
+        """
+        return list(self._slideshows.keys())
+
     def touch(self):
         """Update last touch time stamp and prevent screen timeout in display motion mode."""
         # Update last touch time stamp.
@@ -426,7 +461,7 @@ class App(kivy.app.App, Controller):
             Logger.debug(f"Controller: Controller touched. Next display timeout scheduled in {self._display_timeout} s at {next_timeout_asc}.")
             # Restart playing in case the display has timed out out before.
             self.play()
-            # Cancel previous timeout event.
+            # Cancel previously scheduled timeout event.
             if self._display_event is not None:
                 self._display_event.cancel()
             # Schedule new timeout event.
