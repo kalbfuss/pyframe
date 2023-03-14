@@ -30,6 +30,16 @@ class Controller(ABC):
         """
         pass
 
+    @property
+    @abstractmethod
+    def display_mode(self):
+        """Return the display mode.
+
+        :return: display mode
+        :rtype: str
+        """
+        pass
+
     @abstractmethod
     def next(self):
         """Change to next file in slideshow."""

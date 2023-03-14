@@ -18,18 +18,6 @@ from kivy.core.window import Window
 from kivy.clock import Clock
 from kivy.logger import Logger, LOG_LEVELS
 
-def display_on():
-    """Turn the display on."""
-    # Turn display off on Linux with X server.
-    subprocess.run("/usr/bin/xset dpms force on", shell=True,  stdout=subprocess.DEVNULL,
-    stderr=subprocess.DEVNULL)
-
-def display_off():
-    """Turn the display off."""
-    # Turn display on Linux with X server.
-    subprocess.run("/usr/bin/xset dpms force off", shell=True, stdout=subprocess.DEVNULL,
-    stderr=subprocess.DEVNULL)
-
 
 class App(kivy.app.App, Controller):
     """Pyframe main application."""
@@ -189,6 +177,7 @@ class App(kivy.app.App, Controller):
         self._display_timeout = self._config['display_timeout']
         self._display_event = None
         self._display_mode = ""
+        self._display_state = ""
         self.display_mode = self._config['display_mode']
 
         # Set window size.
@@ -359,17 +348,17 @@ class App(kivy.app.App, Controller):
         # Turn display on and start playing slideshow.
         if mode == "on":
             Logger.info("Controller: Turning display on.")
-            display_on()
+            self.display_on()
             self.play()
         # Turn display off and pause playing slideshow.
         elif mode == "off":
             Logger.info("Controller: Turning display off.")
             self.pause()
-            display_off()
+            self.display_off()
         #  Set display to motion mode and start playing slideshow.
         elif mode == "motion":
             Logger.info("Controller: Setting display to motion mode.")
-            display_on()
+            self.display_on()
             self.play()
             # Update last touch time stamp and schedule timeout event.
             self._last_touch = time.time()
@@ -380,12 +369,41 @@ class App(kivy.app.App, Controller):
         # Update display mode.
         self._display_mode = mode
 
+    @property
+    def display_state(self):
+        """Return the display state.
+
+        :return: display state
+        :rtype: str
+        """
+        return self._display_state
+
+    def display_on(self):
+        """Turn the display on."""
+        # Return if already on.
+        if self._display_state == "on": return
+        # Turn display off on Linux with X server.
+        subprocess.run("/usr/bin/xset dpms force on", shell=True,  stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL)
+        # Update display state.
+        self._display_state == "on"
+
+    def display_off(self):
+        """Turn the display off."""
+        # Return if already off.
+        if self._display_state == "off": return
+        # Turn display on Linux with X server.
+        subprocess.run("/usr/bin/xset dpms force off", shell=True, stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL)
+        # Update display state.
+        self._display_state == "off"
+
     def _on_display_timeout(self, dt):
         """Handle display timeouts in motion mode."""
         # Pause playing slideshow and turn display off.
         Logger.debug(f"Controller: Display has timed out. Turning display off.")
         self.pause()
-        display_off()
+        self.display_off()
 
     def play(self):
         """Start playing the current slideshow."""
@@ -459,7 +477,9 @@ class App(kivy.app.App, Controller):
         if self._display_mode == "motion":
             next_timeout_asc = time.asctime(time.localtime(self._last_touch + self._display_timeout))
             Logger.debug(f"Controller: Controller touched. Next display timeout scheduled in {self._display_timeout} s at {next_timeout_asc}.")
-            # Restart playing in case the display has timed out out before.
+            # Turn display on and restart playing in case the display
+            # has timed out out before.
+            self.display_on()
             self.play()
             # Cancel previously scheduled timeout event.
             if self._display_event is not None:
