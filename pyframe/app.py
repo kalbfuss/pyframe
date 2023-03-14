@@ -4,19 +4,29 @@ import copy
 import logging
 import repository.local
 import repository.webdav
+import subprocess
 import sys
-import threading
 import time
 import yaml
 
 import kivy.app
 
-from repository import Index
-from repository import Repository, InvalidConfigurationError, InvalidUuidError
+from repository import Index, Repository, InvalidConfigurationError, InvalidUuidError
 from . import Indexer, Handler, Slideshow, Scheduler, MqttInterface, InvalidSlideshowConfigurationError, Controller
 
-from kivy.logger import Logger, LOG_LEVELS
 from kivy.core.window import Window
+from kivy.clock import Clock
+from kivy.logger import Logger, LOG_LEVELS
+
+def display_on():
+    """Turn the display on."""
+    # Turn display off on Linux with X server.
+    subprocess.run("/usr/bin/xset dpms force on", shell=True)
+
+def display_off():
+    """Turn the display off."""
+    # Turn display on Linux with X server.
+    subprocess.run("/usr/bin/xset dpms force off", shell=True)
 
 
 class App(kivy.app.App, Controller):
@@ -153,10 +163,45 @@ class App(kivy.app.App, Controller):
             Logger.critical("Configuration: Exiting application as no valid slideshows have been defined.")
             sys.exit(1)
 
-    # Define default configuration parameter values
+    def __init_display(self):
+        """Initialize display and window."""
+
+        # Set display mode.
+        self._display_timeout = self._config['display_timeout']
+        self._display_mode = ""
+        self.display_mode = self._config['display_mode']
+
+        # Set window size.
+        value = self._config['window_size']
+        if type(value) is list and len(value) == 2 and value[0] > 0 and value[1] > 0:
+            Window.size = (value)
+        elif value == "full":
+            Window.fullscreen = 'auto'
+        else:
+            Logger.critical(f"Configuration: Invalid value '{value}' for parameter 'window_size' specified. Acceptable values are '[width, height]' and 'full'.")
+            sys.exit(1)
+        # Disable display of mouse cursor
+        Window.show_cursor = False
+
+    def __load_config(self):
+        """Load application configuration.
+
+        Loads the application configuration from the default configuration file
+        and applies default values where missing.
+        """
+        # Load configuration from yaml file.
+        with open('./config.yaml', 'r') as config_file:
+            config = yaml.safe_load(config_file)
+        self._config.update(config)
+        Logger.debug(f"Configuration: Configuration = {self._config}")
+        return self._config
+
+    # Default configuration.
     _config = {
         'bg_color': [0.9,0.9,0.8],
         'cache': "./cache",
+        'display_mode': "on",
+        'display_timeout': 60,
         'enable_scheduler': "on",
         'enable_mqtt': "on",
         'file_types': [ "images", "videos" ],
@@ -173,19 +218,6 @@ class App(kivy.app.App, Controller):
         'window_size': [ 800, 450 ]
     }
 
-    def __load_config(self):
-        """Load application configuration.
-
-        Loads the application configuration from the default configuration file
-        and applies default values where missing.
-        """
-        # Load configuration from yaml file.
-        with open('./config.yaml', 'r') as config_file:
-            config = yaml.safe_load(config_file)
-        self._config.update(config)
-        Logger.debug(f"Configuration: Configuration = {self._config}")
-        return self._config
-
     def build(self):
         """Build Kivy application.
 
@@ -194,6 +226,7 @@ class App(kivy.app.App, Controller):
         """
         self._scheduler = None
         self._mqtt_interface = None
+        self._screen_event = None
 
         # Load configuration.
         self.__load_config()
@@ -210,19 +243,6 @@ class App(kivy.app.App, Controller):
         self._indexer.start()
         # Create slideshows.
         self.__create_slideshows()
-
-        # Change to full screen mode.
-        value = self._config['window_size']
-        if type(value) is list and len(value) == 2 and value[0] > 0 and value[1] > 0:
-            Window.size = (value)
-        elif value == "full":
-            Window.fullscreen = 'auto'
-        else:
-            Logger.critical(f"Configuration: Invalid value '{value}' for parameter 'window_size' specified. Acceptable values are '[width, height]' and 'full'.")
-            sys.exit(1)
-
-        # Disable display of mouse cursor
-        Window.show_cursor = False
 
         # Make first slideshow the main root widget
         root = next(iter(self._slideshows.values()))
@@ -243,6 +263,9 @@ class App(kivy.app.App, Controller):
 
         # Bind keyboard listener
         Window.bind(on_keyboard=self.on_keyboard)
+
+        # Initialize display
+        self.__init_display()
 
         # Create scheduler if configured and activated.
         if 'schedule' in self._config and (self._config['enable_scheduler'] == "on" or self._config['enable_scheduler'] is True):
@@ -316,30 +339,95 @@ class App(kivy.app.App, Controller):
         # Start playing new slideshow.
         self.root.play()
 
+    @property
+    def display_mode(self):
+        """Return the display mode.
+
+        :return: display mode
+        :rtype: str
+        """
+        return self._display_mode
+
+    @display_mode.setter
+    def display_mode(self, mode):
+        """Set the display mode.
+
+        :param mode: display mode
+        :type mode: str
+        """
+        # Return if already in the right mode.
+        if mode == self._display_mode: return
+        # Turn display on and start playing slideshow.
+        if mode == "on":
+            Logger.info("Controller: Turning display on.")
+            display_on()
+            self.play()
+        # Turn display off and pause playing slideshow.
+        elif mode == "off":
+            Logger.info("Controller: Turning display off.")
+            self.pause()
+            display_off()
+        #  Set display to motion mode and start playing slideshow.
+        elif mode == "motion":
+            Logger.info("Controller: Setting display to motion mode.")
+            display_on()
+            self.play()
+            # Update last touch time stamp and schedule timeout event.
+            self._last_touch = time.time()
+            self._screen_event = self._display_event = Clock.schedule_interval(self._on_display_timeout, self._display_timeout)
+        # Raise exception upon invalid display mode.
+        else:
+            raise Exception(f"Controller: The selected display mode '{mode}' is invalid. Valid display modes are 'on', 'off', and 'motion'.")
+        # Update display mode.
+        self._display_mode = mode
+
+    def _on_display_timeout(self, dt):
+        """Handle display timeouts in motion mode."""
+        # Pause playing slideshow and turn display off.
+        Logger.debug(f"Controller: Display has timed out. Turning display off.")
+        self.pause()
+        display_off()
+
     def play(self):
         """Start playing the current slideshow."""
         if self.root is not None:
+            Logger.info("Controller: Playing/resuming slideshow.")
             self.root.play()
 
     def pause(self):
         """Pause playing the current slideshow."""
         if self.root is not None:
+            Logger.info("Controller: Pausing slideshow.")
             self.root.pause()
 
     def stop(self):
         """Stop playing the current slideshow."""
         if self.root is not None:
+            Logger.info("Controller: Stopping slideshow.")
             self.root.stop()
 
     def previous(self):
         """Change to previous file in slideshow."""
-        Logger.warn("App: Function 'previous' has not been implemented yet.")
+        Logger.warn("Controller: Function 'previous' has not been implemented yet.")
 
     def next(self):
         """Change to next file in slideshow."""
         if self.root is not None:
+            Logger.info("Controller: Changing to next file in slideshow.")
             self.root.next()
 
     def touch(self):
-        """Touch to prevent screen timeout."""
-        Logger.warn("App: Function 'touch' has not been implemented yet.")
+        """Update last touch time stamp and prevent screen timeout in display motion mode."""
+        # Update last touch time stamp.
+        self._last_touch = time.time()
+        # Schedule timeout event.
+        if self._display_mode == "motion":
+            next_timeout_asc = time.asctime(time.localtime(self._last_touch + self._display_timeout))
+            Logger.debug(f"Controller: Controller touched. Next display timeout scheduled in {self._display_timeout} s at {next_timeout_asc}.")
+            # Restart playing in case the display has timed out out before.
+            self.play()
+            # Cancel previous timeout event.
+            if self._display_event is not None:
+                self._display_event.cancel()
+            # Schedule new timeout event.
+            self._screen_event = Clock.schedule_once(self._on_display_timeout, self._display_timeout)

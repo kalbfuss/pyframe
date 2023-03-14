@@ -89,7 +89,7 @@ class Repository(ABC):
     def __iter__(self):
         """Provide iterator which allows to traverse through all files in the repository.
 
-        :return: File iterator.
+        :return: file iterator
         :return type: repository.FileIterator
         """
         return self.iterator()
@@ -100,7 +100,7 @@ class Repository(ABC):
         file. This method is abstract and needs to be implemented by child
         classes.
 
-        :param config:
+        :param config: repository configuration
         :type config: dict
         :raises: InvalidConfigurationError
         """
