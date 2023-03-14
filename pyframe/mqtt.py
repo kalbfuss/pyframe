@@ -52,7 +52,7 @@ class MqttInterface:
             self._client = client
             client.username_pw_set(user, password)
             if tls:
-                client.tls_set(cert_reqs=ssl.CERT_OPTIONAL)
+                client.tls_set(cert_reqs=ssl.CERT_NONE)
                 client.tls_insecure_set(True)
             # Register callback functions.
             client.on_connect = self.on_connect
