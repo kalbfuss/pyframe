@@ -362,7 +362,7 @@ class App(kivy.app.App, Controller):
             self.play()
             # Update last touch time stamp and schedule timeout event.
             self._last_touch = time.time()
-            self._screen_event = self._display_event = Clock.schedule_interval(self._on_display_timeout, self._display_timeout)
+            self._screen_event = self._display_event = Clock.schedule_once(self._on_display_timeout, self._display_timeout)
         # Raise exception upon invalid display mode.
         else:
             raise Exception(f"Controller: The selected display mode '{mode}' is invalid. Valid display modes are 'on', 'off', and 'motion'.")
