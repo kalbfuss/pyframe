@@ -6,9 +6,12 @@ import paho.mqtt.client as mqtt
 import json
 import os
 
+from . import Controller
 from . common import APPLICATION_NAME, APPLICATION_DESCRIPTION, VERSION, PROJECT_NAME
 
+from kivy.clock import Clock
 from kivy.logger import Logger
+
 
 class MqttInterface:
     """MQTT interface of picframe.
@@ -29,6 +32,8 @@ class MqttInterface:
     def __init__(self, config, controller):
         self._config = config
         self._controller = controller
+        self._client = None
+        self._event = None
 
         device_id = config['device_id']
         host = config['host']
@@ -42,6 +47,7 @@ class MqttInterface:
         try:
             # Configure mqtt client.
             client = mqtt.Client(client_id = device_id, clean_session=True)
+            self._client = client
             client.username_pw_set(user, password)
             if tls:
                 client.tls_set_context()
@@ -54,84 +60,10 @@ class MqttInterface:
             # Establish connection.
             Logger.info(f"MQTT: Connecting to broker '{host}:{port}' as user '{user}'.")
             client.connect(host, port, 60)
-            client.loop_start()
+            # Call network loop every x seconds.
+            self._event = Clock.schedule_interval(self.loop, 0.2)
         except Exception as e:
             raise Exception(f"MQTT: An exception occured during setup of the connection: {e}")
-
-    def on_connect(self, client, userdata, flags, rc):
-        if rc != 0:
-            Logger.warning(f"MQTT: Connection to broker failed with error code {rc}.")
-            return
-        Logger.info("MQTT: Connection to broker established.")
-
-        # Update availability
-        Logger.debug("MQTT: Change availability to 'online'.")
-        available_topic = "homeassistant/switch/" + self._device_id + "/available"
-        client.publish(available_topic, "online", qos=0, retain=True)
-
-        # Create control elements
-        Logger.debug("MQTT: Create control elements.")
-        self.__setup_button(client, "_play", "mdi:play", available_topic)
-        self.__setup_button(client, "_pause", "mdi:pause", available_topic)
-        self.__setup_button(client, "_stop", "mdi:stop", available_topic)
-        self.__setup_button(client, "_next", "mdi:next", available_topic)
-        self.__setup_button(client, "_previous", "mdi:previous", available_topic)
-        self.__setup_button(client, "_touch", "mdi:previous", available_topic)
-
-        client.subscribe(self._device_id + "/purge_files", qos=0) # close down without killing!
-        client.subscribe(self._device_id + "/stop", qos=0) # close down without killing!
-
-        """
-        ## sensors
-        self.__setup_sensor(client, "date_from", "mdi:calendar-arrow-left", available_topic, entity_category="config")
-        self.__setup_sensor(client, "date_to", "mdi:calendar-arrow-right", available_topic, entity_category="config")
-        self.__setup_sensor(client, "location_filter", "mdi:map-search", available_topic, entity_category="config")
-        self.__setup_sensor(client, "tags_filter", "mdi:image-search", available_topic, entity_category="config")
-        self.__setup_sensor(client, "image_counter", "mdi:camera-burst", available_topic, entity_category="diagnostic")
-        self.__setup_sensor(client, "image", "mdi:file-image", available_topic, has_attributes=True, entity_category="diagnostic")
-
-        ## numbers
-        self.__setup_number(client, "brightness", 0.0, 1.0, 0.1, "mdi:brightness-6", available_topic)
-        self.__setup_number(client, "time_delay", 1, 400, 1, "mdi:image-plus", available_topic)
-        self.__setup_number(client, "fade_time", 1, 50, 1,"mdi:image-size-select-large", available_topic)
-        self.__setup_number(client, "matting_images", 0.0, 1.0, 0.01, "mdi:image-frame", available_topic)
-
-        ## selects
-        _, dir_list = self.__controller.get_directory_list()
-        dir_list.sort()
-        self.__setup_select(client, "directory", dir_list, "mdi:folder-multiple-image", available_topic, init=True)
-        command_topic = self._device_id + "/directory"
-        client.subscribe(command_topic, qos=0)
-
-        ## switches
-        self.__setup_switch(client, "_text_refresh", "mdi:refresh", available_topic, entity_category="config")
-        self.__setup_switch(client, "_name_toggle", "mdi:subtitles", available_topic,
-                            self.__controller.text_is_on("name"), entity_category="config")
-        self.__setup_switch(client, "_title_toggle", "mdi:subtitles", available_topic,
-                            self.__controller.text_is_on("title"), entity_category="config")
-        self.__setup_switch(client, "_caption_toggle", "mdi:subtitles", available_topic,
-                            self.__controller.text_is_on("caption"), entity_category="config")
-        self.__setup_switch(client, "_date_toggle", "mdi:calendar-today", available_topic,
-                            self.__controller.text_is_on("date"), entity_category="config")
-        self.__setup_switch(client, "_location_toggle", "mdi:crosshairs-gps", available_topic,
-                            self.__controller.text_is_on("location"), entity_category="config")
-        self.__setup_switch(client, "_directory_toggle", "mdi:folder", available_topic,
-                            self.__controller.text_is_on("directory"), entity_category="config")
-        self.__setup_switch(client, "_text_off", "mdi:badge-account-horizontal-outline", available_topic, entity_category="config")
-        self.__setup_switch(client, "_display", "mdi:panorama", available_topic,
-                            self.__controller.display_is_on)
-        self.__setup_switch(client, "_clock", "mdi:clock-outline", available_topic,
-                            self.__controller.clock_is_on, entity_category="config")
-        self.__setup_switch(client, "_shuffle", "mdi:shuffle-variant", available_topic,
-                            self.__controller.shuffle)
-        self.__setup_switch(client, "_paused", "mdi:pause", available_topic,
-                            self.__controller.paused)
-
-        # buttons
-        self.__setup_button(client, "_delete", "mdi:delete", available_topic)
-        self.__setup_button(client, "_back", "mdi:skip-previous", available_topic)
-        self.__setup_button(client, "_next", "mdi:skip-next", available_topic)
-        """
 
     def __setup_sensor(self, client, topic, icon, available_topic, has_attributes=False, entity_category=None):
         sensor_topic_head = "homeassistant/sensor/" + self._device_id
@@ -249,6 +181,84 @@ class MqttInterface:
         client.subscribe(command_topic , qos=0)
         client.publish(config_topic, config_payload, qos=0, retain=True)
 
+    def loop(self, dt):
+        self._client.loop(timeout=0)
+
+    def on_connect(self, client, userdata, flags, rc):
+        if rc != 0:
+            Logger.warning(f"MQTT: Connection to broker failed with error code {rc}.")
+            return
+        Logger.info("MQTT: Connection to broker established.")
+
+        # Update availability
+        Logger.debug("MQTT: Change availability to 'online'.")
+        available_topic = "homeassistant/switch/" + self._device_id + "/available"
+        client.publish(available_topic, "online", qos=0, retain=True)
+
+        # Create control elements
+        Logger.debug("MQTT: Create control elements.")
+        self.__setup_button(client, "_play", "mdi:play", available_topic)
+        self.__setup_button(client, "_pause", "mdi:pause", available_topic)
+        self.__setup_button(client, "_stop", "mdi:stop", available_topic)
+        self.__setup_button(client, "_next", "mdi:next", available_topic)
+        self.__setup_button(client, "_previous", "mdi:previous", available_topic)
+        self.__setup_button(client, "_touch", "mdi:previous", available_topic)
+
+        client.subscribe(self._device_id + "/purge_files", qos=0) # close down without killing!
+        client.subscribe(self._device_id + "/stop", qos=0) # close down without killing!
+
+        """
+        ## sensors
+        self.__setup_sensor(client, "date_from", "mdi:calendar-arrow-left", available_topic, entity_category="config")
+        self.__setup_sensor(client, "date_to", "mdi:calendar-arrow-right", available_topic, entity_category="config")
+        self.__setup_sensor(client, "location_filter", "mdi:map-search", available_topic, entity_category="config")
+        self.__setup_sensor(client, "tags_filter", "mdi:image-search", available_topic, entity_category="config")
+        self.__setup_sensor(client, "image_counter", "mdi:camera-burst", available_topic, entity_category="diagnostic")
+        self.__setup_sensor(client, "image", "mdi:file-image", available_topic, has_attributes=True, entity_category="diagnostic")
+
+        ## numbers
+        self.__setup_number(client, "brightness", 0.0, 1.0, 0.1, "mdi:brightness-6", available_topic)
+        self.__setup_number(client, "time_delay", 1, 400, 1, "mdi:image-plus", available_topic)
+        self.__setup_number(client, "fade_time", 1, 50, 1,"mdi:image-size-select-large", available_topic)
+        self.__setup_number(client, "matting_images", 0.0, 1.0, 0.01, "mdi:image-frame", available_topic)
+
+        ## selects
+        _, dir_list = self.__controller.get_directory_list()
+        dir_list.sort()
+        self.__setup_select(client, "directory", dir_list, "mdi:folder-multiple-image", available_topic, init=True)
+        command_topic = self._device_id + "/directory"
+        client.subscribe(command_topic, qos=0)
+
+        ## switches
+        self.__setup_switch(client, "_text_refresh", "mdi:refresh", available_topic, entity_category="config")
+        self.__setup_switch(client, "_name_toggle", "mdi:subtitles", available_topic,
+                            self.__controller.text_is_on("name"), entity_category="config")
+        self.__setup_switch(client, "_title_toggle", "mdi:subtitles", available_topic,
+                            self.__controller.text_is_on("title"), entity_category="config")
+        self.__setup_switch(client, "_caption_toggle", "mdi:subtitles", available_topic,
+                            self.__controller.text_is_on("caption"), entity_category="config")
+        self.__setup_switch(client, "_date_toggle", "mdi:calendar-today", available_topic,
+                            self.__controller.text_is_on("date"), entity_category="config")
+        self.__setup_switch(client, "_location_toggle", "mdi:crosshairs-gps", available_topic,
+                            self.__controller.text_is_on("location"), entity_category="config")
+        self.__setup_switch(client, "_directory_toggle", "mdi:folder", available_topic,
+                            self.__controller.text_is_on("directory"), entity_category="config")
+        self.__setup_switch(client, "_text_off", "mdi:badge-account-horizontal-outline", available_topic, entity_category="config")
+        self.__setup_switch(client, "_display", "mdi:panorama", available_topic,
+                            self.__controller.display_is_on)
+        self.__setup_switch(client, "_clock", "mdi:clock-outline", available_topic,
+                            self.__controller.clock_is_on, entity_category="config")
+        self.__setup_switch(client, "_shuffle", "mdi:shuffle-variant", available_topic,
+                            self.__controller.shuffle)
+        self.__setup_switch(client, "_paused", "mdi:pause", available_topic,
+                            self.__controller.paused)
+
+        # buttons
+        self.__setup_button(client, "_delete", "mdi:delete", available_topic)
+        self.__setup_button(client, "_back", "mdi:skip-previous", available_topic)
+        self.__setup_button(client, "_next", "mdi:skip-next", available_topic)
+        """
+
     def on_message(self, client, userdata, message):
         payload = message.payload.decode("utf-8")
         switch_topic_head = "homeassistant/switch/" + self._device_id
@@ -258,21 +268,27 @@ class MqttInterface:
         if message.topic == button_topic_head + "_play/set":
             if payload == "ON":
                 Logger.debug("MQTT: 'Play' button was pressed.")
+                self._controller.play()
         elif message.topic == button_topic_head + "_pause/set":
             if payload == "ON":
                 Logger.debug("MQTT: 'Pause' button was pressed.")
+                self._controller.pause()
         if message.topic == button_topic_head + "_stop/set":
             if payload == "ON":
                 Logger.debug("MQTT: 'Stop' button was pressed.")
+                self._controller.stop()
         elif message.topic == button_topic_head + "_next/set":
             if payload == "ON":
                 Logger.debug("MQTT: 'Previous' button was pressed.")
+                self._controller.previous()
         if message.topic == button_topic_head + "_previous/set":
             if payload == "ON":
                 Logger.debug("MQTT: 'Next' button was pressed.")
+                self._controller.next()
         elif message.topic == button_topic_head + "_touch/set":
             if payload == "ON":
                 Logger.debug("MQTT: 'Touch' button was pressed.")
+                self._controller.touch()
         """
         ###### switches ######
         # display
@@ -503,3 +519,10 @@ class MqttInterface:
 
         # send last will and testament
         client.publish(available_topic, "online", qos=0, retain=True)
+
+    def stop(self):
+        """Stop MQTT interface."""
+        if self._event is not None:
+            Clock.unschedule(self._event)
+        if self._client is not None:
+            self._client.disconnect()

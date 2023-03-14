@@ -17,5 +17,6 @@ from . image import SlideshowImage
 from . indexer import Indexer
 from . scheduler import Scheduler
 from . slideshow import Slideshow, InvalidSlideshowConfigurationError
+from . controller import Controller
 from . mqtt import MqttInterface
 from . app import App

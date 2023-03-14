@@ -13,13 +13,13 @@ import kivy.app
 
 from repository import Index
 from repository import Repository, InvalidConfigurationError, InvalidUuidError
-from . import Indexer, Handler, Slideshow, Scheduler, MqttInterface, InvalidSlideshowConfigurationError
+from . import Indexer, Handler, Slideshow, Scheduler, MqttInterface, InvalidSlideshowConfigurationError, Controller
 
 from kivy.logger import Logger, LOG_LEVELS
 from kivy.core.window import Window
 
 
-class App(kivy.app.App):
+class App(kivy.app.App, Controller):
     """Pyframe main application."""
 
     def __configure_logging(self):
@@ -192,6 +192,9 @@ class App(kivy.app.App):
         Loads the application configuration from the default configuration file.
         Creates configured repositories and builds an index across the latter.
         """
+        self._scheduler = None
+        self._mqtt_interface = None
+
         # Load configuration.
         self.__load_config()
         # Configure logging.
@@ -233,7 +236,7 @@ class App(kivy.app.App):
         # Create mqtt interface if configured and activated.
         if 'mqtt' in self._config and self._config['enable_mqtt'] == "on" or self._config['enable_mqtt'] is True:
             try:
-                self._mqtt_interface = MqttInterface(self._config['mqtt'], None)
+                self._mqtt_interface = MqttInterface(self._config['mqtt'], self)
             except Exception as e:
                 Logger.critical(f"Configuration: {e}")
                 sys.exit(1)
@@ -245,14 +248,28 @@ class App(kivy.app.App):
             except Exception as e:
                 Logger.critical(f"Configuration: {e}")
                 sys.exit(1)
-
         # Start playing first defined slideshow otherwise.
         else:
             root.play()
         return root
 
+    def on_stop(self):
+        """Safely stop application."""
+        Logger.debug("App: Preparing for safe exit.")
+        # Stop MQTT interface if running.
+        if self._mqtt_interface is not None:
+            Logger.debug("App: Stopping MQTT interface.")
+            self._mqtt_interface.stop()
+        # Stop scheduler if running.
+        if self._scheduler is not None:
+            Logger.debug("App: Stopping scheduler.")
+            pass
+        # Stop current slideshow.
+        self.stop_slideshow()
+        Logger.debug("App: Stopping slideshow.")
+
     def play_slideshow(self, slideshow=None):
-        """Starts playing the specified slideshow.
+        """Start playing the specified slideshow.
 
         :param slideshow: Name of the slideshow to be played. The name is
             optional. If no name is specified or no slideshow with the specified
@@ -276,3 +293,27 @@ class App(kivy.app.App):
     def stop_slideshow(self):
         if self.root is not None:
             self.root.stop()
+
+    def play(self):
+        """Start playing the current slideshow."""
+        self.play_slideshow()
+
+    def pause(self):
+        """Pause the current slideshow."""
+        Logger.warn("App: Function 'pause' has not been implemented yet.")
+
+    def stop(self):
+        """Stop playing the current slideshow."""
+        self.stop_slideshow()
+
+    def previous(self):
+        """Change to previous file in slideshow."""
+        Logger.warn("App: Function 'previous' has not been implemented yet.")
+
+    def next(self):
+        """Change to next file in slideshow."""
+        Logger.warn("App: Function 'next' has not been implemented yet.")
+
+    def touch(self):
+        """Touch to prevent screen timeout."""
+        Logger.warn("App: Function 'touch' has not been implemented yet.")
