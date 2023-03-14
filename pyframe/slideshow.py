@@ -149,9 +149,6 @@ class Slideshow(AnchorLayout):
                 else:
                     self._criteria['excluded_tags'].append(*value)
 
-        # Bind keyboard listener
-        Window.bind(on_keyboard=self._on_keyboard)
-
     def _create_widget(self, file):
         """Create widget for display of the specified file.
 
@@ -258,26 +255,3 @@ class Slideshow(AnchorLayout):
         """Clock callback function. Display the next file in the slideshow."""
         # Display next file in repository.
         self.next()
-
-    def _on_keyboard(self, window, key, *args):
-        """Handle keyboard events.
-
-        The following events are currently supported:
-        - Right arrow: Show net file.
-        - Left arrow: Show previous file (not yet implemented).
-        - Escape: Exit application.
-        """
-        Logger.info(f"Slideshow: Key '{key}' pressed.")
-        # Display previous file if left arrow pressed.
-        if key == 276:
-            # Not yet implemented as index iterators do not (yet) allow to go backwards.
-            pass
-        # Exit application if escape key pressed.
-        elif key == 27:
-            App.get_running_app().stop()
-        # Display next file for all other keys
-        else:
-            Clock.unschedule(self._event)
-            self.next()
-            Clock.schedule_interval(self._event, self._config['pause'])
-        return True

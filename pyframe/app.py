@@ -241,6 +241,9 @@ class App(kivy.app.App, Controller):
                 Logger.critical(f"Configuration: {e}")
                 sys.exit(1)
 
+        # Bind keyboard listener
+        Window.bind(on_keyboard=self.on_keyboard)
+
         # Create scheduler if configured and activated.
         if 'schedule' in self._config and (self._config['enable_scheduler'] == "on" or self._config['enable_scheduler'] is True):
             try:
@@ -252,6 +255,30 @@ class App(kivy.app.App, Controller):
         else:
             root.play()
         return root
+
+    def on_keyboard(self, window, key, *args):
+        """Handle keyboard events.
+
+        The following events are currently supported:
+        - Right arrow: Show net file.
+        - Left arrow: Show previous file (not yet implemented).
+        - Escape: Exit application.
+        """
+        Logger.info(f"App: Key '{key}' pressed.")
+        # Display previous file if left arrow pressed.
+        if key == 276:
+            # Not yet implemented as index iterators do not (yet) allow to go backwards.
+            pass
+        # Exit application if escape key pressed.
+        elif key == 27:
+            # Let the default handler do the necessary work.
+            return False
+        # Display next file for all other keys
+        else:
+            Clock.unschedule(self._event)
+            self.next()
+            Clock.schedule_interval(self._event, self._config['pause'])
+        return True
 
     def on_stop(self):
         """Safely stop application."""
@@ -267,6 +294,7 @@ class App(kivy.app.App, Controller):
         # Stop current slideshow.
         self.stop_slideshow()
         Logger.debug("App: Stopping slideshow.")
+        return True
 
     def play_slideshow(self, slideshow=None):
         """Start playing the specified slideshow.
