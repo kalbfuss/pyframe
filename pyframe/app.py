@@ -175,7 +175,7 @@ class App(kivy.app.App, Controller):
 
         # Set display mode.
         self._display_timeout = self._config['display_timeout']
-        self._display_event = None
+        self._timeout_event = None
         self._display_mode = ""
         self._display_state = ""
         self.display_mode = self._config['display_mode']
@@ -343,8 +343,8 @@ class App(kivy.app.App, Controller):
         # Return if already in the right mode.
         if mode == self._display_mode: return
         # Cancel previously scheduled timeout event.
-        if self._display_event is not None:
-            self._display_event.cancel()
+        if self._timeout_event is not None:
+            self._timeout_event.cancel()
         # Turn display on and start playing slideshow.
         if mode == "on":
             Logger.info("Controller: Turning display on.")
@@ -362,7 +362,7 @@ class App(kivy.app.App, Controller):
             self.play()
             # Update last touch time stamp and schedule timeout event.
             self._last_touch = time.time()
-            self._screen_event = self._display_event = Clock.schedule_once(self._on_display_timeout, self._display_timeout)
+            self._timeout_event = Clock.schedule_once(self._on_display_timeout, self._display_timeout)
         # Raise exception upon invalid display mode.
         else:
             raise Exception(f"Controller: The selected display mode '{mode}' is invalid. Valid display modes are 'on', 'off', and 'motion'.")
@@ -406,7 +406,7 @@ class App(kivy.app.App, Controller):
         self.display_off()
 
     def play(self):
-        """Start playing the current slideshow."""
+        """Start/resume playing the current slideshow."""
         if self.root is not None:
             Logger.info("Controller: Playing/resuming slideshow.")
             self.root.play()
@@ -482,7 +482,7 @@ class App(kivy.app.App, Controller):
             self.display_on()
             self.play()
             # Cancel previously scheduled timeout event.
-            if self._display_event is not None:
-                self._display_event.cancel()
+            if self._timeout_event is not None:
+                self._timeout_event.cancel()
             # Schedule new timeout event.
-            self._screen_event = Clock.schedule_once(self._on_display_timeout, self._display_timeout)
+            self._timeout_event = Clock.schedule_once(self._on_display_timeout, self._display_timeout)
