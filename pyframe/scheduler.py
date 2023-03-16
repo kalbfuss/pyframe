@@ -72,7 +72,7 @@ class Scheduler:
 
             # Check value of parameter slideshow if specified.
             if 'slideshow' in event_config and event_config['slideshow'] not in self._app.slideshows:
-                raise InvalidScheduleConfigurationError(f"Invalid slideshow  '{event_config['slideshow']}' in the configuration of event '{event}'. Valid slideshows are {self._app.slideshows}.", event_config)                
+                raise InvalidScheduleConfigurationError(f"Invalid slideshow  '{event_config['slideshow']}' in the configuration of event '{event}'. Valid slideshows are {self._app.slideshows}.", event_config)
 
             # Schedule events.
             try:
@@ -102,3 +102,4 @@ class Scheduler:
         display_mode = config.get('display_mode')
         if display_mode is not None:
             self._app.display_mode = display_mode
+            self._app.play()

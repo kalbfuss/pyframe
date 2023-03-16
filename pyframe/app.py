@@ -454,8 +454,8 @@ class App(kivy.app.App, Controller):
         """
         new_root = self._slideshows.get(name, self.root)
         if new_root is not self.root:
-            Logger.debug(f"Controller: Selecting slideshow '{name}'.")
             self.stop()
+            Logger.info(f"Controller: Selecting slideshow '{name}'.")
             Window.add_widget(new_root)
             Window.remove_widget(self.root)
             self.root = new_root
