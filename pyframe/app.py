@@ -255,12 +255,6 @@ class App(kivy.app.App, Controller):
         # Make first slideshow the main root widget
         root = next(iter(self._slideshows.values()))
 
-        # Wait until index contains at least one entry.
-        while root.length() == 0:
-            time.sleep(1)
-            Logger.warn("App: Slideshow still empty. Giving more time to build index.")
-        Logger.info(f"App: Proceeding with {root.length()} files in slideshow.")
-
         # Create mqtt interface if configured and activated.
         if 'mqtt' in self._config and self._config['enable_mqtt'] == "on" or self._config['enable_mqtt'] is True:
             try:
@@ -284,6 +278,12 @@ class App(kivy.app.App, Controller):
                 sys.exit(1)
         # Start playing first defined slideshow otherwise.
         else:
+            # Wait until index contains at least one entry.
+            while root.length() == 0:
+                time.sleep(1)
+                Logger.warn("App: Slideshow still empty. Giving more time to build index.")
+            else:
+                Logger.info(f"App: Proceeding with {root.length()} files in slideshow.")
             root.play()
         return root
 
