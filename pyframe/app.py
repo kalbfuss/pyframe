@@ -133,7 +133,7 @@ class App(kivy.app.App, Controller):
         # Create empty dictionary to collect slideshows
         self._slideshows = dict()
         # Extract global slideshow configuration
-        global_config = {key: config[key] for key in ('always_excluded_tags', 'bg_color', 'excluded_tags', 'file_types', 'most_recent', 'order', 'orientation', 'pause', 'resize', 'rotation', 'sequence', 'tags') if key in config}
+        global_config = {key: config[key] for key in ('always_excluded_tags', 'bg_color', 'excluded_tags', 'file_types', 'label_content', 'label_duration', 'label_font_size', 'label_mode',  'label_padding', 'most_recent', 'order', 'orientation', 'pause', 'resize', 'rotation', 'sequence', 'tags') if key in config}
 
         # Create slideshows from configuration.
         for name, config in config['slideshows'].items():
@@ -216,6 +216,11 @@ class App(kivy.app.App, Controller):
         'file_types': [ "images", "videos" ],
         'index': "./index.sqlite",
         'index_update_interval': 0,
+        'label_mode': "off",
+        'label_content': "all",
+        'label_duration': 24,
+        'label_font_size': 0.08,
+        'label_padding': 0.05,
         'logging': "on",
         'log_level': "warn",
         'log_dir': "./log",

@@ -58,7 +58,7 @@ class Slideshow(AnchorLayout):
         self._length = 0
 
         # Make sure only valid parameters have been specified.
-        valid_keys = {'always_excluded_tags', 'bg_color', 'excluded_tags', 'file_types', 'most_recent', 'order', 'orientation', 'pause', 'repositories', 'sequence', 'resize', 'rotation', 'tags'}
+        valid_keys = {'always_excluded_tags', 'bg_color', 'excluded_tags', 'file_types', 'label_content', 'label_duration', 'label_font_size', 'label_mode', 'label_padding', 'most_recent', 'order', 'orientation', 'pause', 'repositories', 'sequence', 'resize', 'rotation', 'tags'}
         keys = set(config.keys())
         if not keys.issubset(valid_keys):
             raise InvalidSlideshowConfigurationError(f"The configuration of slideshow '{self._name}' contains additional parameters. Only the slideshow parameters {valid_keys} are accepted, but the additional parameter(s) {keys.difference(valid_keys)} has/have been specified.", config)
@@ -127,6 +127,7 @@ class Slideshow(AnchorLayout):
                 # Convert to list if single value specified.
                 if type(value) == str:
                     value = [value]
+                Logger.debug(f"Slideshow: Filtering for tags '{value}' from criterion 'tags' in slideshow '{self._name}'.")
                 self._criteria['tags'] = value
 
             # Filter out excluded tags.
@@ -136,6 +137,7 @@ class Slideshow(AnchorLayout):
                 # Convert to list if single value specified.
                 if type(value) == str:
                     value = [value]
+                Logger.debug(f"Slideshow: Excluding tags '{value}' from criterion 'excluded_tags' in slideshow '{self._name}'.")
                 # Add or append criterion
                 if 'excluded_tags' not in self._criteria:
                     self._criteria['excluded_tags'] = value
@@ -150,6 +152,7 @@ class Slideshow(AnchorLayout):
                 if type(value) == str:
                     value = [value]
                 # Add or append criterion
+                Logger.debug(f"Slideshow: Excluding tags '{value}' from criterion 'always_excluded_tags' in slideshow '{self._name}'.")
                 if 'excluded_tags' not in self._criteria:
                     self._criteria['excluded_tags'] = value
                 else:

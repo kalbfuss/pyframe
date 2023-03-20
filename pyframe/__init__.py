@@ -12,6 +12,7 @@ License: t.b.d.
 
 
 from . mylogging import Handler
+from . content import Content
 from . video import SlideshowVideo
 from . image import SlideshowImage
 from . indexer import Indexer

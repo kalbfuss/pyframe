@@ -5,8 +5,10 @@ from kivy.logger import Logger
 from kivy.uix.video import Video
 from kivy.uix.widget import Widget
 
+from pyframe import Content
 
-class SlideshowVideo(Widget):
+
+class SlideshowVideo(Content):
     """Video slideshow widget.
 
     Loads the video from the specified File and starts playing it as soon as the
@@ -25,13 +27,13 @@ class SlideshowVideo(Widget):
             resize: Mode (str) for resizing of videos. Must equal "fit" or "fill".
         :type config: dict
         """
-        Widget.__init__(self)
+        super().__init__(file, config)
         self._file = file
         self._rotation = file.rotation - config['rotation']
         self._bgcolor = config['bg_color']
         self._resize = config['resize']
         self._video = Video(source=file.source, state='stop', allow_stretch=True, options={'eos': 'loop'})
-        self.add_widget(self._video)
+        self.add_widget(self._video, len(self.children))
         # Call update_canvas method when the size of the widget changes.
         self.bind(size=self.update_canvas)
         # Call autoplay method when the widget becomes visible/invisible.
@@ -43,15 +45,6 @@ class SlideshowVideo(Widget):
             self._video.state = 'stop'
         else:
             self._video.state = 'play'
-
-    @property
-    def file(self):
-        """Return the linked repository file for the slideshow video.
-
-        :return: Linked repository file
-        :rtype: repository.file
-        """
-        return self._file
 
     def update_canvas(self, *args):
         """Update canvas when the size of the widget changes."""

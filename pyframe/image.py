@@ -3,10 +3,13 @@
 from kivy.graphics import PushMatrix, PopMatrix, Rotate, Color, Rectangle
 from kivy.logger import Logger
 from kivy.uix.image import Image
+from kivy.uix.label import Label
 from kivy.uix.widget import Widget
 
+from pyframe import Content
 
-class SlideshowImage(Widget):
+
+class SlideshowImage(Content):
     """Image slideshow widget.
 
     Loads the image from the specified File and starts playing it as soon as the
@@ -25,24 +28,16 @@ class SlideshowImage(Widget):
             resize: Mode (str) for resizing of images. Must equal "fit" or "fill".
         :type config: dict
         """
-        Widget.__init__(self)
+        super().__init__(file, config)
         self._file = file
         self._rotation = file.rotation - config['rotation']
         self._bgcolor = config['bg_color']
         self._resize = config['resize']
+        # Create and add image widget
         self._image = Image(source=file.source, allow_stretch=True)
-        self.add_widget(self._image)
+        self.add_widget(self._image, len(self.children))
         # Call update_canvas method when the size of the widget changes.
         self.bind(size=self.update_canvas)
-
-    @property
-    def file(self):
-        """Return the linked repository file for the slideshow image.
-
-        :return: Linked repository file
-        :rtype: repository.file
-        """
-        return self._file
 
     def update_canvas(self, *args):
         """Update canvas when the size of the widget changes."""
