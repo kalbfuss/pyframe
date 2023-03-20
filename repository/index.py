@@ -365,7 +365,7 @@ class SelectiveIndexIterator:
 
             # Exclude files with excluded tags from iteration.
             elif key == "excluded_tags":
-                query = query.filter(or_(MetaData.tags.any(func.lower(MetaDataTag.name).notin_([tag.lower() for tag in value])), MetaData.tags == None))
+                query = query.filter(or_(~MetaData.tags.any(func.lower(MetaDataTag.name).in_([tag.lower() for tag in value])), MetaData.tags == None))
 
         # Determine limiting date to limit iteration to the n most recent files
         # based on the creation date. Outside of the loop since query needs to
