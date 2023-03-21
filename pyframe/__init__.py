@@ -16,8 +16,8 @@ from . content import Content
 from . video import SlideshowVideo
 from . image import SlideshowImage
 from . indexer import Indexer
+from . controller import Controller, DISPLAY_MODE, DISPLAY_STATE, PLAY_STATE
 from . scheduler import Scheduler
 from . slideshow import Slideshow, InvalidSlideshowConfigurationError
-from . controller import Controller
 from . mqtt import MqttInterface
 from . app import App

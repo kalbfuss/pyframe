@@ -9,6 +9,8 @@ from kivy.logger import Logger
 from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.widget import Widget
 
+from . import PLAY_STATE
+
 from pyframe import SlideshowImage, SlideshowVideo
 
 
@@ -30,11 +32,6 @@ class Slideshow(AnchorLayout):
     optional parameters, which are passed to the constructor.
     """
 
-    # State definitions
-    STATE_STOPPED = 0
-    STATE_PLAYING = 1
-    STATE_PAUSED = 2
-
     def __init__(self, name, index, config):
         """Initialize Slideshow instance.
 
@@ -50,12 +47,11 @@ class Slideshow(AnchorLayout):
         self._name = name
         self._index = index
         self._config = config
-        self._state = Slideshow.STATE_STOPPED
+        self._play_state = PLAY_STATE.STOPPED
         self._event = None
         self._current_widget = None
         self._next_widget = None
         self._iterator = None
-        self._length = 0
 
         # Make sure only valid parameters have been specified.
         valid_keys = {'always_excluded_tags', 'bg_color', 'excluded_tags', 'file_types', 'label_content', 'label_duration', 'label_font_size', 'label_mode', 'label_padding', 'most_recent', 'order', 'orientation', 'pause', 'repositories', 'sequence', 'resize', 'rotation', 'tags'}
@@ -171,11 +167,12 @@ class Slideshow(AnchorLayout):
             widget = SlideshowVideo(file, self._config)
         return widget
 
-    def length(self):
+    @property
+    def file_count(self):
         """Returns the number of files in the slideshow."""
         # Return initial count of current iterator if exists.
         if self._iterator is not None:
-            return self._length()
+            return self._iterator.count()
         else:
             # Create temporary iterator otherwise to determine length.
             return self._index.iterator(**self._criteria).count()
@@ -233,20 +230,20 @@ class Slideshow(AnchorLayout):
         return self._name
 
     @property
-    def state(self):
-        """Return state of the slideshow.
+    def play_state(self):
+        """Return play state.
 
-        Valid states are STATE_STOPPED, STATE_PLAYING, and STATE_PAUSED.
+        See enumeration PLAY_STATE for possible values.
 
-        :return: Slideshow state
-        :rtype: int
+        :return: play state
+        :rtype: str
         """
-        return self._state
+        return self._play_state
 
     def next(self, reschedule=True):
         """Display next file in the index."""
         # Unschedule and re-schedule callback function
-        if reschedule and self._state == Slideshow.STATE_PLAYING and self._event is not None:
+        if reschedule and self._play_state == PLAY_STATE.PLAYING and self._event is not None:
             self._event.cancel()
             self._event = Clock.schedule_interval(self._clock_callback, self._config['pause'])
         # Remove current widget from layout.
@@ -261,41 +258,44 @@ class Slideshow(AnchorLayout):
     def pause(self):
         """Pause playing slideshow."""
         # Skip if already paused.
-        if self._state == Slideshow.STATE_PAUSED: return
+        if self._play_state == PLAY_STATE.PAUSED: return
         # Unschedule the callback function.
         if self._event is not None:
             self._event.cancel()
             self._event = None
+        # Stop playing content of current widget.
+        self._current_widget.stop()
         # Update state.
-        self._state = Slideshow.STATE_PAUSED
+        self._play_state = PLAY_STATE.PAUSED
 
     def play(self):
         """Start playing slideshow."""
         # Skip if already playing.
-        if self._state == Slideshow.STATE_PLAYING: return
+        if self._play_state == PLAY_STATE.PLAYING: return
 
         # Restart iteration if stopped.
-        if self._state == Slideshow.STATE_STOPPED:
+        if self._play_state == PLAY_STATE.STOPPED:
             # Create selective index iterator with sorting/filter criteria from the
             # slideshow configuration.
             self._iterator = self._index.iterator(**self._criteria)
-            # Save number of images in the slide show.
-            self._length = self._iterator.count()
             # Create current widget from first file, add to layout and start playing.
             self._current_widget = self._create_next_widget()
             self.add_widget(self._current_widget)
             # Create next widget from second file.
             self._next_widget = self._create_next_widget()
+        # Restart playing content if paused.
+        elif self._play_state == PLAY_STATE.PAUSED:
+            self._current_widget.play()
 
         # Schedule callback function to start playing slideshow.
         self._event = Clock.schedule_interval(self._clock_callback, self._config['pause'])
         # Update state.
-        self._state = Slideshow.STATE_PLAYING
+        self._play_state = PLAY_STATE.PLAYING
 
     def stop(self):
         """Stop playing slideshow."""
         # Skip if already stopped.
-        if self._state == Slideshow.STATE_STOPPED: return
+        if self._play_state == PLAY_STATE.STOPPED: return
         # Unschedule callback function.
         if self._event is not None:
             self._event.cancel()
@@ -308,7 +308,7 @@ class Slideshow(AnchorLayout):
         self._next_widget = None
         self._iterator = None
         # Update state.
-        self._state = Slideshow.STATE_STOPPED
+        self._play_state = PLAY_STATE.STOPPED
 
     def _clock_callback(self, dt):
         """Clock callback function. Display the next file in the slideshow."""

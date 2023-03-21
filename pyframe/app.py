@@ -12,7 +12,7 @@ import yaml
 import kivy.app
 
 from repository import Index, Repository, InvalidConfigurationError, InvalidUuidError
-from . import Indexer, Handler, Slideshow, Scheduler, MqttInterface, InvalidSlideshowConfigurationError, Controller
+from . import Indexer, Handler, Slideshow, Scheduler, MqttInterface, InvalidSlideshowConfigurationError, Controller, DISPLAY_MODE, DISPLAY_STATE, PLAY_STATE
 
 from kivy.core.window import Window
 from kivy.clock import Clock
@@ -158,13 +158,19 @@ class App(kivy.app.App, Controller):
 
         # Check value of parameter display mode.
         display_mode = self._config['display_mode']
-        if display_mode is True: self._config['display_mode'] = "on"
-        elif display_mode is False: self._config['display_mode'] = "off"
-        elif display_mode == "on": pass
-        elif display_mode == "off": pass
-        elif display_mode == "motion": pass
-        else:
-            Logger.critical(f"Configuration: Invalid display mode '{display_mode}' specified. Valid display modes are 'on', 'off', and 'motion'.")
+        values = [ item.value for item in DISPLAY_MODE ]
+        if display_mode not in values:
+            Logger.critical(f"Configuration: Invalid display mode '{display_mode}' specified. Valid display modes are '{values}'.")
+            sys.exit(1)
+
+        display_state = self._config['display_state']
+        # Convert from booleans to "on" and "off"
+        if display_state is True: display_state = "on"
+        elif display_state is False: display_state = "off"
+        # Check value of parameter display state.
+        values = [ item.value for item in DISPLAY_STATE ]
+        if display_state not in values:
+            Logger.critical(f"Configuration: Invalid display state '{display_state}' specified. Valid display states are '{values}'.")
             sys.exit(1)
 
         # Check value of parameter display timeout
@@ -173,12 +179,13 @@ class App(kivy.app.App, Controller):
             Logger.critical(f"Configuration: Invalid value '{display_timeout}' for parameter display timeout specified. Timeout needs to be a positive integer.")
             sys.exit(1)
 
-        # Set display mode.
-        self._display_timeout = self._config['display_timeout']
+        # Initialize display state and mode.
+        self._display_timeout = display_timeout
         self._timeout_event = None
         self._display_mode = ""
         self._display_state = ""
-        self.display_mode = self._config['display_mode']
+        self.display_state = display_state
+        self.display_mode = display_mode
 
         # Set window size.
         value = self._config['window_size']
@@ -209,7 +216,8 @@ class App(kivy.app.App, Controller):
     _config = {
         'bg_color': [0.9,0.9,0.8],
         'cache': "./cache",
-        'display_mode': "on",
+        'display_mode': "static",
+        'display_state': "on",
         'display_timeout': 300,
         'enable_scheduler': "on",
         'enable_mqtt': "on",
@@ -217,10 +225,10 @@ class App(kivy.app.App, Controller):
         'index': "./index.sqlite",
         'index_update_interval': 0,
         'label_mode': "off",
-        'label_content': "all",
+        'label_content': "full",
         'label_duration': 24,
         'label_font_size': 0.08,
-        'label_padding': 0.05,
+        'label_padding': 0.03,
         'logging': "on",
         'log_level': "warn",
         'log_dir': "./log",
@@ -240,6 +248,7 @@ class App(kivy.app.App, Controller):
         """
         self._scheduler = None
         self._mqtt_interface = None
+        self._play_state = PLAY_STATE.STOPPED
 
         # Load configuration.
         self.__load_config()
@@ -284,11 +293,11 @@ class App(kivy.app.App, Controller):
         # Start playing first defined slideshow otherwise.
         else:
             # Wait until index contains at least one entry.
-            while root.length() == 0:
+            while root.file_count == 0:
                 time.sleep(1)
                 Logger.warn("App: Slideshow still empty. Giving more time to build index.")
             else:
-                Logger.info(f"App: Proceeding with {root.length()} files in slideshow.")
+                Logger.info(f"App: Proceeding with {root.file_count} files in slideshow.")
             root.play()
         return root
 
@@ -301,6 +310,8 @@ class App(kivy.app.App, Controller):
         - Escape: Exit application.
         """
         Logger.info(f"App: Key '{key}' pressed.")
+        # Touch controller.
+        self.touch()
         # Display previous file if left arrow pressed.
         if key == 276:
             # Not yet implemented as index iterators do not (yet) allow to go backwards.
@@ -324,119 +335,16 @@ class App(kivy.app.App, Controller):
         # Stop scheduler if running.
         if self._scheduler is not None:
             Logger.debug("App: Stopping scheduler.")
-            pass
         # Stop current slideshow.
         self.stop()
         return True
 
-    @property
-    def display_mode(self):
-        """Return the display mode.
-
-        :return: display mode
-        :rtype: str
-        """
-        return self._display_mode
-
-    @display_mode.setter
-    def display_mode(self, mode):
-        """Set the display mode.
-
-        :param mode: display mode
-        :type mode: str
-        """
-        # Return if already in the right mode.
-        if mode == self._display_mode: return
-        # Cancel previously scheduled timeout event.
-        if self._timeout_event is not None:
-            self._timeout_event.cancel()
-        # Turn display on and start playing slideshow.
-        if mode == "on":
-            Logger.info("Controller: Turning display on.")
-            self.display_on()
-            self.play()
-        # Turn display off and pause playing slideshow.
-        elif mode == "off":
-            Logger.info("Controller: Turning display off.")
-            self.pause()
-            self.display_off()
-        #  Set display to motion mode and start playing slideshow.
-        elif mode == "motion":
-            Logger.info("Controller: Setting display to motion mode.")
-            self.display_on()
-            self.play()
-            # Update last touch time stamp and schedule timeout event.
-            self._last_touch = time.time()
-            self._timeout_event = Clock.schedule_once(self._on_display_timeout, self._display_timeout)
-        # Raise exception upon invalid display mode.
-        else:
-            raise Exception(f"Controller: The selected display mode '{mode}' is invalid. Valid display modes are 'on', 'off', and 'motion'.")
-        # Update display mode.
-        self._display_mode = mode
-
-    @property
-    def display_state(self):
-        """Return the display state.
-
-        :return: display state
-        :rtype: str
-        """
-        return self._display_state
-
-    def display_on(self):
-        """Turn the display on."""
-        # Return if already on.
-        if self._display_state == "on": return
-        # Turn display off on Linux with X server.
-        subprocess.run("/usr/bin/xset dpms force on", shell=True,  stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL)
-        # Update display state.
-        self._display_state == "on"
-
-    def display_off(self):
-        """Turn the display off."""
-        # Return if already off.
-        if self._display_state == "off": return
-        # Turn display on Linux with X server.
-        subprocess.run("/usr/bin/xset dpms force off", shell=True, stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL)
-        # Update display state.
-        self._display_state == "off"
-
-    def _on_display_timeout(self, dt):
+    def on_display_timeout(self, dt):
         """Handle display timeouts in motion mode."""
         # Pause playing slideshow and turn display off.
-        Logger.debug(f"Controller: Display has timed out. Turning display off.")
+        Logger.debug(f"Controller: Display has timed out.")
         self.pause()
         self.display_off()
-
-    def play(self):
-        """Start/resume playing the current slideshow."""
-        if self.root is not None:
-            Logger.info("Controller: Playing/resuming slideshow.")
-            self.root.play()
-
-    def pause(self):
-        """Pause playing the current slideshow."""
-        if self.root is not None:
-            Logger.info("Controller: Pausing slideshow.")
-            self.root.pause()
-
-    def stop(self):
-        """Stop playing the current slideshow."""
-        if self.root is not None:
-            Logger.info("Controller: Stopping slideshow.")
-            self.root.stop()
-
-    def previous(self):
-        """Change to previous file in slideshow."""
-        Logger.warn("Controller: Function 'previous' has not been implemented yet.")
-
-    def next(self):
-        """Change to next file in slideshow."""
-        if self.root is not None:
-            Logger.info("Controller: Changing to next file in slideshow.")
-            self.root.next()
 
     @property
     def slideshow(self):
@@ -445,10 +353,7 @@ class App(kivy.app.App, Controller):
         :return: slideshow name
         :rtype: str
         """
-        if self.root is not None:
-            return self.root.Name
-        else:
-            return ""
+        return self.root.name
 
     @slideshow.setter
     def slideshow(self, name):
@@ -460,10 +365,163 @@ class App(kivy.app.App, Controller):
         new_root = self._slideshows.get(name, self.root)
         if new_root is not self.root:
             self.stop()
-            Logger.info(f"Controller: Selecting slideshow '{name}'.")
+            Logger.info(f"Controller: Setting slideshow to '{name}'.")
             Window.add_widget(new_root)
             Window.remove_widget(self.root)
             self.root = new_root
+
+    @property
+    def current_file(self):
+        """Return the current repository file.
+
+        :return: current file
+        :rtype: repository.File
+        """
+        return self.root.current_file
+
+    @property
+    def display_mode(self):
+        """Return display mode.
+
+        See enumeration DISPLAY_MODE for possible values.
+
+        :return: display mode
+        :rtype: str
+        """
+        return self._display_mode
+
+    @display_mode.setter
+    def display_mode(self, mode):
+        """Set display mode.
+
+        See enumeration DISPLAY_MODE for possible values.
+
+        :param mode: display mode
+        :type mode: str
+        """
+        # Return if already in the right mode.
+        if mode == self._display_mode: return
+        Logger.info(f"Controller: Changing display mode from '{self._display_mode}' to '{mode}'.")
+        # Turn display on and start playing slideshow.
+        # Cancel previously scheduled timeout event.
+        if self._timeout_event is not None:
+            self._timeout_event.cancel()
+        #  Set display to motion mode and start playing slideshow.
+        if mode == DISPLAY_MODE.STATIC: pass
+        elif mode == DISPLAY_MODE.MOTION:
+            # Update last touch time stamp and schedule timeout event.
+            self._last_touch = time.time()
+            self._timeout_event = Clock.schedule_once(self.on_display_timeout, self._display_timeout)
+        # Raise exception upon invalid display mode.
+        else:
+            raise Exception(f"The selected display mode '{mode}' is invalid. Acceptable values are '{[ item.value for item in DISPLAY_MODE ]}'.")
+        # Update display mode.
+        self._display_mode = mode
+
+    def display_on(self):
+        """Turn the display on."""
+        # Return if already on.
+        if self._display_state == DISPLAY_STATE.ON: return
+        Logger.info("Controller: Turning display on.")
+        # Turn display off on Linux with X server.
+        subprocess.run("/usr/bin/xset dpms force on", shell=True,  stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL)
+        # Update display state.
+        self._display_state == DISPLAY_STATE.ON
+
+    def display_off(self):
+        """Turn the display off."""
+        # Return if already off.
+        if self._display_state == DISPLAY_STATE.OFF: return
+        Logger.info("Controller: Turning display off.")
+        # Turn display on Linux with X server.
+        subprocess.run("/usr/bin/xset dpms force off", shell=True, stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL)
+        # Update display state.
+        self._display_state == DISPLAY_STATE.OFF
+
+    @property
+    def display_state(self):
+        """Return display state.
+
+        See enumeration DISPLAY_STATE for possible values.
+
+        :return: display state
+        :rtype: str
+        """
+        return self._display_state
+
+    @display_state.setter
+    def display_state(self, state):
+        """Set display state.
+
+        See enumeration DISPLAY_STATE for possible values.
+
+        :param state: display state
+        :type mode: str
+        """
+        if self._display_state == state: return
+        if state == DISPLAY_STATE.ON: self.display_on()
+        elif state == DISPLAY_STATE.OFF: self.display_off()
+        else:
+            raise Exception(f"The selected display state '{state}' is invalid. Acceptable values are '{[ item.value for item in DISPLAY_STATE ]}'.")
+
+    def pause(self):
+        """Pause playing the current slideshow."""
+        if self._play_state == PLAY_STATE.PAUSED: return
+        Logger.info(f"Controller: Pausing slideshow '{self.slideshow}'.")
+        self.root.pause()
+        self._play_state = PLAY_STATE.PAUSED
+
+    def play(self):
+        """Start/resume playing the current slideshow."""
+        if self._play_state == PLAY_STATE.PLAYING: return
+        Logger.info(f"Controller: Playing/resuming slideshow '{self.slideshow}'.")
+        self.root.play()
+        self._play_state = PLAY_STATE.PLAYING
+
+    @property
+    def play_state(self):
+        """Return play state.
+
+        See enumeration PLAY_STATE for possible values.
+
+        :return: play state
+        :rtype: str
+        """
+        return self._play_state
+
+    @play_state.setter
+    def play_state(self, state):
+        """Set play state.
+
+        See enumeration PLAY_STATE for possible values.
+
+        :param mode: play state
+        :type mode: str
+        """
+        if self._play_state == state: return
+        if state == DISPLAY_STATE.PLAYING: self.play()
+        elif state == DISPLAY_STATE.PAUSED: self.pause()
+        elif state == DISPLAY_STATE.STOPPED: self.stop()
+        else:
+            raise Exception(f"The selected play state '{state}' is invalid. Acceptable values are '{[ item.value for item in PLAY_STATE ]}'.")
+
+    def stop(self):
+        """Stop playing the current slideshow."""
+        if self._play_state == PLAY_STATE.STOPPED: return
+        Logger.info(f"Controller: Stopping slideshow '{self.slideshow}'.")
+        self.root.stop()
+        self._play_state = PLAY_STATE.STOPPED
+
+    def previous(self):
+        """Change to previous file in slideshow."""
+        Logger.warn("Controller: Function 'previous' has not been implemented yet.")
+
+    def next(self):
+        """Change to next file in slideshow."""
+        Logger.info(f"Controller: Changing to next file in slideshow '{self.slideshow}'.")
+        self.root.next()
 
     @property
     def slideshows(self):
@@ -478,16 +536,17 @@ class App(kivy.app.App, Controller):
         """Update last touch time stamp and prevent screen timeout in display motion mode."""
         # Update last touch time stamp.
         self._last_touch = time.time()
-        # Schedule timeout event.
-        if self._display_mode == "motion":
-            next_timeout_asc = time.asctime(time.localtime(self._last_touch + self._display_timeout))
-            Logger.debug(f"Controller: Controller touched. Next display timeout scheduled in {self._display_timeout} s at {next_timeout_asc}.")
-            # Turn display on and restart playing in case the display
-            # has timed out out before.
-            self.display_on()
-            self.play()
-            # Cancel previously scheduled timeout event.
-            if self._timeout_event is not None:
-                self._timeout_event.cancel()
-            # Schedule new timeout event.
-            self._timeout_event = Clock.schedule_once(self._on_display_timeout, self._display_timeout)
+        # Return if display not in motion mode.
+        if self.display_mode != DISPLAY_MODE.MOTION: return
+        # Cancel previously scheduled timeout event.
+        if self._timeout_event is not None:
+            self._timeout_event.cancel()
+        # Turn display on and restart playing in case the display
+        # has timed out out before.
+        self.display_on()
+        self.play()
+        # Schedule new timeout event.
+        self._timeout_event = Clock.schedule_once(self.on_display_timeout, self._display_timeout)
+        # Log next display timeout.
+        next_timeout_asc = time.asctime(time.localtime(self._last_touch + self._display_timeout))
+        Logger.debug(f"Controller: Controller has been touched. Next display timeout scheduled in {self._display_timeout} s at {next_timeout_asc}.")

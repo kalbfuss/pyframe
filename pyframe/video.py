@@ -42,9 +42,17 @@ class SlideshowVideo(Content):
     def autoplay(self, *args):
         """Start/stop playing the video when the widget becomes visible/invisible."""
         if self.parent is None:
-            self._video.state = 'stop'
+            self.stop()
         else:
-            self._video.state = 'play'
+            self.play()
+
+    def play(self):
+        """Start playing content."""
+        self._video.state = 'play'
+
+    def stop(self):
+        """Stop playing content."""
+        self._video.state = 'stop'
 
     def update_canvas(self, *args):
         """Update canvas when the size of the widget changes."""

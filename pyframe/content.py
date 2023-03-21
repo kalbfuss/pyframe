@@ -35,6 +35,32 @@ class Content(Widget):
         # Call _adjust_label method after the widget's size has been set.
         self.bind(size=self._adjust_label)
 
+    def _adjust_label(self, *args):
+        """Adjust label when the widget becomes visible and its size is set."""
+        # Set font size.
+        font_size = round(self.config.get('label_font_size', 0.05) * self.height)
+        self._wlabel.font_size = font_size
+        self._blabel.font_size = font_size
+        # Set padding.
+        padding = round(self.config.get('label_padding', 0.05) * self.width)
+        self._wlabel.padding = (padding, padding)
+        self._blabel.padding = (padding, padding)
+        # Resize labels.
+        offset = ceil(0.03*font_size)
+        self._wlabel.pos = (self.x, self.y + offset)
+        self._wlabel.size = (self.width - offset, self.height)
+        self._wlabel.text_size = self._wlabel.size
+        self._blabel.pos = (self.x + offset, self.y)
+        self._blabel.size = (self.width - offset, self.height - offset)
+        self._blabel.text_size = self._blabel.size
+        # Schedule events to turn labels off and on.
+        mode = self.config.get('label_mode', "on")
+        pause = self.config.get('pause')
+        duration = self.config.get('label_duration', 24)
+        if mode == "auto" and pause is not None and duration < pause:
+            Clock.schedule_once(self._label_off, duration/2)
+            Clock.schedule_once(self._label_on, pause - duration/2)
+
     def _label_off(self, dt):
         "Turn label off."
         self._wlabel.text = ""
@@ -46,15 +72,6 @@ class Content(Widget):
         self._blabel.text = self.label
 
     @property
-    def file(self):
-        """Return linked repository file.
-
-        :return: linked repository file
-        :rtype: repository.file
-        """
-        return self._file
-
-    @property
     def config(self):
         """Return content configuration.
 
@@ -62,6 +79,15 @@ class Content(Widget):
         :rtype: dict
         """
         return self._config
+
+    @property
+    def file(self):
+        """Return linked repository file.
+
+        :return: linked repository file
+        :rtype: repository.file
+        """
+        return self._file
 
     @property
     def label(self):
@@ -96,28 +122,10 @@ class Content(Widget):
         label = label + f" · {self.file.uuid} [i]in[/i] {self.file.rep.uuid}"
         return label
 
-    def _adjust_label(self, *args):
-        """Adjust label when the widget becomes visible and its size is set."""
-        # Set font size.
-        font_size = round(self.config.get('label_font_size', 0.05) * self.height)
-        self._wlabel.font_size = font_size
-        self._blabel.font_size = font_size
-        # Set padding.
-        padding = round(self.config.get('label_padding', 0.05) * self.width)
-        self._wlabel.padding = (padding, padding)
-        self._blabel.padding = (padding, padding)
-        # Resize labels.
-        offset = ceil(0.03*font_size)
-        self._wlabel.pos = (self.x, self.y + offset)
-        self._wlabel.size = (self.width - offset, self.height)
-        self._wlabel.text_size = self._wlabel.size
-        self._blabel.pos = (self.x + offset, self.y)
-        self._blabel.size = (self.width - offset, self.height - offset)
-        self._blabel.text_size = self._blabel.size
-        # Schedule events to turn labels off and on.
-        mode = self.config.get('label_mode', "on")
-        pause = self.config.get('pause')
-        duration = self.config.get('label_duration', 24)
-        if mode == "auto" and pause is not None and duration < pause:
-            Clock.schedule_once(self._label_off, duration/2)
-            Clock.schedule_once(self._label_on, pause - duration/2)
+    def play(self):
+        """Start playing content."""
+        pass
+
+    def stop(self):
+        """Stop playing content."""
+        pass
