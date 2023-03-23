@@ -44,6 +44,7 @@ class Scheduler:
         :raises: InvalidScheduleConfigurationError
         """
         self._app = app
+        self._event = None
 
         # Define valid and required keys per event configuration.
         valid_keys = {"display_mode", "display_state", "slideshow", "time"}
@@ -97,11 +98,6 @@ class Scheduler:
         # Set clock interval and callback function.
         self.run_pending(0)
 
-    def run_pending(self, dt):
-        """Run pending schedule jobs."""
-        schedule.run_pending()
-        Clock.schedule_once(self.run_pending, schedule.idle_seconds())
-
     def on_event(self, event, config):
         """Handle scheduled events."""
         Logger.info(f"Scheduler: Event '{event}' fired.")
@@ -124,3 +120,14 @@ class Scheduler:
             elif display_state == DISPLAY_STATE.OFF:
                 self._app.stop()
                 self._app.display_off()
+
+    def run_pending(self, dt):
+        """Run pending schedule jobs."""
+        schedule.run_pending()
+        self._event = Clock.schedule_once(self.run_pending, schedule.idle_seconds())
+
+    def stop(self):
+        """Stop scheduler."""
+        if self._event is not None:
+            self._event.cancel()
+            self._event = None

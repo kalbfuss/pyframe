@@ -292,9 +292,9 @@ class Slideshow(AnchorLayout):
         self.dispatch('on_content_change', self)
 
     def on_content_change(self, *largs):
-        """Handle 'on_content_change event'."""
-        # Do nothing
-        Logger.debug("Slideshow: 'on_content_change' event fired.")
+        """Default handler for 'on_content_change' event."""
+        # Do nothing.
+        Logger.debug("Slideshow: Ignoring event 'on_content_change' since it should have been handled elsewhere.")
 
     def pause(self):
         """Pause playing slideshow."""

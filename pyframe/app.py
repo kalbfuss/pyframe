@@ -253,7 +253,11 @@ class App(kivy.app.App, Controller):
         self._mqtt_interface = None
         self._play_state = PLAY_STATE.STOPPED
 
-        # Register event fired upon state changes.
+        # Bind to window 'on_request_close' event for safe shutdown of the
+        # application.
+        Window.bind(on_request_close=self.on_request_close)
+        # Register 'on_state_change' event, which is fired upon content and
+        # controller state changes.
         self.register_event_type('on_state_change')
 
         # Load configuration.
@@ -306,6 +310,7 @@ class App(kivy.app.App, Controller):
                 Logger.info(f"App: Proceeding with {self.root.file_count} files in slideshow.")
             Logger.debug(f"{self.root}")
             self.play()
+
         return self.root
 
     def on_content_change(self, slideshow, *largs):
@@ -325,26 +330,23 @@ class App(kivy.app.App, Controller):
         - Escape: Exit application.
         """
         Logger.info(f"App: Key '{key}' pressed.")
-        # Touch controller.
+        # Touch controller to prevent screen timeout.
         self.touch()
-        # Display previous file if left arrow pressed.
-        if key == 276:
-            # Not yet implemented as index iterators do not (yet) allow to go backwards.
-            pass
+        # Display previous file if left arrow pressed. Not yet implemented.
+        if key == 276: pass
         # Exit application if escape key pressed.
         elif key == 27:
             # Let the default handler do the necessary work.
             return False
         # Display next file for all other keys
-        else:
-            self.next()
+        else: self.next()
         return True
 
     def on_state_change(self, *largs):
         """Default handler for 'on_state_change' events."""
         pass
 
-    def on_stop(self):
+    def on_request_close(self, *largs, **kwargs):
         """Safely stop application."""
         Logger.debug("App: Preparing for safe exit.")
         # Stop MQTT interface if running.
@@ -354,9 +356,10 @@ class App(kivy.app.App, Controller):
         # Stop scheduler if running.
         if self._scheduler is not None:
             Logger.debug("App: Stopping scheduler.")
+            self._scheduler.stop()
         # Stop current slideshow.
         self.stop()
-        return True
+        return False
 
     def on_display_timeout(self, dt):
         """Handle display timeouts in motion mode."""
