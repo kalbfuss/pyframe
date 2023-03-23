@@ -165,19 +165,8 @@ class Slideshow(AnchorLayout):
 
         # Compile filter criteria for use with selective index iterator.
         self.__compile_filter_criteria()
-
-        # Create selective index iterator with sorting/filter criteria from the
-        # slideshow configuration.
-        self._iterator = self._index.iterator(**self._criteria)
-        # Create current widget from first file and add to layout.
-        self._current_widget = self._create_next_widget()
-        # Create next widget from second file.
-        self._next_widget = self._create_next_widget()
-
         # Register event fired upon slideshow content changes.
         self.register_event_type('on_content_change')
-        # Fire event to indicate content change
-        self.dispatch('on_content_change', self)
 
     def _create_widget(self, file):
         """Create widget for display of the specified file.
@@ -244,10 +233,15 @@ class Slideshow(AnchorLayout):
     def current_file(self):
         """Return linked repository file for the current content widget.
 
+        Note that the method may return None if no currrent file is available,
+        e.g. if the slideshow is stopped.
+
         :return: linked repository file
         :rtype: repository.file
         """
-        return self._current_widget.file
+        if self._current_widget is not None:
+            return self._current_widget.file
+        else: return None
 
     @property
     def name(self):
@@ -314,16 +308,22 @@ class Slideshow(AnchorLayout):
         """Start playing slideshow."""
         # Skip if already playing.
         if self._play_state == PLAY_STATE.PLAYING: return
-        # Add current widget to layout if previously stopped.
-        if self._play_state == PLAY_STATE.STOPPED:
-            self.add_widget(self._current_widget)
-        # Restart playing content in current widget.
-        if hasattr(self._current_widget, 'play'):
-            self._current_widget.play()
+
+        # Create selective index iterator with sorting/filter criteria from the
+        # slideshow configuration.
+        self._iterator = self._index.iterator(**self._criteria)
+        # Create current widget from first file and add to layout.
+        self._current_widget = self._create_next_widget()
+        self.add_widget(self._current_widget)
+        # Create next widget from second file.
+        self._next_widget = self._create_next_widget()
         # Schedule callback function to start playing slideshow.
         self._event = Clock.schedule_interval(self._clock_callback, self._config['pause'])
         # Update state.
         self._play_state = PLAY_STATE.PLAYING
+        # Fire event to indicate content change.
+        self.dispatch('on_content_change', self)
+
 
     def stop(self):
         """Stop playing slideshow."""
@@ -337,11 +337,9 @@ class Slideshow(AnchorLayout):
         self.remove_widget(self._current_widget)
         # Reset selective index iterator with sorting/filter criteria from the
         # slideshow configuration.
-        self._iterator = self._index.iterator(**self._criteria)
-        # Create current widget from first file.
-        self._current_widget = self._create_next_widget()
-        # Create next widget from second file.
-        self._next_widget = self._create_next_widget()
+        self._iterator = None
+        self._current_widget = None
+        self._next_widget = None
         # Update state.
         self._play_state = PLAY_STATE.STOPPED
         # Fire event to indicate content change.

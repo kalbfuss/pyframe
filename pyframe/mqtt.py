@@ -357,28 +357,29 @@ class MqttInterface:
     def publish_state(self, *largs):
         client = self._client
 
-        # Update file sensor and attributes.
-        Logger.debug("MQTT: Updating file sensor and attributes.")
-        file = self._controller.current_file
-        eid = entity_id("File")
-        uid = unique_id(self._device_id, eid)
-        topic_head = f"{ROOT_TOPIC}/{self._device_id}/{eid}"
-        # Update state.
-        state_topic = f"{topic_head}/state"
-        payload = json.dumps({ eid: file.uuid })
-        client.publish(state_topic, payload, qos=0, retain=False)
-        # Update attributes.
-        attributes_topic = f"{topic_head}/attributes"
-        payload = {
-            'Description': file.description,
-            'Tags': "".join(f"#{tag} " for tag in file.tags),
-            'Size': f"{file.width} x {file.height}",
-            'Creation date': file.creation_date.strftime("%Y-%m-%d %H:%M:%S"),
-            'Last modified': file.last_modified.strftime("%Y-%m-%d %H:%M:%S"),
-            'Repository': file.rep.uuid
-        }
-        payload = json.dumps(payload)
-        client.publish(attributes_topic, payload, qos=0, retain=False)
+        # Update file sensor and attributes if current file available.
+        if self._controller.current_file is not None:
+            Logger.debug("MQTT: Updating file sensor and attributes.")
+            file = self._controller.current_file
+            eid = entity_id("File")
+            uid = unique_id(self._device_id, eid)
+            topic_head = f"{ROOT_TOPIC}/{self._device_id}/{eid}"
+            # Update state.
+            state_topic = f"{topic_head}/state"
+            payload = json.dumps({ eid: file.uuid })
+            client.publish(state_topic, payload, qos=0, retain=False)
+            # Update attributes.
+            attributes_topic = f"{topic_head}/attributes"
+            payload = {
+                'Description': file.description,
+                'Tags': "".join(f"#{tag} " for tag in file.tags),
+                'Size': f"{file.width} x {file.height}",
+                'Creation date': file.creation_date.strftime("%Y-%m-%d %H:%M:%S"),
+                'Last modified': file.last_modified.strftime("%Y-%m-%d %H:%M:%S"),
+                'Repository': file.rep.uuid
+            }
+            payload = json.dumps(payload)
+            client.publish(attributes_topic, payload, qos=0, retain=False)
 
         # Update selections.
         file = self._controller.current_file
