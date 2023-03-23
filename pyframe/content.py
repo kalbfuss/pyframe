@@ -114,10 +114,7 @@ class Content(Widget):
         if label_content == "short": return label
         # Format and append tags if any.
         if self.file.tags:
-            tag_str = str()
-            for tag in self.file.tags:
-                tag_str = tag_str + f" #{tag}"
-            label = label + f" · [i]{tag_str}[/i]"
+            label = label + " ·[i]" + "".join(f" #{tag}" for tag in self.file.tags) + "[/i]"
         # Append file and repository uuid.
         label = label + f" · {self.file.uuid} [i]in[/i] {self.file.rep.uuid}"
         return label

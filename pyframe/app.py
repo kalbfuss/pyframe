@@ -141,9 +141,12 @@ class App(kivy.app.App, Controller):
             # settings supersede global settings.
             combined_config = copy.deepcopy(global_config)
             combined_config.update(config)
-            # Create new slideshow and add to hash
+            # Create new slideshow, bind 'on_content_change' event and add to
+            # slideshow do dictionary.
             try:
-                self._slideshows[name] = Slideshow(name, index, combined_config)
+                slideshow = Slideshow(name, index, combined_config)
+                slideshow.bind(on_content_change=self.on_content_change)
+                self._slideshows[name] = slideshow
             except InvalidSlideshowConfigurationError as e:
                 Logger.critical(f"Configuration: {e}")
                 sys.exit(1)
@@ -250,6 +253,9 @@ class App(kivy.app.App, Controller):
         self._mqtt_interface = None
         self._play_state = PLAY_STATE.STOPPED
 
+        # Register event fired upon state changes.
+        self.register_event_type('on_state_change')
+
         # Load configuration.
         self.__load_config()
         # Configure logging.
@@ -267,7 +273,7 @@ class App(kivy.app.App, Controller):
         self.__create_slideshows()
 
         # Make first slideshow the main root widget
-        root = next(iter(self._slideshows.values()))
+        self.root = next(iter(self._slideshows.values()))
 
         # Create mqtt interface if configured and activated.
         if 'mqtt' in self._config and self._config['enable_mqtt'] == "on" or self._config['enable_mqtt'] is True:
@@ -293,13 +299,22 @@ class App(kivy.app.App, Controller):
         # Start playing first defined slideshow otherwise.
         else:
             # Wait until index contains at least one entry.
-            while root.file_count == 0:
+            while self.root.file_count == 0:
                 time.sleep(1)
                 Logger.warn("App: Slideshow still empty. Giving more time to build index.")
             else:
-                Logger.info(f"App: Proceeding with {root.file_count} files in slideshow.")
-            root.play()
-        return root
+                Logger.info(f"App: Proceeding with {self.root.file_count} files in slideshow.")
+            Logger.debug(f"{self.root}")
+            self.play()
+        return self.root
+
+    def on_content_change(self, slideshow, *largs):
+        """Handle slideshow content change events."""
+        Logger.debug(f"App: Event 'on_content_change' from slideshow '{slideshow.name}' received. Forwarding as event 'on_stage_change'.")
+        # Forward as 'on_state_change' event.
+        self.dispatch('on_state_change')
+        # Consume event.
+        return True
 
     def on_keyboard(self, window, key, *args):
         """Handle keyboard events.
@@ -325,6 +340,10 @@ class App(kivy.app.App, Controller):
             self.next()
         return True
 
+    def on_state_change(self, *largs):
+        """Default handler for 'on_state_change' events."""
+        pass
+
     def on_stop(self):
         """Safely stop application."""
         Logger.debug("App: Preparing for safe exit.")
@@ -345,30 +364,6 @@ class App(kivy.app.App, Controller):
         Logger.debug(f"Controller: Display has timed out.")
         self.pause()
         self.display_off()
-
-    @property
-    def slideshow(self):
-        """Return name of the current slideshow.
-
-        :return: slideshow name
-        :rtype: str
-        """
-        return self.root.name
-
-    @slideshow.setter
-    def slideshow(self, name):
-        """Set current slideshow by its name.
-
-        :param name: slideshow name
-        :type name: str
-        """
-        new_root = self._slideshows.get(name, self.root)
-        if new_root is not self.root:
-            self.stop()
-            Logger.info(f"Controller: Setting slideshow to '{name}'.")
-            Window.add_widget(new_root)
-            Window.remove_widget(self.root)
-            self.root = new_root
 
     @property
     def current_file(self):
@@ -417,6 +412,7 @@ class App(kivy.app.App, Controller):
             raise Exception(f"The selected display mode '{mode}' is invalid. Acceptable values are '{[ item.value for item in DISPLAY_MODE ]}'.")
         # Update display mode.
         self._display_mode = mode
+        self.dispatch('on_state_change')
 
     def display_on(self):
         """Turn the display on."""
@@ -427,7 +423,8 @@ class App(kivy.app.App, Controller):
         subprocess.run("/usr/bin/xset dpms force on", shell=True,  stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL)
         # Update display state.
-        self._display_state == DISPLAY_STATE.ON
+        self._display_state = DISPLAY_STATE.ON
+        self.dispatch('on_state_change')
 
     def display_off(self):
         """Turn the display off."""
@@ -438,7 +435,8 @@ class App(kivy.app.App, Controller):
         subprocess.run("/usr/bin/xset dpms force off", shell=True, stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL)
         # Update display state.
-        self._display_state == DISPLAY_STATE.OFF
+        self._display_state = DISPLAY_STATE.OFF
+        self.dispatch('on_state_change')
 
     @property
     def display_state(self):
@@ -472,6 +470,7 @@ class App(kivy.app.App, Controller):
         Logger.info(f"Controller: Pausing slideshow '{self.slideshow}'.")
         self.root.pause()
         self._play_state = PLAY_STATE.PAUSED
+        self.dispatch('on_state_change')
 
     def play(self):
         """Start/resume playing the current slideshow."""
@@ -479,6 +478,7 @@ class App(kivy.app.App, Controller):
         Logger.info(f"Controller: Playing/resuming slideshow '{self.slideshow}'.")
         self.root.play()
         self._play_state = PLAY_STATE.PLAYING
+        self.dispatch('on_state_change')
 
     @property
     def play_state(self):
@@ -501,9 +501,9 @@ class App(kivy.app.App, Controller):
         :type mode: str
         """
         if self._play_state == state: return
-        if state == DISPLAY_STATE.PLAYING: self.play()
-        elif state == DISPLAY_STATE.PAUSED: self.pause()
-        elif state == DISPLAY_STATE.STOPPED: self.stop()
+        if state == PLAY_STATE.PLAYING: self.play()
+        elif state == PLAY_STATE.PAUSED: self.pause()
+        elif state == PLAY_STATE.STOPPED: self.stop()
         else:
             raise Exception(f"The selected play state '{state}' is invalid. Acceptable values are '{[ item.value for item in PLAY_STATE ]}'.")
 
@@ -513,15 +513,51 @@ class App(kivy.app.App, Controller):
         Logger.info(f"Controller: Stopping slideshow '{self.slideshow}'.")
         self.root.stop()
         self._play_state = PLAY_STATE.STOPPED
+        self.dispatch('on_state_change')
 
     def previous(self):
         """Change to previous file in slideshow."""
+        # Skip if not playing.
+        if self._play_state == PLAY_STATE.STOPPED: return
         Logger.warn("Controller: Function 'previous' has not been implemented yet.")
 
     def next(self):
         """Change to next file in slideshow."""
+        # Skip if not playing.
+        if self._play_state == PLAY_STATE.STOPPED: return
         Logger.info(f"Controller: Changing to next file in slideshow '{self.slideshow}'.")
         self.root.next()
+
+    @property
+    def slideshow(self):
+        """Return name of the current slideshow.
+
+        :return: slideshow name
+        :rtype: str
+        """
+        return self.root.name
+
+    @slideshow.setter
+    def slideshow(self, name):
+        """Set current slideshow by its name.
+
+        :param name: slideshow name
+        :type name: str
+        """
+        # Retrieve slideshow by its name. Stick to the current slideshow if
+        # specified slideshow does not exist.
+        new_root = self._slideshows.get(name, self.root)
+        if new_root is not self.root:
+            # Save play state and stop playing the current slideshow.
+            cur_play_state = self.play_state
+            self.stop()
+            # Replace the root widget.
+            Logger.info(f"Controller: Setting slideshow to '{name}'.")
+            Window.add_widget(new_root)
+            Window.remove_widget(self.root)
+            self.root = new_root
+            self.play_state = cur_play_state
+            self.dispatch('on_state_change')
 
     @property
     def slideshows(self):

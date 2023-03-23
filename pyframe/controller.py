@@ -27,26 +27,6 @@ class Controller(ABC):
 
     @property
     @abstractmethod
-    def slideshow(self):
-        """Return name of the current slideshow.
-
-        :return: slideshow name
-        :rtype: str
-        """
-        pass
-
-    @slideshow.setter
-    @abstractmethod
-    def slideshow(self, name):
-        """Set current slideshow by its name.
-
-        :param name: slideshow name
-        :type name: str
-        """
-        pass
-
-    @property
-    @abstractmethod
     def current_file(self):
         """Return the current repository file.
 
@@ -155,6 +135,26 @@ class Controller(ABC):
     @abstractmethod
     def previous(self):
         """Change to previous file in slideshow."""
+        pass
+
+    @property
+    @abstractmethod
+    def slideshow(self):
+        """Return name of the current slideshow.
+
+        :return: name of slideshow
+        :rtype: str
+        """
+        pass
+
+    @slideshow.setter
+    @abstractmethod
+    def slideshow(self, name):
+        """Set current slideshow by its name.
+
+        :param name: name of slideshow
+        :type name: str
+        """
         pass
 
     @property

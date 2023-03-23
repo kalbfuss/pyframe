@@ -32,35 +32,17 @@ class Slideshow(AnchorLayout):
     optional parameters, which are passed to the constructor.
     """
 
-    def __init__(self, name, index, config):
-        """Initialize Slideshow instance.
+    def __compile_filter_criteria(self):
+        """Compile filter criteria.
 
-        :param name: Name of slideshow.
-        :type name: str
-        :param index: Index of files in active repositories.
-        :type index: repository.Index
-        :param config: Slideshow configuration from configuration file section.
-        :type config: dict
-        :raises InvalidSlideshowConfigurationError:
+        Helper function to compile filter criteria from the slideshow
+        configuration and convert them into criteria compatible with a selective
+        index iterator. Filter criteria are stored in the attribute _criteria
+        of the object.
         """
-        AnchorLayout.__init__(self, anchor_x='center', anchor_y='center')
-        self._name = name
-        self._index = index
-        self._config = config
-        self._play_state = PLAY_STATE.STOPPED
-        self._event = None
-        self._current_widget = None
-        self._next_widget = None
-        self._iterator = None
-
-        # Make sure only valid parameters have been specified.
-        valid_keys = {'always_excluded_tags', 'bg_color', 'excluded_tags', 'file_types', 'label_content', 'label_duration', 'label_font_size', 'label_mode', 'label_padding', 'most_recent', 'order', 'orientation', 'pause', 'repositories', 'sequence', 'resize', 'rotation', 'tags'}
-        keys = set(config.keys())
-        if not keys.issubset(valid_keys):
-            raise InvalidSlideshowConfigurationError(f"The configuration of slideshow '{self._name}' contains additional parameters. Only the slideshow parameters {valid_keys} are accepted, but the additional parameter(s) {keys.difference(valid_keys)} has/have been specified.", config)
-
+        config = self._config
         self._criteria = dict()
-        # Compile filter criteria from slideshow configuration.
+
         for key, value in config.items():
 
             # Filter repository by uuid.
@@ -154,10 +136,53 @@ class Slideshow(AnchorLayout):
                 else:
                     self._criteria['excluded_tags'].append(*value)
 
+    def __init__(self, name, index, config):
+        """Initialize slideshow instance.
+
+        :param name: name of slideshow.
+        :type name: str
+        :param index: index of files in active repositories.
+        :type index: repository.Index
+        :param config: slideshow configuration from configuration file section.
+        :type config: dict
+        :raises InvalidSlideshowConfigurationError:
+        """
+        AnchorLayout.__init__(self, anchor_x='center', anchor_y='center')
+        self._name = name
+        self._index = index
+        self._config = config
+        self._play_state = PLAY_STATE.STOPPED
+        self._event = None
+        self._current_widget = None
+        self._next_widget = None
+        self._iterator = None
+
+        # Make sure only valid parameters have been specified.
+        valid_keys = {'always_excluded_tags', 'bg_color', 'excluded_tags', 'file_types', 'label_content', 'label_duration', 'label_font_size', 'label_mode', 'label_padding', 'most_recent', 'order', 'orientation', 'pause', 'repositories', 'sequence', 'resize', 'rotation', 'tags'}
+        keys = set(config.keys())
+        if not keys.issubset(valid_keys):
+            raise InvalidSlideshowConfigurationError(f"The configuration of slideshow '{self._name}' contains additional parameters. Only the slideshow parameters {valid_keys} are accepted, but the additional parameter(s) {keys.difference(valid_keys)} has/have been specified.", config)
+
+        # Compile filter criteria for use with selective index iterator.
+        self.__compile_filter_criteria()
+
+        # Create selective index iterator with sorting/filter criteria from the
+        # slideshow configuration.
+        self._iterator = self._index.iterator(**self._criteria)
+        # Create current widget from first file and add to layout.
+        self._current_widget = self._create_next_widget()
+        # Create next widget from second file.
+        self._next_widget = self._create_next_widget()
+
+        # Register event fired upon slideshow content changes.
+        self.register_event_type('on_content_change')
+        # Fire event to indicate content change
+        self.dispatch('on_content_change', self)
+
     def _create_widget(self, file):
         """Create widget for display of the specified file.
 
-        :param file: File to be displayed
+        :param file: file to be displayed
         :type file: repository.File
         :rtype: Widget
         """
@@ -169,7 +194,7 @@ class Slideshow(AnchorLayout):
 
     @property
     def file_count(self):
-        """Returns the number of files in the slideshow."""
+        """Return number of files in the slideshow."""
         # Return initial count of current iterator if exists.
         if self._iterator is not None:
             return self._iterator.count()
@@ -184,7 +209,7 @@ class Slideshow(AnchorLayout):
         respective file. An empty widget is returned after 5 failed attempts.
         If the end of the iteration is reached, the iteration is restarted.
 
-        :return: Next file in the slideshow.
+        :return: next file in the slideshow.
         :rtype: Widget
         """
         attempts = 0
@@ -219,14 +244,18 @@ class Slideshow(AnchorLayout):
     def current_file(self):
         """Return linked repository file for the current content widget.
 
-        :return: Linked repository file
+        :return: linked repository file
         :rtype: repository.file
         """
         return self._current_widget.file
 
     @property
     def name(self):
-        """Return name of the slidshow."""
+        """Return name of the slidshow.
+
+        :return: name of slideshow
+        :rtype: str
+        """
         return self._name
 
     @property
@@ -242,6 +271,8 @@ class Slideshow(AnchorLayout):
 
     def next(self, reschedule=True):
         """Display next file in the index."""
+        # Skip if not playing.
+        if self._play_state == PLAY_STATE.STOPPED: return
         # Unschedule and re-schedule callback function
         if reschedule and self._play_state == PLAY_STATE.PLAYING and self._event is not None:
             self._event.cancel()
@@ -252,8 +283,18 @@ class Slideshow(AnchorLayout):
         self._current_widget = self._next_widget
         # Add current widget to layout.
         self.add_widget(self._current_widget)
+        # Stop playing content in current widget if slideshow is paused.
+        if self._play_state == PLAY_STATE.PAUSED and hasattr(self._current_widget, 'stop'):
+            self._current_widget.stop()
         # Create widget for next frame.
         self._next_widget = self._create_next_widget()
+        # Fire event to indicate content change
+        self.dispatch('on_content_change', self)
+
+    def on_content_change(self, *largs):
+        """Handle 'on_content_change event'."""
+        # Do nothing
+        Logger.debug("Slideshow: 'on_content_change' event fired.")
 
     def pause(self):
         """Pause playing slideshow."""
@@ -263,8 +304,9 @@ class Slideshow(AnchorLayout):
         if self._event is not None:
             self._event.cancel()
             self._event = None
-        # Stop playing content of current widget.
-        self._current_widget.stop()
+        # Stop playing content in current widget.
+        if hasattr(self._current_widget, 'stop'):
+            self._current_widget.stop()
         # Update state.
         self._play_state = PLAY_STATE.PAUSED
 
@@ -272,21 +314,12 @@ class Slideshow(AnchorLayout):
         """Start playing slideshow."""
         # Skip if already playing.
         if self._play_state == PLAY_STATE.PLAYING: return
-
-        # Restart iteration if stopped.
+        # Add current widget to layout if previously stopped.
         if self._play_state == PLAY_STATE.STOPPED:
-            # Create selective index iterator with sorting/filter criteria from the
-            # slideshow configuration.
-            self._iterator = self._index.iterator(**self._criteria)
-            # Create current widget from first file, add to layout and start playing.
-            self._current_widget = self._create_next_widget()
             self.add_widget(self._current_widget)
-            # Create next widget from second file.
-            self._next_widget = self._create_next_widget()
-        # Restart playing content if paused.
-        elif self._play_state == PLAY_STATE.PAUSED:
+        # Restart playing content in current widget.
+        if hasattr(self._current_widget, 'play'):
             self._current_widget.play()
-
         # Schedule callback function to start playing slideshow.
         self._event = Clock.schedule_interval(self._clock_callback, self._config['pause'])
         # Update state.
@@ -300,15 +333,19 @@ class Slideshow(AnchorLayout):
         if self._event is not None:
             self._event.cancel()
             self._event = None
-        # Remove and destroy current widget
-        if self._current_widget is not None:
-            self.remove_widget(self._current_widget)
-            self._current_widget = None
-        # Destroy next widget and iterator.
-        self._next_widget = None
-        self._iterator = None
+        # Remove current widget from layout.
+        self.remove_widget(self._current_widget)
+        # Reset selective index iterator with sorting/filter criteria from the
+        # slideshow configuration.
+        self._iterator = self._index.iterator(**self._criteria)
+        # Create current widget from first file.
+        self._current_widget = self._create_next_widget()
+        # Create next widget from second file.
+        self._next_widget = self._create_next_widget()
         # Update state.
         self._play_state = PLAY_STATE.STOPPED
+        # Fire event to indicate content change.
+        self.dispatch('on_content_change', self)
 
     def _clock_callback(self, dt):
         """Clock callback function. Display the next file in the slideshow."""

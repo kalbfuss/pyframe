@@ -8,57 +8,90 @@ import paho.mqtt.client as mqtt
 import ssl
 import time
 
-from . import Controller
+from . import Controller, DISPLAY_MODE, DISPLAY_STATE, PLAY_STATE
 from . common import APPLICATION_NAME, APPLICATION_DESCRIPTION, VERSION, PROJECT_NAME
 
 from kivy.clock import Clock
 from kivy.logger import Logger
 
 
+# Pyframe and Home Assistant root topics
+ROOT_TOPIC = "pyframe"
+HA_ROOT_TOPIC = "homeassistant"
+
+def entity_id(name):
+    """Convert entity name to entity id."""
+    return name.lower().replace(' ', '_')
+
+def unique_id(device_id, entity_id):
+    """Combine device and entity id to unique id."""
+    return f"{device_id}_{entity_id}"
+
+
 class MqttInterface:
-    """MQTT interface of picframe.
+    """MQTT remote control.
 
-    This interface interacts via mqtt with the user to steer the image display.
-
-    Attributes
-    ----------
-    controller : Controler
-        Controller for picframe
-
-
-    Methods
-    -------
-
+    Implements an MQTT based remote control for pyframe photo frames. The
+    remote control is automatically registered in home assistant via the MQTT
+    discovery service.
     """
 
     def __init__(self, config, controller):
+        """ Initialize MQTT interface instance.
+
+        Establishes a connection to the MQTT broker based on the provided
+        configuration. Note that only password based authentication is supported
+        at the moemnt. The controller instance is used to control the pyframe
+        photo frame.
+
+        The following configuration parameters are supported:
+            host: MQTT broker (required)
+            port: connection port (default: 8883)
+            tls: true if a secure connection shall be used (default: true)
+            tls_insecure: true if insecure TLS connections are permitted (default: false)
+            user: login name (required)
+            password: login password (required)
+            device_id: pyframe device id (default: "pyframe")
+
+        :param config: MQTT interface configuration
+        :param controller: Pyframe controller
+        :type config: dict
+        :type controller: pyframe.controller
+        """
         self._config = config
         self._controller = controller
         self._client = None
         self._event = None
 
-        device_id = config['device_id']
         host = config['host']
-        port = config['port']
-        tls = config['tls']
+        port = config.get('port', 8883)
+        tls = config.get('tls', True)
+        tls_insecure = config.get('tls_insecure', False)
         user = config['user']
         password = config['password']
+        device_id = config.get('device_id', "pyframe")
 
         self._device_id = device_id
+        self._availability_topic = f"homeassistant/switch/{device_id}/available"
 
         try:
             # Configure mqtt client.
             client = mqtt.Client(client_id = device_id, clean_session=True)
             self._client = client
             client.username_pw_set(user, password)
-            if tls:
+            if tls and tls_insecure is False:
+                client.tls_set(cert_reqs=ssl.CERT_REQUIRED)
+            elif tls and tls_insecure is True:
                 client.tls_set(cert_reqs=ssl.CERT_NONE)
                 client.tls_insecure_set(True)
             # Register callback functions.
             client.on_connect = self.on_connect
+            client.on_disconnect = self.on_disconnect
             client.on_message = self.on_message
+            # Make client attempt to reconnect up to 36.4h (i.e. 2^17s)
+            client.reconnect_delay_set(min_delay=1, max_delay=131072)
             # Publish initial availabiliy as "offline".
-            client.will_set("homeassistant/switch/" + device_id + "/available", "offline", qos=0, retain=True)
+            client.will_set(self._availability_topic, "offline", qos=0, retain=True)
             # Establish connection.
             Logger.info(f"MQTT: Connecting to broker '{host}:{port}' as user '{user}'.")
             client.connect(host, port, 60)
@@ -67,460 +100,298 @@ class MqttInterface:
         except Exception as e:
             raise Exception(f"MQTT: An exception occured during setup of the connection: {e}")
 
-    def __setup_sensor(self, client, topic, icon, available_topic, has_attributes=False, entity_category=None):
-        sensor_topic_head = "homeassistant/sensor/" + self._device_id
-        config_topic = sensor_topic_head + "_" + topic + "/config"
-        name = self._device_id + "_" + topic
-        dict = {"name": name,
-                "icon": icon,
-                "value_template": "{{ value_json." + topic + "}}",
-                "avty_t": available_topic,
-                "uniq_id": name,
-                "dev":{"ids":[self._device_id]}}
-        if has_attributes == True:
-            dict["state_topic"] = sensor_topic_head + "_" + topic + "/state"
-            dict["json_attributes_topic"] = sensor_topic_head + "_" + topic + "/attributes"
-        else:
-            dict["state_topic"] = sensor_topic_head + "/state"
-        if entity_category:
-            dict["entity_category"] = entity_category
+    def __setup_select(self, client, name, options, icon=None, category=None):
+        """Helper function to setup selections in Home Assistant.
 
-        config_payload = json.dumps(dict)
-        client.publish(config_topic, config_payload, qos=0, retain=True)
-        client.subscribe(self._device_id + "/" + topic, qos=0)
+        :param client: MQTT client instance
+        :type client: paho.mqtt.client
+        :param name: name of selection
+        :type name: str
+        :param options: selectable options
+        :type options: list of str
+        :param icon: name of icon
+        :type icon: str
+        :param category: optional category name
+        :type category: str
+        """
+        eid = entity_id(name)
+        uid = unique_id(self._device_id, eid)
+        config_topic = f"{HA_ROOT_TOPIC}/select/{uid}/config"
+        state_topic = f"{ROOT_TOPIC}/{self._device_id}/state"
+        command_topic = f"{ROOT_TOPIC}/{self._device_id}/{eid}/set"
 
-    def __setup_number(self, client, topic, min, max, step, icon, available_topic):
-        number_topic_head = "homeassistant/number/" + self._device_id
-        config_topic = number_topic_head + "_" + topic + "/config"
-        command_topic = self._device_id + "/" + topic
-        state_topic = "homeassistant/sensor/" + self._device_id + "/state"
-        name = self._device_id + "_" + topic
-        config_payload = json.dumps({"name": name,
-                                    "min": min,
-                                    "max": max,
-                                    "step": step,
-                                    "icon": icon,
-                                    "entity_category": "config",
-                                    "state_topic": state_topic,
-                                    "command_topic": command_topic,
-                                    "value_template": "{{ value_json." + topic + "}}",
-                                    "avty_t": available_topic,
-                                    "uniq_id": name,
-                                    "dev":{"ids":[self._device_id]}})
-        client.publish(config_topic, config_payload, qos=0, retain=True)
+        payload = {
+            "name": name,
+            "unique_id": uid,
+            "options": options,
+            "availability_topic": self._availability_topic,
+            "state_topic": state_topic,
+            "command_topic": command_topic,
+            "value_template": "{{ value_json." + eid + "}}",
+            "device": {
+                "name": self._device_id,
+                "identifiers": [self._device_id],
+                "model": APPLICATION_NAME,
+                "sw_version": VERSION,
+                "manufacturer": PROJECT_NAME
+            }
+        }
+        if icon:
+            payload["icon"] = icon
+        if category:
+            payload["entity_category"] = category
+        payload = json.dumps(payload)
+
+        client.publish(config_topic, payload, qos=0, retain=True)
         client.subscribe(command_topic, qos=0)
 
-    def __setup_select(self, client, topic, options, icon, available_topic, init=False):
-        select_topic_head = "homeassistant/select/" + self._device_id
-        config_topic = select_topic_head + "_" + topic + "/config"
-        command_topic = self._device_id + "/" + topic
-        state_topic = "homeassistant/sensor/" + self._device_id + "/state"
-        name = self._device_id + "_" + topic
+    def __setup_sensor(self, client, name, icon, has_attributes=False, category=None):
+        """Helper function to setup sensors in Home Assistant.
 
-        config_payload = json.dumps({"name": name,
-                                    "entity_category": "config",
-                                    "icon": icon,
-                                    "options": options,
-                                    "state_topic": state_topic,
-                                    "command_topic": command_topic,
-                                    "value_template": "{{ value_json." + topic + "}}",
-                                    "avty_t": available_topic,
-                                    "uniq_id": name,
-                                    "dev":{"ids":[self._device_id]}})
-        client.publish(config_topic, config_payload, qos=0, retain=True)
-        if init:
-            client.subscribe(command_topic, qos=0)
+        :param client: MQTT client instance
+        :type client: paho.mqtt.client
+        :param name: name of sensor
+        :type name: str
+        :param icon: name of icon
+        :type icon: str
+        :param has_attributes: optional flag indicating whether setup has
+            attributes (default: false)
+        :type has_attributes: bool
+        :param category: optional category name
+        :type category: str
+        """
+        eid = entity_id(name)
+        uid = unique_id(self._device_id, eid)
+        config_topic = f"{HA_ROOT_TOPIC}/sensor/{uid}/config"
+        state_topic = f"{ROOT_TOPIC}/{self._device_id}/{eid}/state"
+        attributes_topic = f"{ROOT_TOPIC}/{self._device_id}/{eid}/attributes"
 
-    def __setup_switch(self, client, topic, icon, available_topic, is_on=False, entity_category=None):
-        switch_topic_head = "homeassistant/switch/" + self._device_id
-        config_topic = switch_topic_head + topic + "/config"
-        command_topic = switch_topic_head + topic + "/set"
-        state_topic = switch_topic_head + topic + "/state"
-        dict = {"name": self._device_id + topic,
-                "icon": icon,
-                "command_topic": command_topic,
-                "state_topic": state_topic,
-                "avty_t": available_topic,
-                "uniq_id": self._device_id + topic,
-                "dev": {
-                "ids": [self._device_id],
+        payload = {
+            "name": name,
+            "unique_id": uid,
+            "icon": icon,
+            "availability_topic": self._availability_topic,
+            "state_topic": state_topic,
+            "value_template": "{{ value_json." + eid + "}}",
+            "device": {
                 "name": self._device_id,
-                "mdl": f"{APPLICATION_NAME} - {APPLICATION_DESCRIPTION}",
-                "sw": VERSION,
-                "mf": PROJECT_NAME}}
-        if self._device_url :
-            dict["dev"]["cu"] = self._device_url
-        if entity_category:
-            dict["entity_category"] = entity_category
-        config_payload = json.dumps(dict)
+                "identifiers": [self._device_id],
+                "model": APPLICATION_NAME,
+                "sw_version": VERSION,
+                "manufacturer": PROJECT_NAME
+            }
+        }
+        if has_attributes:
+            payload["json_attributes_topic"] = attributes_topic
+        if category:
+            payload["entity_category"] = category
+        payload = json.dumps(payload)
 
-        client.subscribe(command_topic , qos=0)
-        client.publish(config_topic, config_payload, qos=0, retain=True)
-        client.publish(state_topic, "ON" if is_on else "OFF", qos=0, retain=True)
+        client.publish(config_topic, payload, qos=0, retain=True)
 
-    def __setup_button(self, client, topic, icon, available_topic, entity_category=None):
-        button_topic_head = "homeassistant/button/" + self._device_id
-        config_topic = button_topic_head + topic + "/config"
-        command_topic = button_topic_head + topic + "/set"
-        dict = {"name": self._device_id + topic,
-                "icon": icon,
-                "command_topic": command_topic,
-                "payload_press": "ON",
-                "avty_t": available_topic,
-                "uniq_id": self._device_id + topic,
-                "dev": {
-                "ids": [self._device_id],
+    def __setup_button(self, client, name, icon, category=None):
+        """Helper function to setup buttons in Home Assistant.
+
+        :param client: MQTT client instance
+        :type client: paho.mqtt.client
+        :param name: name of sensor
+        :type name: str
+        :param icon: name of icon
+        :type icon: str
+        :param category: optional category name
+        :type category: str
+        """
+        eid = entity_id(name)
+        uid = unique_id(self._device_id, eid)
+        config_topic = f"{HA_ROOT_TOPIC}/button/{uid}/config"
+        command_topic = f"{ROOT_TOPIC}/{self._device_id}/{eid}/set"
+
+        payload = {
+            "name": name,
+            "unique_id": uid,
+            "icon": icon,
+            "availability_topic": self._availability_topic,
+            "command_topic": command_topic,
+            "payload_press": "ON",
+            "device": {
                 "name": self._device_id,
-                "mdl": "PictureFrame",
-#                "sw": __version__,
-                "mf": "pi3d PictureFrame project"}}
-#        if self._device_url:
-#            dict["dev"]["cu"] = self._device_url
-        if entity_category:
-            dict["entity_category"] = entity_category
-        config_payload = json.dumps(dict)
+                "identifiers": [self._device_id],
+                "model": APPLICATION_NAME,
+                "sw_version": VERSION,
+                "manufacturer": PROJECT_NAME
+            }
+        }
+        if category:
+            payload["entity_category"] = category
+        payload = json.dumps(payload)
 
-        client.subscribe(command_topic , qos=0)
-        client.publish(config_topic, config_payload, qos=0, retain=True)
+        client.subscribe(command_topic, qos=0)
+        client.publish(config_topic, payload, qos=0, retain=True)
 
     def loop(self, dt):
         self._client.loop(timeout=0)
 
     def on_connect(self, client, userdata, flags, rc):
-        if rc != 0:
-            Logger.warning(f"MQTT: Connection to broker failed with error code {rc}.")
+        """Update availability and setup sensors/controls after successful
+        connection to broker.
+
+        Callback function for connection events. See Paho MQTT client
+        documentation for explanation of userdata, flags and rc parameters.
+
+        :param client: MQTT client instance
+        :type client: paho.mqtt.client
+        :param userdata: not used
+        :type userdata: none
+        :param flags: not used
+        :type flags: none
+        :param rc: connection result code
+        :type rc: int
+        """
+        # Verify successful connection.
+        if rc != mqtt.MQTT_ERR_SUCCESS:
+            Logger.error(f"MQTT: Connection to broker failed with error code {rc}.")
             return
         Logger.info("MQTT: Connection to broker established.")
 
-        # Update availability
-        Logger.debug("MQTT: Change availability to 'online'.")
-        available_topic = "homeassistant/switch/" + self._device_id + "/available"
-        client.publish(available_topic, "online", qos=0, retain=True)
+        # Update availability.
+        Logger.debug("MQTT: Changing availability to 'online'.")
+        client.publish(self._availability_topic, "online", qos=0, retain=True)
 
-        # Create control elements
-        Logger.debug("MQTT: Create control elements.")
-        self.__setup_button(client, "_play", "mdi:play", available_topic)
-        self.__setup_button(client, "_pause", "mdi:pause", available_topic)
-        self.__setup_button(client, "_stop", "mdi:stop", available_topic)
-        self.__setup_button(client, "_next", "mdi:skip-next", available_topic)
-        self.__setup_button(client, "_previous", "mdi:skip-previous", available_topic)
-        self.__setup_button(client, "_touch", "mdi:gesture-tap", available_topic)
+        Logger.debug("MQTT: Creating control elements.")
+        # Create buttons.
+        self.__setup_button(client, "Play", "mdi:play")
+        self.__setup_button(client, "Pause", "mdi:pause")
+        self.__setup_button(client, "Stop", "mdi:stop")
+        self.__setup_button(client, "Next", "mdi:skip-next")
+        self.__setup_button(client, "Previous", "mdi:skip-previous")
+        self.__setup_button(client, "Touch", "mdi:gesture-tap")
+        # Create selections.
+        self.__setup_select(client, "Display mode", [ item.value for item in DISPLAY_MODE ], category="config")
+        self.__setup_select(client, "Display state", [ item.value for item in DISPLAY_STATE ], category="config")
+        self.__setup_select(client, "Play state", [ item.value for item in PLAY_STATE ], category="config")
+        self.__setup_select(client, "Slideshow", self._controller.slideshows, category="config")
+        # Create sensors.
+        self.__setup_sensor(client, "File", "mdi:file-image", has_attributes=True)
 
-        client.subscribe(self._device_id + "/purge_files", qos=0) # close down without killing!
-        client.subscribe(self._device_id + "/stop", qos=0) # close down without killing!
+        # Publish the current state
+        self.publish_state()
+        # Ensure new state is published automatically after content change.
+        self._controller.bind(on_state_change=self.publish_state)
 
+    def on_disconnect(self, client, userdata, rc):
+        """Reconnect to broker in case of unexpected disconnect.
+
+        Callback function for disconnection events. See Paho MQTT client
+        documentation for explanation of userdata and rc parameters.
+
+        :param client: MQTT client instance
+        :type client: paho.mqtt.client
+        :param userdata: not used
+        :type userdata: none
+        :param rc: connection result code
+        :type rc: int
         """
-        ## sensors
-        self.__setup_sensor(client, "date_from", "mdi:calendar-arrow-left", available_topic, entity_category="config")
-        self.__setup_sensor(client, "date_to", "mdi:calendar-arrow-right", available_topic, entity_category="config")
-        self.__setup_sensor(client, "location_filter", "mdi:map-search", available_topic, entity_category="config")
-        self.__setup_sensor(client, "tags_filter", "mdi:image-search", available_topic, entity_category="config")
-        self.__setup_sensor(client, "image_counter", "mdi:camera-burst", available_topic, entity_category="diagnostic")
-        self.__setup_sensor(client, "image", "mdi:file-image", available_topic, has_attributes=True, entity_category="diagnostic")
-
-        ## numbers
-        self.__setup_number(client, "brightness", 0.0, 1.0, 0.1, "mdi:brightness-6", available_topic)
-        self.__setup_number(client, "time_delay", 1, 400, 1, "mdi:image-plus", available_topic)
-        self.__setup_number(client, "fade_time", 1, 50, 1,"mdi:image-size-select-large", available_topic)
-        self.__setup_number(client, "matting_images", 0.0, 1.0, 0.01, "mdi:image-frame", available_topic)
-
-        ## selects
-        _, dir_list = self.__controller.get_directory_list()
-        dir_list.sort()
-        self.__setup_select(client, "directory", dir_list, "mdi:folder-multiple-image", available_topic, init=True)
-        command_topic = self._device_id + "/directory"
-        client.subscribe(command_topic, qos=0)
-
-        ## switches
-        self.__setup_switch(client, "_text_refresh", "mdi:refresh", available_topic, entity_category="config")
-        self.__setup_switch(client, "_name_toggle", "mdi:subtitles", available_topic,
-                            self.__controller.text_is_on("name"), entity_category="config")
-        self.__setup_switch(client, "_title_toggle", "mdi:subtitles", available_topic,
-                            self.__controller.text_is_on("title"), entity_category="config")
-        self.__setup_switch(client, "_caption_toggle", "mdi:subtitles", available_topic,
-                            self.__controller.text_is_on("caption"), entity_category="config")
-        self.__setup_switch(client, "_date_toggle", "mdi:calendar-today", available_topic,
-                            self.__controller.text_is_on("date"), entity_category="config")
-        self.__setup_switch(client, "_location_toggle", "mdi:crosshairs-gps", available_topic,
-                            self.__controller.text_is_on("location"), entity_category="config")
-        self.__setup_switch(client, "_directory_toggle", "mdi:folder", available_topic,
-                            self.__controller.text_is_on("directory"), entity_category="config")
-        self.__setup_switch(client, "_text_off", "mdi:badge-account-horizontal-outline", available_topic, entity_category="config")
-        self.__setup_switch(client, "_display", "mdi:panorama", available_topic,
-                            self.__controller.display_is_on)
-        self.__setup_switch(client, "_clock", "mdi:clock-outline", available_topic,
-                            self.__controller.clock_is_on, entity_category="config")
-        self.__setup_switch(client, "_shuffle", "mdi:shuffle-variant", available_topic,
-                            self.__controller.shuffle)
-        self.__setup_switch(client, "_paused", "mdi:pause", available_topic,
-                            self.__controller.paused)
-
-        # buttons
-        self.__setup_button(client, "_delete", "mdi:delete", available_topic)
-        self.__setup_button(client, "_back", "mdi:skip-previous", available_topic)
-        self.__setup_button(client, "_next", "mdi:skip-next", available_topic)
-        """
+        self._controller.unbind(on_state_change=self.publish_state)
+        if rc != mqtt.MQTT_ERR_SUCCESS:
+            Logger.error(f"MQTT: Connection to broker lost with error code {rc}. Attempting to reconnect.")
+            client.reconnect()
 
     def on_message(self, client, userdata, message):
-        payload = message.payload.decode("utf-8")
-        switch_topic_head = "homeassistant/switch/" + self._device_id
-        button_topic_head = "homeassistant/button/" + self._device_id
+        """Process messages from subscribed topics.
 
-        # ext buttons
-        if message.topic == button_topic_head + "_play/set":
+        Callback function message events. See Paho MQTT client documentation for explanation of userdata and and message parameters.
+
+        :param client: MQTT client instance
+        :type client: paho.mqtt.client
+        :param userdata: not used
+        :type userdata: none
+        :param message: MQTT message
+        :type message: dict
+        """
+        payload = message.payload.decode("utf-8")
+        device_id = self._device_id
+
+        def __topic(name):
+            return f"{ROOT_TOPIC}/{self._device_id}/{entity_id(name)}/set"
+
+        # Process button messages.
+        if message.topic == __topic("Play"):
             if payload == "ON":
                 Logger.debug("MQTT: 'Play' button was pressed.")
                 self._controller.play()
-        elif message.topic == button_topic_head + "_pause/set":
+        elif message.topic == __topic("Pause"):
             if payload == "ON":
                 Logger.debug("MQTT: 'Pause' button was pressed.")
                 self._controller.pause()
-        if message.topic == button_topic_head + "_stop/set":
+        if message.topic == __topic("Stop"):
             if payload == "ON":
                 Logger.debug("MQTT: 'Stop' button was pressed.")
                 self._controller.stop()
-        elif message.topic == button_topic_head + "_previous/set":
+        elif message.topic == __topic("Previous"):
             if payload == "ON":
                 Logger.debug("MQTT: 'Previous' button was pressed.")
                 self._controller.previous()
-        if message.topic == button_topic_head + "_next/set":
+        if message.topic == __topic("Next"):
             if payload == "ON":
                 Logger.debug("MQTT: 'Next' button was pressed.")
                 self._controller.next()
-        elif message.topic == button_topic_head + "_touch/set":
+        elif message.topic == __topic("Touch"):
             if payload == "ON":
                 Logger.debug("MQTT: 'Touch' button was pressed.")
                 self._controller.touch()
-        """
-        ###### switches ######
-        # display
-        if message.topic == switch_topic_head + "_display/set":
-            state_topic = switch_topic_head + "_display/state"
-            if msg == "ON":
-                self.__controller.display_is_on = True
-                client.publish(state_topic, "ON", retain=True)
-            elif msg == "OFF":
-                self.__controller.display_is_on = False
-                client.publish(state_topic, "OFF", retain=True)
-        # clock
-        if message.topic == switch_topic_head + "_clock/set":
-            state_topic = switch_topic_head + "_clock/state"
-            if msg == "ON":
-                self.__controller.clock_is_on = True
-                client.publish(state_topic, "ON", retain=True)
-            elif msg == "OFF":
-                self.__controller.clock_is_on = False
-                client.publish(state_topic, "OFF", retain=True)
-        # shuffle
-        elif message.topic == switch_topic_head + "_shuffle/set":
-            state_topic = switch_topic_head + "_shuffle/state"
-            if msg == "ON":
-                self.__controller.shuffle = True
-                client.publish(state_topic, "ON", retain=True)
-            elif msg == "OFF":
-                self.__controller.shuffle = False
-                client.publish(state_topic, "OFF", retain=True)
-        # paused
-        elif message.topic == switch_topic_head + "_paused/set":
-            state_topic = switch_topic_head + "_paused/state"
-            if msg == "ON":
-                self.__controller.paused = True
-                client.publish(state_topic, "ON", retain=True)
-            elif msg == "OFF":
-                self.__controller.paused = False
-                client.publish(state_topic, "OFF", retain=True)
-        # back buttons
-        elif message.topic == button_topic_head + "_back/set":
-            if msg == "ON":
-                self.__controller.back()
-        # next buttons
-        elif message.topic == button_topic_head + "_next/set":
-            if msg == "ON":
-                self.__controller.next()
-        # delete
-        elif message.topic == button_topic_head + "_delete/set":
-            if msg == "ON":
-                self.__controller.delete()
-        # title on
-        elif message.topic == switch_topic_head + "_title_toggle/set":
-            state_topic = switch_topic_head + "_title_toggle/state"
-            if msg in ("ON", "OFF"):
-                self.__controller.set_show_text("title", msg)
-                client.publish(state_topic, msg, retain=True)
-        # caption on
-        elif message.topic == switch_topic_head + "_caption_toggle/set":
-            state_topic = switch_topic_head + "_caption_toggle/state"
-            if msg in ("ON", "OFF"):
-                self.__controller.set_show_text("caption", msg)
-                client.publish(state_topic, msg, retain=True)
-        # name on
-        elif message.topic == switch_topic_head + "_name_toggle/set":
-            state_topic = switch_topic_head + "_name_toggle/state"
-            if msg in ("ON", "OFF"):
-                self.__controller.set_show_text("name", msg)
-                client.publish(state_topic, msg, retain=True)
-        # date_on
-        elif message.topic == switch_topic_head + "_date_toggle/set":
-            state_topic = switch_topic_head + "_date_toggle/state"
-            if msg in ("ON", "OFF"):
-                self.__controller.set_show_text("date", msg)
-                client.publish(state_topic, msg, retain=True)
-        # location_on
-        elif message.topic == switch_topic_head + "_location_toggle/set":
-            state_topic = switch_topic_head + "_location_toggle/state"
-            if msg in ("ON", "OFF"):
-                self.__controller.set_show_text("location", msg)
-                client.publish(state_topic, msg, retain=True)
-        # directory_on
-        elif message.topic == switch_topic_head + "_directory_toggle/set":
-            state_topic = switch_topic_head + "_directory_toggle/state"
-            if msg in ("ON", "OFF"):
-                self.__controller.set_show_text("folder", msg)
-                client.publish(state_topic, msg, retain=True)
-        # text_off
-        elif message.topic == switch_topic_head + "_text_off/set":
-            state_topic = switch_topic_head + "_text_off/state"
-            if msg == "ON":
-                self.__controller.set_show_text()
-                client.publish(state_topic, "OFF", retain=True)
-                state_topic = switch_topic_head + "_directory_toggle/state"
-                client.publish(state_topic, "OFF", retain=True)
-                state_topic = switch_topic_head + "_location_toggle/state"
-                client.publish(state_topic, "OFF", retain=True)
-                state_topic = switch_topic_head + "_date_toggle/state"
-                client.publish(state_topic, "OFF", retain=True)
-                state_topic = switch_topic_head + "_name_toggle/state"
-                client.publish(state_topic, "OFF", retain=True)
-                state_topic = switch_topic_head + "_title_toggle/state"
-                client.publish(state_topic, "OFF", retain=True)
-                state_topic = switch_topic_head + "_caption_toggle/state"
-                client.publish(state_topic, "OFF", retain=True)
-        # text_refresh
-        elif message.topic == switch_topic_head + "_text_refresh/set":
-            state_topic = switch_topic_head + "_text_refresh/state"
-            if msg == "ON":
-                client.publish(state_topic, "OFF", retain=True)
-                self.__controller.refresh_show_text()
 
-        ##### values ########
-        # change subdirectory
-        elif message.topic == self._device_id + "/directory":
-            self.__logger.info("Recieved subdirectory: %s", msg)
-            self.__controller.subdirectory = msg
-        # date_from
-        elif message.topic == self._device_id + "/date_from":
-            self.__logger.info("Recieved date_from: %s", msg)
-            self.__controller.date_from = msg
-        # date_to
-        elif message.topic == self._device_id + "/date_to":
-            self.__logger.info("Recieved date_to: %s", msg)
-            self.__controller.date_to = msg
-        # fade_time
-        elif message.topic == self._device_id + "/fade_time":
-            self.__logger.info("Recieved fade_time: %s", msg)
-            self.__controller.fade_time = float(msg)
-        # time_delay
-        elif message.topic == self._device_id + "/time_delay":
-            self.__logger.info("Recieved time_delay: %s", msg)
-            self.__controller.time_delay = float(msg)
-        # brightness
-        elif message.topic == self._device_id + "/brightness":
-            self.__logger.info("Recieved brightness: %s", msg)
-            self.__controller.brightness = float(msg)
-        # matting_images
-        elif message.topic == self._device_id + "/matting_images":
-            self.__logger.info("Received matting_images: %s", msg)
-            self.__controller.matting_images = float(msg)
-        # location filter
-        elif message.topic == self._device_id + "/location_filter":
-            self.__logger.info("Recieved location filter: %s", msg)
-            self.__controller.location_filter = msg
-        # tags filter
-        elif message.topic == self._device_id + "/tags_filter":
-            self.__logger.info("Recieved tags filter: %s", msg)
-            self.__controller.tags_filter = msg
+        # Process selections messages.
+        elif message.topic == __topic("Display mode"):
+                Logger.debug(f"MQTT: 'Display mode' was changed to '{payload}'.")
+                self._controller.display_mode = payload
+        elif message.topic == __topic("Display state"):
+                Logger.debug(f"MQTT: 'Display state' was changed to '{payload}'.")
+                self._controller.display_state = payload
+        elif message.topic == __topic("Play state"):
+                Logger.debug(f"MQTT: 'Play state' was changed to '{payload}'.")
+                self._controller.play_state = payload
+        elif message.topic == __topic("Slideshow"):
+                Logger.debug(f"MQTT: 'Slideshow' was changed to '{payload}'.")
+                self._controller.slideshow = payload
 
-        # set the flag to purge files from database
-        elif message.topic == self._device_id + "/purge_files":
-            self.__controller.purge_files()
+    def publish_state(self, *largs):
+        client = self._client
 
-        # stop loops and end program
-        elif message.topic == self._device_id + "/stop":
-            self.__controller.stop()
-        """
+        # Update file sensor and attributes.
+        Logger.debug("MQTT: Updating file sensor and attributes.")
+        file = self._controller.current_file
+        eid = entity_id("File")
+        uid = unique_id(self._device_id, eid)
+        topic_head = f"{ROOT_TOPIC}/{self._device_id}/{eid}"
+        # Update state.
+        state_topic = f"{topic_head}/state"
+        payload = json.dumps({ eid: file.uuid })
+        client.publish(state_topic, payload, qos=0, retain=False)
+        # Update attributes.
+        attributes_topic = f"{topic_head}/attributes"
+        payload = {
+            'Description': file.description,
+            'Tags': "".join(f"#{tag} " for tag in file.tags),
+            'Size': f"{file.width} x {file.height}",
+            'Creation date': file.creation_date.strftime("%Y-%m-%d %H:%M:%S"),
+            'Last modified': file.last_modified.strftime("%Y-%m-%d %H:%M:%S"),
+            'Repository': file.rep.uuid
+        }
+        payload = json.dumps(payload)
+        client.publish(attributes_topic, payload, qos=0, retain=False)
 
-    def publish_state(self, client, userdata, mid):
-        sensor_topic_head = "homeassistant/sensor/" + self._device_id
-        switch_topic_head = "homeassistant/switch/" + self._device_id
-        available_topic = switch_topic_head + "/available"
-
-        sensor_state_payload = {}
-        image_state_payload = {}
-
-        """
-        ## image
-        # image attributes
-        if image_attr is not None:
-            attributes_topic = sensor_topic_head + "_image/attributes"
-            self.__logger.debug("Send image attributes: %s", image_attr)
-            self.__client.publish(attributes_topic, json.dumps(image_attr), qos=0, retain=False)
-        # image sensor
-        if image is not None:
-            _, tail = os.path.split(image)
-            image_state_payload["image"] = tail
-            image_state_topic = sensor_topic_head + "_image/state"
-            self.__logger.info("Send image state: %s", image_state_payload)
-            self.__client.publish(image_state_topic, json.dumps(image_state_payload), qos=0, retain=False)
-
-        ## sensor
-        # directory sensor
-        actual_dir, dir_list = self.__controller.get_directory_list()
-        sensor_state_payload["directory"] = actual_dir
-        # image counter sensor
-        sensor_state_payload["image_counter"] = str(self.__controller.get_number_of_files())
-        # date_from
-        sensor_state_payload["date_from"] = int(self.__controller.date_from)
-        # date_to
-        sensor_state_payload["date_to"] = int(self.__controller.date_to)
-        # location_filter
-        sensor_state_payload["location_filter"] = self.__controller.location_filter
-        # tags_filter
-        sensor_state_payload["tags_filter"] = self.__controller.tags_filter
-        ## number state
-        # time_delay
-        sensor_state_payload["time_delay"] = self.__controller.time_delay
-        # fade_time
-        sensor_state_payload["fade_time"] = self.__controller.fade_time
-        # brightness
-        sensor_state_payload["brightness"] = self.__controller.brightness
-        # matting_images
-        sensor_state_payload["matting_images"] = self.__controller.matting_images
-
-        #pulish sensors
-        dir_list.sort()
-        self.__setup_select(self.__client, "directory", dir_list, "mdi:folder-multiple-image", available_topic, init=False)
-
-        self.__logger.info("Send sensor state: %s", sensor_state_payload)
-        sensor_state_topic = sensor_topic_head + "/state"
-        self.__client.publish(sensor_state_topic, json.dumps(sensor_state_payload), qos=0, retain=False)
-
-        # publish state of switches
-        # pause
-        state_topic = switch_topic_head + "_paused/state"
-        payload = "ON" if self.__controller.paused else "OFF"
-        self.__client.publish(state_topic, payload, retain=True)
-        # shuffle
-        state_topic = switch_topic_head + "_shuffle/state"
-        payload = "ON" if self.__controller.shuffle else "OFF"
-        self.__client.publish(state_topic, payload, retain=True)
-        # display
-        state_topic = switch_topic_head + "_display/state"
-        payload = "ON" if self.__controller.display_is_on else "OFF"
-        self.__client.publish(state_topic, payload, retain=True)
-        """
-
-        # send last will and testament
-        client.publish(available_topic, "online", qos=0, retain=True)
+        # Update selections.
+        file = self._controller.current_file
+        Logger.debug("MQTT: Updating configuration selections.")
+        state_topic = f"{ROOT_TOPIC}/{self._device_id}/state"
+        payload = {
+            entity_id("Display mode"): self._controller.display_mode,
+            entity_id("Display state"): self._controller.display_state,
+            entity_id("Play state"): self._controller.play_state,
+            entity_id("Slideshow"): self._controller.slideshow
+        }
+        payload = json.dumps(payload)
+        client.publish(state_topic, payload, qos=0, retain=False)
 
     def stop(self):
         """Stop MQTT interface."""

@@ -41,7 +41,7 @@ class RepositoryFile:
             ORIENTATION_PORTRAIT: Content heigher than wide
         creation_date (datetime): Creation date of file content.
         last_modified (datetime): Date of last file modification.
-        last_update (datetime): Date of last metadata update.
+        last_updated (datetime): Date of last metadata update.
         description (str): Description of the file content. Default is None.
         rating (int): Rating of the file content. Default is None.
         source (str): Source of the file (e.g. full path or URL).
