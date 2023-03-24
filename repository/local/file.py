@@ -46,7 +46,7 @@ class RepositoryFile(repository.RepositoryFile):
         :return: File-like object providing access to file content.
         :rtype: file
         """
-        self._file = open(self._path, "r")
+        self._file = open(self._path, "rb")
         return self._file
 
     def __exit__(self, type, value, traceback):
