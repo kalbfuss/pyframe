@@ -5,11 +5,10 @@ import ffmpeg
 import fnmatch
 import logging
 
-
+from abc import ABC, abstractmethod
 from datetime import datetime
 from iptcinfo3 import IPTCInfo
-
-from abc import ABC, abstractmethod
+from PIL import Image
 
 
 class RepositoryFile:
@@ -136,19 +135,22 @@ class RepositoryFile:
         # Save current datetime in property last_updated.
         self._last_updated = datetime.today()
 
-        # Open image file for reading (binary mode)
-        file = open(path, 'rb')
-        # Return Exif tags
-        tags = exifread.process_file(file)
+        # Use PIL to determine image size.
+        with Image.open(path) as image:
+            self._width, self._height = image.size
+        logging.debug(f"Image size: {str(self._width)}x{str(self._height)}")
+
+        # Open image file for reading (binary mode) and extract EXIF information.
+        with open(path, 'rb') as file:
+            tags = exifread.process_file(file)
 #        logging.debug(f"{self.uuid}: {tags}")
 
         # Obtain width from metadata if available
-        if "EXIF ExifImageWidth" in tags:
-            self._width = tags["EXIF ExifImageWidth"].values[0]
-
+#        if "EXIF ExifImageWidth" in tags:
+#            self._width = tags["EXIF ExifImageWidth"].values[0]
         # Obtain height from metadata if available
-        if "EXIF ExifImageLength" in tags:
-            self._height = tags["EXIF ExifImageLength"].values[0]
+#        if "EXIF ExifImageLength" in tags:
+#            self._height = tags["EXIF ExifImageLength"].values[0]
 
         # Obtain rotation from metadata if available
         if "Image Orientation" in tags:
