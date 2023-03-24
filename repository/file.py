@@ -138,7 +138,7 @@ class RepositoryFile:
         # Use PIL to determine image size.
         with Image.open(path) as image:
             self._width, self._height = image.size
-        logging.debug(f"Image size: {str(self._width)}x{str(self._height)}")
+#        logging.debug(f"Image size: {str(self._width)}x{str(self._height)}")
 
         # Open image file for reading (binary mode) and extract EXIF information.
         with open(path, 'rb') as file:

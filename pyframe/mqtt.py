@@ -52,6 +52,7 @@ class MqttInterface:
             user: login name (required)
             password: login password (required)
             device_id: pyframe device id (default: "pyframe")
+            device_name: pyframe device name (default: device_id)
 
         :param config: MQTT interface configuration
         :param controller: Pyframe controller
@@ -69,14 +70,14 @@ class MqttInterface:
         tls_insecure = config.get('tls_insecure', False)
         user = config['user']
         password = config['password']
-        device_id = config.get('device_id', "pyframe")
 
-        self._device_id = device_id
-        self._availability_topic = f"homeassistant/switch/{device_id}/available"
+        self._device_id = config.get('device_id', "pyframe")
+        self._device_name = config.get('device_name', self._device_id)
+        self._availability_topic = f"homeassistant/switch/{self._device_id}/available"
 
         try:
             # Configure mqtt client.
-            client = mqtt.Client(client_id = device_id, clean_session=True)
+            client = mqtt.Client(client_id = self._device_id, clean_session=True)
             self._client = client
             client.username_pw_set(user, password)
             if tls and tls_insecure is False:
@@ -122,6 +123,7 @@ class MqttInterface:
 
         payload = {
             "name": name,
+            "object_id": uid,
             "unique_id": uid,
             "options": options,
             "availability_topic": self._availability_topic,
@@ -129,7 +131,7 @@ class MqttInterface:
             "command_topic": command_topic,
             "value_template": "{{ value_json." + eid + "}}",
             "device": {
-                "name": self._device_id,
+                "name": self._device_name,
                 "identifiers": [self._device_id],
                 "model": APPLICATION_NAME,
                 "sw_version": VERSION,
@@ -168,19 +170,21 @@ class MqttInterface:
 
         payload = {
             "name": name,
+            "object_id": uid,
             "unique_id": uid,
             "icon": icon,
             "availability_topic": self._availability_topic,
             "state_topic": state_topic,
             "value_template": "{{ value_json." + eid + "}}",
             "device": {
-                "name": self._device_id,
+                "name": self._device_name,
                 "identifiers": [self._device_id],
                 "model": APPLICATION_NAME,
                 "sw_version": VERSION,
                 "manufacturer": PROJECT_NAME
             }
         }
+        Logger.debug(payload)
         if has_attributes:
             payload["json_attributes_topic"] = attributes_topic
         if category:
@@ -208,13 +212,14 @@ class MqttInterface:
 
         payload = {
             "name": name,
+            "object_id": uid,
             "unique_id": uid,
             "icon": icon,
             "availability_topic": self._availability_topic,
             "command_topic": command_topic,
             "payload_press": "ON",
             "device": {
-                "name": self._device_id,
+                "name": self._device_name,
                 "identifiers": [self._device_id],
                 "model": APPLICATION_NAME,
                 "sw_version": VERSION,
