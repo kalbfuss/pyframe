@@ -26,9 +26,9 @@ class MyExceptionHandler(ExceptionHandler):
     Logs all exceptions, but continues with the execution. The main purpose of
     the handler is to prevent the application from exiting unexpectedly.
     """
-    def handle_exception(self, e):
+    def handle_exception(self, inst):
         """Log all exceptions."""
-        Logger.exception(f"App: An exception was raised: {e}")
+        Logger.exception(f"App: An exception was raised: {inst}")
         return ExceptionManager.PASS
 
 
@@ -483,6 +483,25 @@ class App(kivy.app.App, Controller):
         else:
             raise Exception(f"The selected display state '{state}' is invalid. Acceptable values are '{[ item.value for item in DISPLAY_STATE ]}'.")
 
+    @property
+    def display_timeout(self):
+        """Return display timeout.
+
+        :return: display timeout in seconds
+        :rtype: int
+        """
+        return _display_timeout
+
+    @display_timeout.setter
+    def display_timeout(self, timeout):
+        """Set display timeout.
+
+        :param timeout: display timeout in seconds
+        :type timeout: int
+        """
+        Logger.info(f"Controller: Setting display timeout to {timeout}s.")
+        self._display_timeout = timeout
+
     def pause(self):
         """Pause playing the current slideshow."""
         if self._play_state == PLAY_STATE.PAUSED: return
@@ -497,6 +516,7 @@ class App(kivy.app.App, Controller):
         Logger.info(f"Controller: Playing/resuming slideshow '{self.slideshow}'.")
         self.root.play()
         self._play_state = PLAY_STATE.PLAYING
+        self.display_on
         self.dispatch('on_state_change')
 
     @property
@@ -532,6 +552,7 @@ class App(kivy.app.App, Controller):
         Logger.info(f"Controller: Stopping slideshow '{self.slideshow}'.")
         self.root.stop()
         self._play_state = PLAY_STATE.STOPPED
+        self.display_off
         self.dispatch('on_state_change')
 
     def previous(self):
@@ -591,14 +612,12 @@ class App(kivy.app.App, Controller):
         """Update last touch time stamp and prevent screen timeout in display motion mode."""
         # Update last touch time stamp.
         self._last_touch = time.time()
-        # Return if display not in motion mode.
-        if self.display_mode != DISPLAY_MODE.MOTION: return
+        # Return if display not in motion mode or slideshow stopped.
+        if self.display_mode != DISPLAY_MODE.MOTION or self.play_state == PLAY_STATE.STOPPED: return
         # Cancel previously scheduled timeout event.
         if self._timeout_event is not None:
             self._timeout_event.cancel()
-        # Turn display on and restart playing in case the display
-        # has timed out out before.
-        self.display_on()
+        # Restart playing the slideshow.
         self.play()
         # Schedule new timeout event.
         self._timeout_event = Clock.schedule_once(self.on_display_timeout, self._display_timeout)

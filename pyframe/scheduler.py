@@ -3,7 +3,7 @@
 import schedule
 import subprocess
 
-from . import DISPLAY_MODE, DISPLAY_STATE
+from . import DISPLAY_MODE, PLAY_STATE
 
 from kivy.clock import Clock
 from kivy.logger import Logger, LOG_LEVELS
@@ -47,7 +47,7 @@ class Scheduler:
         self._event = None
 
         # Define valid and required keys per event configuration.
-        valid_keys = {"display_mode", "display_state", "slideshow", "time"}
+        valid_keys = {"display_mode", "display_timeout", "play_state", "slideshow", "time"}
         required_keys = {"time"}
 
         # Build schedule from configuration
@@ -70,20 +70,22 @@ class Scheduler:
                 if display_mode not in values:
                     raise InvalidScheduleConfigurationError(f"Invalid display mode '{display_mode}' in the configuration of event '{event}'. Acceptable values are '{values}'.", event_config)
 
-            display_state = event_config.get('display_state')
-            if display_state is not None:
-                # Convert from booleans to "on" and "off"
-                if display_state is True: display_state = "on"
-                elif display_state is False: display_state = "off"
-                event_config['display_state'] = display_state
+            play_state = event_config.get('play_state')
+            if play_state is not None:
                 # Check value of parameter display mode.
-                values = [ item.value for item in DISPLAY_STATE ]
-                if display_state not in values:
-                    raise InvalidScheduleConfigurationError(f"Invalid display state '{display_state}' in the configuration of event '{event}'. Acceptable values are '{values}'.", event_config)
+                values = [ item.value for item in PLAY_STATE ]
+                if play_state not in values:
+                    raise InvalidScheduleConfigurationError(f"Invalid play state '{play_state}' in the configuration of event '{event}'. Acceptable values are '{values}'.", event_config)
 
             # Check value of parameter slideshow if specified.
             if 'slideshow' in event_config and event_config['slideshow'] not in self._app.slideshows:
                 raise InvalidScheduleConfigurationError(f"Invalid slideshow  '{event_config['slideshow']}' in the configuration of event '{event}'. Acceptable values are '{self._app.slideshows}'.", event_config)
+
+            # Check value of parameter display_timeout if specified.
+            display_timeout = event_config.get('display_timeout')
+            if display_timeout is not None:
+                if type(display_timeout) is not int or display_timeout < 0:
+                    raise InvalidScheduleConfigurationError(f"Invalid display timeout '{display_timeout}' in the configuration of event '{event}'. Display timeout must be a positive integer value.", event_config)
 
             # Schedule events.
             try:
@@ -105,21 +107,19 @@ class Scheduler:
         display_mode = config.get('display_mode')
         if display_mode is not None:
             self._app.display_mode = display_mode
+        # Set display timeout if specified.
+        display_timeout = config.get('display_timeout')
+        if display_timeout is not None:
+            self._app.display_timeout = display_timeout
         # Set slideshow if specified, turn display on and start playing.
         slideshow = config.get('slideshow')
         if slideshow is not None:
             self._app.slideshow = slideshow
-            self._app.display_on()
             self._app.play()
         # Set display state if specified.
-        display_state = config.get('display_state')
-        if display_state is not None:
-            if display_state == DISPLAY_STATE.ON:
-                self._app.display_on()
-                self._app.play()
-            elif display_state == DISPLAY_STATE.OFF:
-                self._app.stop()
-                self._app.display_off()
+        play_state = config.get('play_state')
+        if play_state is not None:
+            self._app.play_state = play_state
 
     def run_pending(self, dt):
         """Run pending schedule jobs."""

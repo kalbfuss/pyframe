@@ -93,6 +93,26 @@ class Controller(ABC):
         """
         pass
 
+    @property
+    @abstractmethod
+    def display_timeout(self):
+        """Return display timeout.
+
+        :return: display timeout in seconds
+        :rtype: int
+        """
+        pass
+
+    @display_timeout.setter
+    @abstractmethod
+    def display_timeout(self, timeout):
+        """Set display timeout.
+
+        :param timeout: display timeout in seconds
+        :type timeout: int
+        """
+        pass
+
     @abstractmethod
     def next(self):
         """Change to next file in slideshow."""
