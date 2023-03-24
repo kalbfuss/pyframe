@@ -14,9 +14,22 @@ import kivy.app
 from repository import Index, Repository, InvalidConfigurationError, InvalidUuidError
 from . import Indexer, Handler, Slideshow, Scheduler, MqttInterface, InvalidSlideshowConfigurationError, Controller, DISPLAY_MODE, DISPLAY_STATE, PLAY_STATE
 
+from kivy.base import ExceptionHandler, ExceptionManager
 from kivy.core.window import Window
 from kivy.clock import Clock
 from kivy.logger import Logger, LOG_LEVELS
+
+
+class MyExceptionHandler(ExceptionHandler):
+    """Pyframe exception handler.
+
+    Logs all exceptions, but continues with the execution. The main purpose of
+    the handler is to prevent the application from exiting unexpectedly.
+    """
+    def handle_exception(self, e):
+        """Log all exceptions."""
+        Logger.exception(f"App: An exception was raised: {e}")
+        return ExceptionManager.PASS
 
 
 class App(kivy.app.App, Controller):
@@ -310,6 +323,9 @@ class App(kivy.app.App, Controller):
                 Logger.info(f"App: Proceeding with {self.root.file_count} files in slideshow.")
             Logger.debug(f"{self.root}")
             self.play()
+
+        # Catch and log all exceptions, but continue with the execution.
+        ExceptionManager.add_handler(MyExceptionHandler)
 
         return self.root
 
