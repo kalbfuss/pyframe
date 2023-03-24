@@ -15,7 +15,7 @@ from repository import RepositoryFile, InvalidUuidError, Repository
 from sqlalchemy import create_engine, desc, event, func, update, delete, or_, Column, DateTime, ForeignKey, Integer, String, Boolean
 from sqlalchemy.engine import Engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import backref, relationship, sessionmaker
+from sqlalchemy.orm import backref, relationship, sessionmaker, scoped_session
 
 
 # Install listener for connection events to automatically enable foreign key
@@ -136,7 +136,8 @@ class Index:
             Base.metadata.create_all(self._engine)
             # Open database session
             self._session_factory = sessionmaker(bind=self._engine)
-            self._session = self._session_factory()
+            self._scoped_session = scoped_session(self._session_factory)
+            self._session = self._scoped_session()
         except Exception as e:
             logging.critical(f"An error ocurred while opening the index database '{dbname}': {e}")
 
@@ -164,7 +165,7 @@ class Index:
         :type rebuild: bool
         """
         # Create new session since build may be called from different thread.
-        session = self._session_factory()
+        session = self._scoped_session()
 
         # Delete all metadata for the specified repository.
         if rebuild:
