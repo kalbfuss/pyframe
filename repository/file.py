@@ -168,17 +168,20 @@ class RepositoryFile:
         else:
             self._orientation = RepositoryFile.ORIENTATION_LANDSCAPE
 
-        # Etract image description if available
+        # Etract image description if available.
         if "Image ImageDescription" in tags:
             self._description = tags["Image ImageDescription"].values
 
-        # Extract creation date if available
-        if "EXIF DateTimeOriginal" in tags:
-            try:
+        # Extract creation date if available.
+        try:
+            if "EXIF DateTimeOriginal" in tags:
                 creation_date = tags["EXIF DateTimeOriginal"].values
                 self._creation_date = datetime.strptime(creation_date, "%Y:%m:%d %H:%M:%S")
-            except ValueError:
-                logging.error(f"Invalid creation time format {creation_date}")
+            elif "Image DateTime" in tags:
+                creation_date = tags["Image DateTime"].values
+                self._creation_date = datetime.strptime(creation_date, "%Y:%m:%d %H:%M:%S")
+        except ValueError:
+            logging.error(f"Invalid creation time format {creation_date}")
 
         # Extract rating if available
         # Tag is currently not supported by exifread
