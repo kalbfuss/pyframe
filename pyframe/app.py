@@ -7,6 +7,7 @@ import repository.webdav
 import subprocess
 import sys
 import time
+import traceback
 import yaml
 
 import kivy.app
@@ -14,21 +15,29 @@ import kivy.app
 from repository import Index, Repository, InvalidConfigurationError, InvalidUuidError
 from . import Indexer, Handler, Slideshow, Scheduler, MqttInterface, InvalidSlideshowConfigurationError, Controller, DISPLAY_MODE, DISPLAY_STATE, PLAY_STATE
 
-from kivy.base import ExceptionHandler, ExceptionManager
+from kivy.base import ExceptionManager
 from kivy.core.window import Window
 from kivy.clock import Clock
 from kivy.logger import Logger, LOG_LEVELS
 
 
-class MyExceptionHandler(ExceptionHandler):
+class ExceptionHandler(kivy.base.ExceptionHandler):
     """Pyframe exception handler.
 
     Logs all exceptions, but continues with the execution. The main purpose of
     the handler is to prevent the application from exiting unexpectedly.
     """
-    def handle_exception(self, inst):
-        """Log all exceptions."""
-        Logger.exception(f"App: An exception was raised: {inst}")
+    def handle_exception(self, *largs):
+        """Log all exceptions and continue with execution.
+
+        For unknown reasons, the exception is not always provided as an argument
+        albeit the kivy documentation says so. The method thus retrieves the
+        last raised exception via a system call.
+        """
+        _, e, _ = sys.exc_info()
+        Logger.error("App: An exception was raised:")
+        Logger.error(f"App: {''.join(traceback.format_exception(e)).rstrip()}")
+        Logger.error("App: Ignoring and continuing with execution.")
         return ExceptionManager.PASS
 
 
@@ -325,7 +334,7 @@ class App(kivy.app.App, Controller):
             self.play()
 
         # Catch and log all exceptions, but continue with the execution.
-        ExceptionManager.add_handler(MyExceptionHandler)
+        ExceptionManager.add_handler(ExceptionHandler)
 
         return self.root
 
@@ -346,14 +355,14 @@ class App(kivy.app.App, Controller):
         - Escape: Exit application.
         """
         Logger.info(f"App: Key '{key}' pressed.")
+        # Exit application if escape key pressed.
+        if key == 27:
+            # Let the default handler do the necessary work.
+            return False
         # Touch controller to prevent screen timeout.
         self.touch()
         # Display previous file if left arrow pressed. Not yet implemented.
         if key == 276: pass
-        # Exit application if escape key pressed.
-        elif key == 27:
-            # Let the default handler do the necessary work.
-            return False
         # Display next file for all other keys
         else: self.next()
         return True
@@ -367,6 +376,8 @@ class App(kivy.app.App, Controller):
 
         Shuts down the MQTT remote controller, scheduler and stops the current
         the current slideswhow."""
+        # Stop current slideshow.
+        self.stop()
         # Stop MQTT interface if running.
         if self._mqtt_interface is not None:
             Logger.info("App: Stopping MQTT interface.")
@@ -375,8 +386,10 @@ class App(kivy.app.App, Controller):
         if self._scheduler is not None:
             Logger.info("App: Stopping scheduler.")
             self._scheduler.stop()
-        # Stop current slideshow.
-        self.stop()
+        # Close metadata index if open.
+        if self._index is not None:
+            Logger.info("App: Closing metadata index.")
+            self._index.close()
 
     def on_request_close(self, *largs, **kwargs):
         """Prepare for application closure after 'on_request_close' event.

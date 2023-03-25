@@ -143,14 +143,7 @@ class Index:
             logging.critical(f"An error ocurred while opening the index database '{dbname}': {e}")
 
     def __del__(self):
-        try:
-            logging.info(f"Closing file index database '{self._dbname}'")
-            # Close database session and dispose engine
-            if self._session:
-                self._session.close()
-#            if self._engine: self._engine.dispose()
-        except Exception as e:
-            logging.error(f"An error ocurred while closing the index database '{self._dbname}': {e}")
+        self.close()
 
     def build(self, rep, rebuild=False):
         """Build metadata index.
@@ -247,6 +240,16 @@ class Index:
         # Commit pending changes and close session
         session.commit()
         session.close()
+
+    def close(self):
+        try:
+            logging.debug(f"Closing file index database '{self._dbname}'")
+            # Close database session and dispose engine
+            if self._session:
+                self._session.close()
+            if self._engine: self._engine.dispose()
+        except Exception as e:
+            logging.error(f"An error ocurred while closing the index database '{self._dbname}': {e}")
 
     def lookup(self, file, rep):
         """Lookup file metadata.
