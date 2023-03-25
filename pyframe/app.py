@@ -269,7 +269,7 @@ class App(kivy.app.App, Controller):
         # Bind to window 'on_request_close' event for safe shutdown of the
         # application.
         Window.bind(on_request_close=self.on_request_close)
-        # Register 'on_state_change' event, which is fired upon content and
+        # Register 'state_change' event, which is fired upon content and
         # controller state changes.
         self.register_event_type('on_state_change')
 
@@ -362,25 +362,37 @@ class App(kivy.app.App, Controller):
         """Default handler for 'on_state_change' events."""
         pass
 
-    def on_request_close(self, *largs, **kwargs):
-        """Safely stop application."""
-        Logger.debug("App: Preparing for safe exit.")
+    def close(self):
+        """Prepare application for safe exit.
+
+        Shuts down the MQTT remote controller, scheduler and stops the current
+        the current slideswhow."""
         # Stop MQTT interface if running.
         if self._mqtt_interface is not None:
-            Logger.debug("App: Stopping MQTT interface.")
+            Logger.info("App: Stopping MQTT interface.")
             self._mqtt_interface.stop()
         # Stop scheduler if running.
         if self._scheduler is not None:
-            Logger.debug("App: Stopping scheduler.")
+            Logger.info("App: Stopping scheduler.")
             self._scheduler.stop()
         # Stop current slideshow.
         self.stop()
+
+    def on_request_close(self, *largs, **kwargs):
+        """Prepare for application closure after 'on_request_close' event.
+
+        By default, the event 'on_request_close' is dispatched after the esacape
+        key has been pressed. The event is not consumed (false return value)
+        such that the application is closed by kivy afterwards.
+        """
+        Logger.info("App: Application closure requested. Preparing for safe exit.")
+        self.close()
         return False
 
     def on_display_timeout(self, dt):
         """Handle display timeouts in motion mode."""
         # Pause playing slideshow and turn display off.
-        Logger.debug(f"Controller: Display has timed out.")
+        Logger.info(f"Controller: Display has timed out.")
         self.pause()
         self.display_off()
 

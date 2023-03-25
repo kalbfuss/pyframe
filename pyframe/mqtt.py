@@ -184,7 +184,6 @@ class MqttInterface:
                 "manufacturer": PROJECT_NAME
             }
         }
-        Logger.debug(payload)
         if has_attributes:
             payload["json_attributes_topic"] = attributes_topic
         if category:
