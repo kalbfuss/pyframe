@@ -311,7 +311,7 @@ class SelectiveIndexIterator:
     """Selective index iterator.
 
     Selective iterator which allows to traverse through a sub-population of
-    files in the index according to specified criteria.
+    files in the index according to specified filter and order criteria.
     """
 
     def __init__(self, session, **criteria):
@@ -319,12 +319,16 @@ class SelectiveIndexIterator:
 
         :param session: SQLAlchemy database session
         :type session: sqlalchemy.orm.Session
-        :param criteria: Dictionary containing iteration criteria
+        :param criteria: dictionary containing iteration criteria
         :type criteria: dict
         :raises: InvalidIterationCriteriaError
         """
+        self._result = None
+        self._length = 0
+        self._position = 0
+
         # Initialize query.
-        query = session.query(MetaData)
+        query = session.query(MetaData.file_uuid, MetaData.rep_uuid)
 
         # Make sure only valid parameters have been specified.
         valid_keys = {'excluded_tags', 'most_recent', 'order', 'orientation', 'repository', 'tags', 'type'}
@@ -410,14 +414,13 @@ class SelectiveIndexIterator:
             value = criteria['most_recent']
             query = query.filter(MetaData.creation_date >= date_limit).limit(value)
 
-        # Query data and save iterator for list with metadata objects.
-        self._count = query.count()
-        self._iterator = query.all().__iter__()
+        # Query data and save list of metadata objects.
+        self._result = query.all()
 
     def __iter__(self):
         """Return self as iterator.
 
-        :return: Self
+        :return: self
         :return type: repository.SelectiveIndexIterator
         """
         return self
@@ -425,23 +428,48 @@ class SelectiveIndexIterator:
     def __next__(self):
         """Return next file in iteration.
 
-        :return: Next file in iteration
+        :return: next file in iteration
         :return type: repository.RepositoryFile
         :raises: StopIteration
         """
-        # Repeat until we have a valid file or end of iteration is reached. Note
-        # that StopIteration is not raised explicitly, but raised implicitly as
-        # the end of the list with metadata objects is reached.
+        # Repeat until we have a valid file or end of iteration is reached.
         while True:
             # Retrieve next metadata object in iteration.
-            mdata = self._iterator.__next__()
-            self._count = self._count - 1
+            if self._position < len(self._result):
+                mdata = self._result[self._position]
+                self._position = self._position + 1
+            # Raise exception if end of iteration is reached.
+            else:
+                raise StopIteration()
             # Try to obtain corresponding file.
             try:
                 return Repository.by_uuid(mdata.rep_uuid).file_by_uuid(mdata.file_uuid)
+            # Catch any invalid uuid errors in case the file is no longer
+            # available in the repository and continue.
             except InvalidUuidError:
                 pass
 
-    def count(self):
-        """Return number of remaining elments in iteration."""
-        return self._count
+    @property
+    def length(self):
+        """Return number of files in index."""
+        return len(self._result)
+
+    def previous(self, n=1):
+        """Return previous file in iteration.
+
+        Optionally, an offset may be specified to retrieve even earlier elements
+        of the iteration.
+
+        :param n: Optional offset. An offset of 1 corresponds to the previous
+          element. An offset of 2 to the second previous element etc.
+        :type n: int
+        :return: previous file in iteration
+        :return type: repository.RepositoryFile
+        :raises: StopIteration
+        """
+        # Adjust position to retrieve previous as next file.
+        if self._position > n:
+            self._position = self._position - (n + 1)
+            return next(self)
+        else:
+            raise StopIteration()

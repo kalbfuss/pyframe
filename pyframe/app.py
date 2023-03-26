@@ -361,10 +361,13 @@ class App(kivy.app.App, Controller):
             return False
         # Touch controller to prevent screen timeout.
         self.touch()
-        # Display previous file if left arrow pressed. Not yet implemented.
-        if key == 276: pass
-        # Display next file for all other keys
-        else: self.next()
+        # Display next file if right arrow pressed.
+        if key == 275:
+            self.next()
+        # Display previous file if left arrow pressed.
+        elif key == 276:
+            self.previous()
+        # Consume event.
         return True
 
     def on_state_change(self, *largs):
@@ -584,7 +587,8 @@ class App(kivy.app.App, Controller):
         """Change to previous file in slideshow."""
         # Skip if not playing.
         if self._play_state == PLAY_STATE.STOPPED: return
-        Logger.warn("Controller: Function 'previous' has not been implemented yet.")
+        Logger.info(f"Controller: Changing to previous file in slideshow '{self.slideshow}'.")
+        self.root.previous()
 
     def next(self):
         """Change to next file in slideshow."""

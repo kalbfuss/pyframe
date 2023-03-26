@@ -154,7 +154,6 @@ class Slideshow(AnchorLayout):
         self._play_state = PLAY_STATE.STOPPED
         self._event = None
         self._current_widget = None
-        self._next_widget = None
         self._iterator = None
 
         # Make sure only valid parameters have been specified.
@@ -181,23 +180,19 @@ class Slideshow(AnchorLayout):
             widget = SlideshowVideo(file, self._config)
         return widget
 
-    @property
-    def file_count(self):
-        """Return number of files in the slideshow."""
-        # Return initial count of current iterator if exists.
-        if self._iterator is not None:
-            return self._iterator.count()
-        else:
-            # Create temporary iterator otherwise to determine length.
-            return self._index.iterator(**self._criteria).count()
-
-    def _create_next_widget(self):
+    def _create_next_widget(self, previous=False):
         """Return widget for the next file in the slideshow.
+
+        Alternatively, a widget for the previous file in the slideshow may be
+        returend by setting the 'previous' flag to True.
 
         Catches any exception that occurs during file retrieval and skips the
         respective file. An empty widget is returned after 5 failed attempts.
         If the end of the iteration is reached, the iteration is restarted.
 
+        :param previous: Set to True if widget for previous file shall be
+            returend.
+        :type previous: bool
         :return: next file in the slideshow.
         :rtype: Widget
         """
@@ -205,15 +200,22 @@ class Slideshow(AnchorLayout):
         while True:
             try:
                 # Attempt to retrieve next file in repository.
-                file = next(self._iterator)
+                if previous is False:
+                    file = next(self._iterator)
+                # Or attempt to retrieve previous file in repository if previous
+                # flag has been set.
+                else:
+                    file = self._iterator.previous()
                 widget = self._create_widget(file)
-                # Exit loop if no exception occurred
+                # Exit loop if no exception occurred.
                 break
             # Create new iterator if end of iteration has been reached and try
             # again.
             except StopIteration:
-                Logger.info("Slideshow: End of iteration. Restarting iteration.")
+                Logger.info("Slideshow: End of slideshow reached. Restarting slideshow.")
                 self._iterator = self._index.iterator(**self._criteria)
+                # Make sure to return next and not previous file.
+                previous = False
                 continue
             # Log error if any other exception occurred and try again.
             except IOError as e:
@@ -228,6 +230,16 @@ class Slideshow(AnchorLayout):
                     self.stop()
                     return Widget()
         return widget
+
+    @property
+    def file_count(self):
+        """Return number of files in the slideshow."""
+        # Return initial count of current iterator if exists.
+        if self._iterator is not None:
+            return self._iterator.length
+        else:
+            # Create temporary iterator otherwise to determine length.
+            return self._index.iterator(**self._criteria).length
 
     @property
     def current_file(self):
@@ -263,8 +275,8 @@ class Slideshow(AnchorLayout):
         """
         return self._play_state
 
-    def next(self, reschedule=True):
-        """Display next file in the index."""
+    def next(self, reschedule=True, previous=False):
+        """Display next file in index."""
         # Skip if not playing.
         if self._play_state == PLAY_STATE.STOPPED: return
         # Unschedule and re-schedule callback function
@@ -273,15 +285,13 @@ class Slideshow(AnchorLayout):
             self._event = Clock.schedule_interval(self._clock_callback, self._config['pause'])
         # Remove current widget from layout.
         self.remove_widget(self._current_widget)
-        # Make next widget the current widget.
-        self._current_widget = self._next_widget
-        # Add current widget to layout.
-        self.add_widget(self._current_widget)
+        # Make widget from next file the current widget.
+        self._current_widget = self._create_next_widget(previous)
         # Stop playing content in current widget if slideshow is paused.
         if self._play_state == PLAY_STATE.PAUSED and hasattr(self._current_widget, 'stop'):
             self._current_widget.stop()
-        # Create widget for next frame.
-        self._next_widget = self._create_next_widget()
+        # Add current widget to layout.
+        self.add_widget(self._current_widget)
         # Fire event to indicate content change
         self.dispatch('on_content_change', self)
 
@@ -308,15 +318,12 @@ class Slideshow(AnchorLayout):
         """Start playing slideshow."""
         # Skip if already playing.
         if self._play_state == PLAY_STATE.PLAYING: return
-
         # Create selective index iterator with sorting/filter criteria from the
         # slideshow configuration.
         self._iterator = self._index.iterator(**self._criteria)
         # Create current widget from first file and add to layout.
         self._current_widget = self._create_next_widget()
         self.add_widget(self._current_widget)
-        # Create next widget from second file.
-        self._next_widget = self._create_next_widget()
         # Schedule callback function to start playing slideshow.
         self._event = Clock.schedule_interval(self._clock_callback, self._config['pause'])
         # Update state.
@@ -324,6 +331,9 @@ class Slideshow(AnchorLayout):
         # Fire event to indicate content change.
         self.dispatch('on_content_change', self)
 
+    def previous(self, reschedule=True):
+        """Display previous file in index."""
+        self.next(previous=True)
 
     def stop(self):
         """Stop playing slideshow."""
@@ -339,7 +349,6 @@ class Slideshow(AnchorLayout):
         # slideshow configuration.
         self._iterator = None
         self._current_widget = None
-        self._next_widget = None
         # Update state.
         self._play_state = PLAY_STATE.STOPPED
         # Fire event to indicate content change.
