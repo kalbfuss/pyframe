@@ -20,12 +20,15 @@ class RepositoryFile(repository.RepositoryFile):
 
     def __init__(self, uuid, rep, index=None, index_lookup=True, extract_metadata=True):
         """Initialize file."""
-        repository.RepositoryFile.__init__(self, uuid, rep, index, index_lookup)
+        super().__init__(uuid, rep, index, index_lookup)
 
         # Throw exception if file does not exist
         self._path = os.path.join(rep.root, uuid)
         if not os.path.isfile(self._path):
             raise InvalidUuidError("There is no file with UUID '{uuid}'.", uuid)
+
+        # Set file name from uuid
+        self._name = os.path.basename(uuid)
 
         # Determine last modification and file creation date.
         last_modified = datetime.fromtimestamp(os.path.getmtime(self._path))

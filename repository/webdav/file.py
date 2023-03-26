@@ -38,11 +38,14 @@ class RepositoryFile(repository.RepositoryFile):
     def __init__(self, uuid, rep, index=None, index_lookup=True, extract_metadata=True):
         """Initialize file."""
         # Call constructor of parent class.
-        repository.RepositoryFile.__init__(self, uuid, rep, index, index_lookup)
+        super().__init__(uuid, rep, index, index_lookup)
 
         # Basic initialization.
         self._cache_file = None
         self._path = None
+
+        # Set file name from uuid
+        self._name = os.path.basename(uuid)
 
         # Attempt to determine last modification and file creation date.
         if not self._in_index:

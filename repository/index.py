@@ -414,6 +414,8 @@ class SelectiveIndexIterator:
             value = criteria['most_recent']
             query = query.filter(MetaData.creation_date >= date_limit).limit(value)
 
+        logging.debug(f"Building selective index iterator with the following query: {str(query)}")
+
         # Query data and save list of metadata objects.
         self._result = query.all()
 

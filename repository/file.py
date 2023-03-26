@@ -96,7 +96,7 @@ class RepositoryFile:
             mdata = index.lookup(self, rep)
 
         if mdata is not None:
-            logging.info(f"Assigning metadata of file '{self._uuid}' from index.")
+            logging.debug(f"Assigning metadata of file '{self._uuid}' from index.")
             self._in_index = True
             self._type = mdata.type
             self._width = mdata.width
