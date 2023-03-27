@@ -27,17 +27,30 @@ class ExceptionHandler(kivy.base.ExceptionHandler):
     Logs all exceptions, but continues with the execution. The main purpose of
     the handler is to prevent the application from exiting unexpectedly.
     """
-    def handle_exception(self, *largs):
+
+    def __init__(self, app):
+        """Initialize exception handler instance."""
+        super().__init__()
+        self._app = app
+
+    def handle_exception(self, exception):
         """Log all exceptions and continue with execution.
 
         For unknown reasons, the exception is not always provided as an argument
         albeit the kivy documentation says so. The method thus retrieves the
         last raised exception via a system call.
         """
-        _, e, _ = sys.exc_info()
+        # Log information on exception.
         Logger.error("App: An exception was raised:")
-        Logger.error(f"App: {''.join(traceback.format_exception(e)).rstrip()}")
+        Logger.error(f"App: {''.join(traceback.format_exception(exception)).rstrip()}")
         Logger.error("App: Ignoring and continuing with execution.")
+        # Wait for a moment to slow down infinite loops.
+        time.sleep(10)
+        # Restart slideshow if playing.
+        if self._app.play_state == PLAY_STATE.PLAYING:
+            self._app.stop()
+            self._app.play()
+        # Continue with execution.
         return ExceptionManager.PASS
 
 
@@ -334,7 +347,7 @@ class App(kivy.app.App, Controller):
             self.play()
 
         # Catch and log all exceptions, but continue with the execution.
-        ExceptionManager.add_handler(ExceptionHandler)
+        ExceptionManager.add_handler(ExceptionHandler(self))
 
         return self.root
 
@@ -544,7 +557,7 @@ class App(kivy.app.App, Controller):
         Logger.info(f"Controller: Playing/resuming slideshow '{self.slideshow}'.")
         self.root.play()
         self._play_state = PLAY_STATE.PLAYING
-        self.display_on
+        self.display_on()
         self.dispatch('on_state_change')
 
     @property
@@ -580,7 +593,7 @@ class App(kivy.app.App, Controller):
         Logger.info(f"Controller: Stopping slideshow '{self.slideshow}'.")
         self.root.stop()
         self._play_state = PLAY_STATE.STOPPED
-        self.display_off
+        self.display_off()
         self.dispatch('on_state_change')
 
     def previous(self):
@@ -646,8 +659,7 @@ class App(kivy.app.App, Controller):
         # Cancel previously scheduled timeout event.
         if self._timeout_event is not None:
             self._timeout_event.cancel()
-        # Turn display on and restart playing the slideshow.
-        self.display_on()
+        # Restart playing the slideshow.
         self.play()
         # Schedule new timeout event.
         self._timeout_event = Clock.schedule_once(self.on_display_timeout, self._display_timeout)
