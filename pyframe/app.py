@@ -646,7 +646,8 @@ class App(kivy.app.App, Controller):
         # Cancel previously scheduled timeout event.
         if self._timeout_event is not None:
             self._timeout_event.cancel()
-        # Restart playing the slideshow.
+        # Turn display on and restart playing the slideshow.
+        self.display_on()
         self.play()
         # Schedule new timeout event.
         self._timeout_event = Clock.schedule_once(self.on_display_timeout, self._display_timeout)
