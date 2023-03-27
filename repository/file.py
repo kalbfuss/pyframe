@@ -84,7 +84,7 @@ class RepositoryFile:
         self._last_modified = datetime.today()
         self._last_updated = datetime.today()
         self._description = str()
-        self._rating = 0
+        self._rating = None
         self._tags = list()
 
         # Attempt to determine type from extension.
@@ -171,6 +171,10 @@ class RepositoryFile:
         # Etract image description if available.
         if "Image ImageDescription" in tags:
             self._description = tags["Image ImageDescription"].values
+
+        # Extract image rating if available.
+        if "Image Rating" in tags:
+            self._rating = tags["Image Rating"].values[0]
 
         # Extract creation date if available.
         try:
