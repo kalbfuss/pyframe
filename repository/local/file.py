@@ -58,7 +58,7 @@ class RepositoryFile(repository.RepositoryFile):
 
     def extract_metadata(self):
         """Extract metadata from file content."""
-        logging.info(f"Extracting metadata of file '{self.uuid}' from file content.")
+        logging.debug(f"Extracting metadata of file '{self.uuid}' from file content.")
         # If image try to extract metadata from EXIF tag.
         if self._type == repository.RepositoryFile.TYPE_IMAGE:
             self._extract_image_metadata(self._path)

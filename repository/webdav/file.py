@@ -110,7 +110,7 @@ class RepositoryFile(repository.RepositoryFile):
         if self.type in (repository.RepositoryFile.TYPE_IMAGE, repository.RepositoryFile.TYPE_VIDEO):
             self._download()
         # Attempt to extract metadata from file content.
-        logging.info(f"Extracting metadata of file '{self.uuid}' from file content.")
+        logging.debug(f"Extracting metadata of file '{self.uuid}' from file content.")
         if self._type == repository.RepositoryFile.TYPE_IMAGE:
             self._extract_image_metadata(self._path)
         elif self._type == repository.RepositoryFile.TYPE_VIDEO:
