@@ -42,7 +42,8 @@ class ExceptionHandler(kivy.base.ExceptionHandler):
         """
         # Log information on exception.
         Logger.error("App: An exception was raised:")
-        Logger.error(f"App: {''.join(traceback.format_exception(exception)).rstrip()}")
+        if exception is not None:
+            Logger.error(f"App: {''.join(traceback.format_exception(exception)).rstrip()}")
         Logger.error("App: Ignoring and continuing with execution.")
         # Wait for a moment to slow down infinite loops.
         time.sleep(10)
