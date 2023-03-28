@@ -40,18 +40,24 @@ class ExceptionHandler(kivy.base.ExceptionHandler):
         albeit the kivy documentation says so. The method thus retrieves the
         last raised exception via a system call.
         """
-        # Log information on exception.
-        Logger.error("App: An exception was raised:")
-        if exception is not None:
-            Logger.error(f"App: {''.join(traceback.format_exception(exception)).rstrip()}")
-        Logger.error("App: Ignoring and continuing with execution.")
-        # Wait for a moment to slow down infinite loops.
-        time.sleep(10)
-        # Restart slideshow if playing.
-        if self._app.play_state == PLAY_STATE.PLAYING:
-            self._app.stop()
-            self._app.play()
-        # Continue with execution.
+        # Make sure we do not produce any unhandled exceptions within the
+        # exception handler.
+        try:
+            # Log information on exception.
+            Logger.error("App: An exception was raised:")
+            # Formatting of the exception may fail depending on the exception
+            # object passed.
+            try: Logger.error(f"App: {''.join(traceback.format_exception(exception)).rstrip()}")
+            except: pass
+            Logger.error("App: Ignoring and continuing with execution.")
+            # Wait for a moment to slow down infinite loops.
+            time.sleep(10)
+            # Restart slideshow if playing.
+            if self._app.play_state == PLAY_STATE.PLAYING:
+                self._app.stop()
+                self._app.play()
+            # Continue with execution.
+        except: pass
         return ExceptionManager.PASS
 
 
