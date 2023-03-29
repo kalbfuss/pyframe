@@ -6,10 +6,10 @@ from kivy.uix.image import Image
 from kivy.uix.label import Label
 from kivy.uix.widget import Widget
 
-from pyframe import Content
+from pyframe.content import ContentBase
 
 
-class SlideshowImage(Content):
+class SlideshowImage(ContentBase):
     """Image slideshow widget.
 
     Loads the image from the specified File and starts playing it as soon as the

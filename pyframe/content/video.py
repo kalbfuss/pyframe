@@ -5,10 +5,10 @@ from kivy.logger import Logger
 from kivy.uix.video import Video
 from kivy.uix.widget import Widget
 
-from pyframe import Content
+from pyframe.content import ContentBase
 
 
-class SlideshowVideo(Content):
+class SlideshowVideo(ContentBase):
     """Video slideshow widget.
 
     Loads the video from the specified File and starts playing it as soon as the

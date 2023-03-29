@@ -8,7 +8,7 @@ from datetime import datetime
 from math import ceil
 
 
-class Content(Widget):
+class ContentBase(Widget):
     """Slideshow content widget.
 
     Base class for slideshow image and video widgets. Provides basic
