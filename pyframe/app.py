@@ -330,7 +330,8 @@ class App(kivy.app.App, Controller):
         self.root = next(iter(self._slideshows.values()))
 
         # Create mqtt interface if configured and activated.
-        if 'mqtt' in self._config and self._config['enable_mqtt'] == "on" or self._config['enable_mqtt'] is True:
+        value = self._config.get('enable_mqtt')
+        if 'mqtt' in self._config and (value == "on" or value is True):
             try:
                 self._mqtt_interface = MqttInterface(self._config['mqtt'], self)
             except Exception as e:
@@ -344,7 +345,8 @@ class App(kivy.app.App, Controller):
         self.__init_display()
 
         # Create scheduler if configured and activated.
-        if 'schedule' in self._config and (self._config['enable_scheduler'] == "on" or self._config['enable_scheduler'] is True):
+        value = self._config.get('enable_scheduler')
+        if 'schedule' in self._config and (value == "on" or value is True):
             try:
                 self._scheduler = Scheduler(self._config['schedule'], self)
             except Exception as e:
