@@ -271,6 +271,7 @@ class App(kivy.app.App, Controller):
         'display_mode': "static",
         'display_state': "on",
         'display_timeout': 300,
+        'enable_exception_handler': "on",
         'enable_scheduler': "on",
         'enable_mqtt': "on",
         'file_types': [ "images", "videos" ],
@@ -360,8 +361,12 @@ class App(kivy.app.App, Controller):
             Logger.debug(f"{self.root}")
             self.play()
 
-        # Catch and log all exceptions, but continue with the execution.
-        ExceptionManager.add_handler(ExceptionHandler(self))
+        # Install default exception handler to prevent the application from
+        # exiting unexpectedly. All exceptions are caught and logged, but the
+        # appplication continues with the execution afterwards.
+        value = self._config.get('enable_exception_handler')
+        if value == "on" or value is True:
+            ExceptionManager.add_handler(ExceptionHandler(self))
 
         return self.root
 
