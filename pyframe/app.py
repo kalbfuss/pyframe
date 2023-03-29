@@ -352,13 +352,6 @@ class App(kivy.app.App, Controller):
                 sys.exit(1)
         # Start playing first defined slideshow otherwise.
         else:
-            # Wait until index contains at least one entry.
-            while self.root.file_count == 0:
-                time.sleep(1)
-                Logger.warn("App: Slideshow still empty. Giving more time to build index.")
-            else:
-                Logger.info(f"App: Proceeding with {self.root.file_count} files in slideshow.")
-            Logger.debug(f"{self.root}")
             self.play()
 
         # Install default exception handler to prevent the application from

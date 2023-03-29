@@ -90,6 +90,7 @@ class ErrorMessage(ContentBase):
         # Position and resize label.
         self._label.pos = (self.x, self.y)
         self._label.size = (self.width, self.height)
+        self._label.text_size = self._label.size
         # Set font size and padding of label.
         font_size = round(self.config.get('label_font_size', 0.05) * self.height)
         self._label.font_size = font_size

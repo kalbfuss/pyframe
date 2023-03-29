@@ -196,6 +196,17 @@ class Slideshow(AnchorLayout):
         :return: next file in the slideshow.
         :rtype: Widget
         """
+        # Return error message widget if the slideshow does not contain any
+        # files and re-create index iterator.
+        if self._iterator.length == 0:
+            Logger.error("Slideshow: The slideshow does not contain any files.")
+            # Re-create index iterator for a new chance. Possibly, the
+            # background indexer has added new files in the meantime.
+            self._iterator = self._index.iterator(**self._criteria)
+            return ErrorMessage("The slideshow does not contain any files.", self._config)
+
+        # Make up to 5 attempts to create the next content widget. Return an
+        # error message widget otherwise.
         attempts = 0
         while True:
             try:
@@ -203,13 +214,13 @@ class Slideshow(AnchorLayout):
                 if previous is False:
                     file = next(self._iterator)
                 # Or attempt to retrieve previous file in repository if previous
-                # flag has been set.
+                # flag is set.
                 else:
                     file = self._iterator.previous()
                 widget = self._create_widget(file)
                 # Exit loop if no exception occurred.
                 break
-            # Create new iterator if end of iteration has been reached and try
+            # Create new iterator if end of slideshow has been reached and try
             # again.
             except StopIteration:
                 Logger.info("Slideshow: End of slideshow reached. Restarting slideshow.")
@@ -223,12 +234,14 @@ class Slideshow(AnchorLayout):
                 continue
             finally:
                 attempts = attempts + 1
-                # Stop slideshow and return empty widget if number of attempts
-                # exceeds limit.
-                if attempts > 5:
-                    Logger.error(f"Slideshow: Stopping slidewhow after {attempts} failed attempts to retrieve next file.")
-                    self.stop()
-                    return Widget()
+                # Restart slideshow and return error message widget if number of
+                # failed attempts exceeds 5.
+                if attempts >= 5:
+                    Logger.error(f"Slideshow: Restarting slideshow after {attempts} failed attempts to retrieve the next file.")
+                    # Re-create index iterator for a new chance. Possibly, the
+                    # background indexer has updated the index in the meantime.
+                    self._iterator = self._index.iterator(**self._criteria)
+                    return ErrorMessage(f"Restarting slideshow after {attempts} failed attempts to retrieve the next file.", self._config)
         return widget
 
     @property
