@@ -284,7 +284,8 @@ class Slideshow(AnchorLayout):
             self._event.cancel()
             self._event = Clock.schedule_interval(self._clock_callback, self._config['pause'])
         # Remove current widget from layout.
-        self.remove_widget(self._current_widget)
+        if self._current_widget is not None:
+            self.remove_widget(self._current_widget)
         # Make widget from next file the current widget.
         self._current_widget = self._create_next_widget(previous)
         # Stop playing content in current widget if slideshow is paused.
@@ -344,12 +345,13 @@ class Slideshow(AnchorLayout):
             self._event.cancel()
             self._event = None
         # Remove current widget from layout.
-        self.remove_widget(self._current_widget)
+        if self._current_widget is not None:
+            self.remove_widget(self._current_widget)
         # Reset selective index iterator with sorting/filter criteria from the
         # slideshow configuration.
         self._iterator = None
         self._current_widget = None
-        # Update state.
+        # Update state otherwise.
         self._play_state = PLAY_STATE.STOPPED
         # Fire event to indicate content change.
         self.dispatch('on_content_change', self)
