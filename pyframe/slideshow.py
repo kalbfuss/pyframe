@@ -120,7 +120,7 @@ class Slideshow(AnchorLayout):
                 if 'excluded_tags' not in self._criteria:
                     self._criteria['excluded_tags'] = value
                 else:
-                    self._criteria['excluded_tags'].append(*value)
+                    self._criteria['excluded_tags'] += value
 
             # Filter out excluded tags.
             if key == "always_excluded_tags":
@@ -134,7 +134,7 @@ class Slideshow(AnchorLayout):
                 if 'excluded_tags' not in self._criteria:
                     self._criteria['excluded_tags'] = value
                 else:
-                    self._criteria['excluded_tags'].append(*value)
+                    self._criteria['excluded_tags'] += value
 
     def __init__(self, name, index, config):
         """Initialize slideshow instance.
