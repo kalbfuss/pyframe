@@ -10,6 +10,6 @@ Author: Bernd Kalbfuß
 License: t.b.d.
 """
 
-from . base import ContentBase
+from . base import ContentBase, ErrorMessage, LabeledContent
 from . image import SlideshowImage
 from . video import SlideshowVideo

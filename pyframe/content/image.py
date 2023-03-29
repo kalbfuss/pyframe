@@ -6,10 +6,10 @@ from kivy.uix.image import Image
 from kivy.uix.label import Label
 from kivy.uix.widget import Widget
 
-from pyframe.content import ContentBase
+from pyframe.content import LabeledContent
 
 
-class SlideshowImage(ContentBase):
+class SlideshowImage(LabeledContent):
     """Image slideshow widget.
 
     Loads the image from the specified File and starts playing it as soon as the
@@ -29,7 +29,7 @@ class SlideshowImage(ContentBase):
         :type config: dict
         """
         super().__init__(file, config)
-        self._file = file
+#        self._file = file
         self._rotation = file.rotation - config['rotation']
         self._bgcolor = config['bg_color']
         self._resize = config['resize']

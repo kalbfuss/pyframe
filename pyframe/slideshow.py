@@ -11,7 +11,7 @@ from kivy.uix.widget import Widget
 
 from . import PLAY_STATE
 
-from pyframe.content import SlideshowImage, SlideshowVideo
+from pyframe.content import ErrorMessage, SlideshowImage, SlideshowVideo
 
 
 class InvalidSlideshowConfigurationError(Exception):

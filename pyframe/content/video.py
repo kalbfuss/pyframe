@@ -5,10 +5,10 @@ from kivy.logger import Logger
 from kivy.uix.video import Video
 from kivy.uix.widget import Widget
 
-from pyframe.content import ContentBase
+from pyframe.content import LabeledContent
 
 
-class SlideshowVideo(ContentBase):
+class SlideshowVideo(LabeledContent):
     """Video slideshow widget.
 
     Loads the video from the specified File and starts playing it as soon as the
@@ -28,7 +28,7 @@ class SlideshowVideo(ContentBase):
         :type config: dict
         """
         super().__init__(file, config)
-        self._file = file
+#        self._file = file
         self._rotation = file.rotation - config['rotation']
         self._bgcolor = config['bg_color']
         self._resize = config['resize']
