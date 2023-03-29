@@ -28,7 +28,6 @@ class SlideshowVideo(LabeledContent):
         :type config: dict
         """
         super().__init__(file, config)
-#        self._file = file
         self._rotation = file.rotation - config['rotation']
         self._bgcolor = config['bg_color']
         self._resize = config['resize']
