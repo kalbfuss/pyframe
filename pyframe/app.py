@@ -45,10 +45,17 @@ class ExceptionHandler(kivy.base.ExceptionHandler):
         try:
             # Log information on exception.
             Logger.error("App: An exception was raised:")
-            # Formatting of the exception may fail depending on the exception
-            # object passed.
-            try: Logger.error(f"App: {''.join(traceback.format_exception(exception)).rstrip()}")
-            except: pass
+            # Formatting the excpetion has failed for unknown reasons in the
+            # past. Putting into separate try block to make sure subsequent
+            # code is executed.
+            try:
+                # Retrieve information on last exception via system call since
+                # exception object passed to handler sometimes seems to be
+                # missing/incomplete.
+                _, e, _ = sys.exc_info()
+                Logger.error(f"App: {''.join(traceback.format_exception(e)).rstrip()}")
+            except:
+                pass
             Logger.error("App: Ignoring and continuing with execution.")
             # Wait for a moment to slow down infinite loops.
             time.sleep(10)
