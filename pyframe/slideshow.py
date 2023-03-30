@@ -356,15 +356,12 @@ class Slideshow(AnchorLayout):
         """Stop playing slideshow."""
         # Skip if already stopped.
         if self._play_state == PLAY_STATE.STOPPED: return
-        Logger.debug("Slideshow: Stopping playing.")
         # Unschedule callback function.
         if self._event is not None:
-            Logger.debug("Slideshow: Unscheduling callback function.")
             self._event.cancel()
             self._event = None
         # Remove current widget from layout.
         if self._current_widget is not None:
-            Logger.debug("Slideshow: Removing current widget from layout.")
             self.remove_widget(self._current_widget)
         # Reset selective index iterator with sorting/filter criteria from the
         # slideshow configuration.
