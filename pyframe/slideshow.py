@@ -302,7 +302,7 @@ class Slideshow(AnchorLayout):
         # Make widget from next file the current widget.
         self._current_widget = self._create_next_widget(previous)
         # Stop playing content in current widget if slideshow is paused.
-        if self._play_state == PLAY_STATE.PAUSED and hasattr(self._current_widget, 'stop'):
+        if self._play_state == PLAY_STATE.PAUSED:
             self._current_widget.stop()
         # Add current widget to layout.
         self.add_widget(self._current_widget)
@@ -312,19 +312,18 @@ class Slideshow(AnchorLayout):
     def on_content_change(self, *largs):
         """Default handler for 'on_content_change' event."""
         # Do nothing.
-        Logger.debug("Slideshow: Ignoring event 'on_content_change' since it should have been handled elsewhere.")
+        Logger.warn("Slideshow: Ignoring event 'on_content_change' since it should have been handled elsewhere.")
 
     def pause(self):
         """Pause playing slideshow."""
-        # Skip if already paused.
-        if self._play_state == PLAY_STATE.PAUSED: return
+        # Skip if already paused or stopped.
+        if self._play_state == PLAY_STATE.PAUSED or self._play_state == PLAY_STATE.STOPPED: return
         # Unschedule the callback function.
         if self._event is not None:
             self._event.cancel()
             self._event = None
         # Stop playing content in current widget.
-        if hasattr(self._current_widget, 'stop'):
-            self._current_widget.stop()
+        self._current_widget.stop()
         # Update state.
         self._play_state = PLAY_STATE.PAUSED
 
@@ -332,9 +331,13 @@ class Slideshow(AnchorLayout):
         """Start playing slideshow."""
         # Skip if already playing.
         if self._play_state == PLAY_STATE.PLAYING: return
-        # Create selective index iterator with sorting/filter criteria from the
-        # slideshow configuration.
-        self._iterator = self._index.iterator(**self._criteria)
+        # Create new selective index iterator with sorting/filter criteria from
+        # the slideshow configuration if not paused.
+        if self._play_state != PLAY_STATE.PAUSED:
+            self._iterator = self._index.iterator(**self._criteria)
+        # Remove current widget from layout.
+        if self._current_widget is not None:
+            self.remove_widget(self._current_widget)
         # Create current widget from first file and add to layout.
         self._current_widget = self._create_next_widget()
         self.add_widget(self._current_widget)
@@ -353,12 +356,15 @@ class Slideshow(AnchorLayout):
         """Stop playing slideshow."""
         # Skip if already stopped.
         if self._play_state == PLAY_STATE.STOPPED: return
+        Logger.debug("Slideshow: Stopping playing.")
         # Unschedule callback function.
         if self._event is not None:
+            Logger.debug("Slideshow: Unscheduling callback function.")
             self._event.cancel()
             self._event = None
         # Remove current widget from layout.
         if self._current_widget is not None:
+            Logger.debug("Slideshow: Removing current widget from layout.")
             self.remove_widget(self._current_widget)
         # Reset selective index iterator with sorting/filter criteria from the
         # slideshow configuration.

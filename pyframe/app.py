@@ -367,7 +367,7 @@ class App(kivy.app.App, Controller):
 
     def on_content_change(self, slideshow, *largs):
         """Handle slideshow content change events."""
-        Logger.debug(f"App: Event 'on_content_change' from slideshow '{slideshow.name}' received. Forwarding as event 'on_stage_change'.")
+        Logger.debug(f"App: Event 'on_content_change' from slideshow '{slideshow.name}' received. Forwarding as event 'on_state_change'.")
         # Forward as 'on_state_change' event.
         self.dispatch('on_state_change')
         # Consume event.
@@ -478,9 +478,11 @@ class App(kivy.app.App, Controller):
         #  Set display to motion mode and start playing slideshow.
         if mode == DISPLAY_MODE.STATIC: pass
         elif mode == DISPLAY_MODE.MOTION:
-            # Update last touch time stamp and schedule timeout event.
+            # Update last touch time stamp.
             self._last_touch = time.time()
-            self._timeout_event = Clock.schedule_once(self.on_display_timeout, self._display_timeout)
+            # Schedule schedule timeout event if not stopped.
+            if self.play_state != PLAY_STATE.STOPPED:
+                self._timeout_event = Clock.schedule_once(self.on_display_timeout, self._display_timeout)
         # Raise exception upon invalid display mode.
         else:
             raise Exception(f"The selected display mode '{mode}' is invalid. Acceptable values are '{[ item.value for item in DISPLAY_MODE ]}'.")
@@ -559,7 +561,8 @@ class App(kivy.app.App, Controller):
 
     def pause(self):
         """Pause playing the current slideshow."""
-        if self._play_state == PLAY_STATE.PAUSED: return
+        # Skip if already paused or stopped.
+        if self._play_state == PLAY_STATE.PAUSED or self._play_state == PLAY_STATE.STOPPED: return
         Logger.info(f"Controller: Pausing slideshow '{self.slideshow}'.")
         self.root.pause()
         self._play_state = PLAY_STATE.PAUSED
@@ -567,11 +570,14 @@ class App(kivy.app.App, Controller):
 
     def play(self):
         """Start/resume playing the current slideshow."""
+        # Skip if already playing.
         if self._play_state == PLAY_STATE.PLAYING: return
         Logger.info(f"Controller: Playing/resuming slideshow '{self.slideshow}'.")
+        # Start playing current slideshow.
         self.root.play()
         self._play_state = PLAY_STATE.PLAYING
         self.display_on()
+        self.touch()
         self.dispatch('on_state_change')
 
     @property
@@ -603,8 +609,13 @@ class App(kivy.app.App, Controller):
 
     def stop(self):
         """Stop playing the current slideshow."""
+        # Skip if already stopped.
         if self._play_state == PLAY_STATE.STOPPED: return
         Logger.info(f"Controller: Stopping slideshow '{self.slideshow}'.")
+        # Cancel previously scheduled timeout event.
+        if self._timeout_event is not None:
+            self._timeout_event.cancel()
+        # Stop playing current slideshow.
         self.root.stop()
         self._play_state = PLAY_STATE.STOPPED
         self.display_off()
