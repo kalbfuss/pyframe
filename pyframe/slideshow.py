@@ -290,9 +290,9 @@ class Slideshow(AnchorLayout):
 
     def next(self, reschedule=True, previous=False):
         """Display next file in index."""
-        # Skip if not playing.
+        # Skip if not playing or paused.
         if self._play_state == PLAY_STATE.STOPPED: return
-        # Unschedule and re-schedule callback function
+        # Unschedule and re-schedule callback function.
         if reschedule and self._play_state == PLAY_STATE.PLAYING and self._event is not None:
             self._event.cancel()
             self._event = Clock.schedule_interval(self._clock_callback, self._config['pause'])
