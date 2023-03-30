@@ -8,7 +8,7 @@ import paho.mqtt.client as mqtt
 import ssl
 import time
 
-from . import Controller, DISPLAY_MODE, DISPLAY_STATE, PLAY_STATE
+from . import Controller, DISPLAY_MODE, DISPLAY_STATE, PLAY_STATE, check_config
 from . common import APPLICATION_NAME, APPLICATION_DESCRIPTION, VERSION, PROJECT_NAME
 
 from kivy.clock import Clock
@@ -36,6 +36,10 @@ class MqttInterface:
     discovery service.
     """
 
+    # Required and valid configuration parameters
+    CONF_REQ_KEYS = {'host', 'user', 'password'}
+    CONF_VALID_KEYS = {'port', 'tls', 'tls_insecure', 'device_id', 'device_name'} | CONF_REQ_KEYS
+
     def __init__(self, config, controller):
         """ Initialize MQTT interface instance.
 
@@ -48,7 +52,8 @@ class MqttInterface:
             host: MQTT broker (required)
             port: connection port (default: 8883)
             tls: true if a secure connection shall be used (default: true)
-            tls_insecure: true if insecure TLS connections are permitted (default: false)
+            tls_insecure: true if insecure TLS connections, i.e. connections
+                with non-trusted certificates, are permitted (default: false)
             user: login name (required)
             password: login password (required)
             device_id: pyframe device id (default: "pyframe")
@@ -59,6 +64,9 @@ class MqttInterface:
         :type config: dict
         :type controller: pyframe.controller
         """
+        # Check the configuration for valid and required parameters.
+        check_config(config, self.CONF_VALID_KEYS, self.CONF_REQ_KEYS)
+
         self._config = config
         self._controller = controller
         self._client = None
@@ -99,7 +107,7 @@ class MqttInterface:
             # Call network loop every x seconds.
             self._event = Clock.schedule_interval(self.loop, 0.2)
         except Exception as e:
-            raise Exception(f"MQTT: An exception occured during setup of the connection: {e}")
+            raise Exception(f"An exception occured during setup of the connection: {e}")
 
     def __setup_select(self, client, name, options, icon=None, category=None):
         """Helper function to setup selections in Home Assistant.

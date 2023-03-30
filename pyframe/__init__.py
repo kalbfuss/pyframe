@@ -11,6 +11,7 @@ License: t.b.d.
 """
 
 
+from . common import check_config
 from . mylogging import Handler
 from . indexer import Indexer
 from . controller import Controller, DISPLAY_MODE, DISPLAY_STATE, PLAY_STATE

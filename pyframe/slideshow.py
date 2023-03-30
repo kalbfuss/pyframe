@@ -152,7 +152,7 @@ class Slideshow(AnchorLayout):
         self._index = index
         self._config = config
         self._play_state = PLAY_STATE.STOPPED
-        self._event = None
+        self._next_next_event = None
         self._current_widget = None
         self._iterator = None
 
@@ -293,9 +293,9 @@ class Slideshow(AnchorLayout):
         # Skip if not playing or paused.
         if self._play_state == PLAY_STATE.STOPPED: return
         # Unschedule and re-schedule callback function.
-        if reschedule and self._play_state == PLAY_STATE.PLAYING and self._event is not None:
-            self._event.cancel()
-            self._event = Clock.schedule_interval(self._clock_callback, self._config['pause'])
+        if reschedule and self._play_state == PLAY_STATE.PLAYING and self._next_event is not None:
+            self._next_event.cancel()
+            self._next_event = Clock.schedule_interval(self._clock_callback, self._config['pause'])
         # Remove current widget from layout.
         if self._current_widget is not None:
             self.remove_widget(self._current_widget)
@@ -319,9 +319,9 @@ class Slideshow(AnchorLayout):
         # Skip if already paused or stopped.
         if self._play_state == PLAY_STATE.PAUSED or self._play_state == PLAY_STATE.STOPPED: return
         # Unschedule the callback function.
-        if self._event is not None:
-            self._event.cancel()
-            self._event = None
+        if self._next_event is not None:
+            self._next_event.cancel()
+            self._next_event = None
         # Stop playing content in current widget.
         self._current_widget.stop()
         # Update state.
@@ -342,7 +342,7 @@ class Slideshow(AnchorLayout):
         self._current_widget = self._create_next_widget()
         self.add_widget(self._current_widget)
         # Schedule callback function to start playing slideshow.
-        self._event = Clock.schedule_interval(self._clock_callback, self._config['pause'])
+        self._next_event = Clock.schedule_interval(self._clock_callback, self._config['pause'])
         # Update state.
         self._play_state = PLAY_STATE.PLAYING
         # Fire event to indicate content change.
@@ -357,9 +357,9 @@ class Slideshow(AnchorLayout):
         # Skip if already stopped.
         if self._play_state == PLAY_STATE.STOPPED: return
         # Unschedule callback function.
-        if self._event is not None:
-            self._event.cancel()
-            self._event = None
+        if self._next_event is not None:
+            self._next_event.cancel()
+            self._next_event = None
         # Remove current widget from layout.
         if self._current_widget is not None:
             self.remove_widget(self._current_widget)

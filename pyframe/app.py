@@ -13,6 +13,7 @@ import yaml
 import kivy.app
 
 from repository import Index, Repository, InvalidConfigurationError, InvalidUuidError
+from . common import ConfigurationError
 from . import Indexer, Handler, Slideshow, Scheduler, MqttInterface, InvalidSlideshowConfigurationError, Controller, DISPLAY_MODE, DISPLAY_STATE, PLAY_STATE
 
 from kivy.base import ExceptionManager
@@ -334,8 +335,11 @@ class App(kivy.app.App, Controller):
         if 'mqtt' in self._config and (value == "on" or value is True):
             try:
                 self._mqtt_interface = MqttInterface(self._config['mqtt'], self)
+            except ConfigurationError as e:
+                Logger.critical(f"Configuration: The MQTT interface configuration is invalid. {e}")
+                sys.exit(1)
             except Exception as e:
-                Logger.critical(f"Configuration: {e}")
+                Logger.critical(f"MQTT: {e}")
                 sys.exit(1)
 
         # Bind keyboard listener
