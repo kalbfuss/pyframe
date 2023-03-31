@@ -243,11 +243,14 @@ class Index:
 
     def close(self):
         try:
-            logging.debug(f"Closing file index database '{self._dbname}'")
+
             # Close database session and dispose engine
             if self._session:
+                logging.debug(f"Closing database session.")
                 self._session.close()
-            if self._engine: self._engine.dispose()
+            if self._engine:
+                logging.debug(f"Disposing engine for database '{self._dbname}'.")
+                self._engine.dispose()
         except Exception as e:
             logging.error(f"An error ocurred while closing the index database '{self._dbname}': {e}")
 
@@ -328,7 +331,7 @@ class SelectiveIndexIterator:
         self._position = 0
 
         # Initialize query.
-        query = session.query(MetaData.file_uuid, MetaData.rep_uuid)
+        query = session.query(MetaData.file_uuid, MetaData.rep_uuid, MetaData.creation_date)
 
         # Make sure only valid parameters have been specified.
         valid_keys = {'excluded_tags', 'most_recent', 'order', 'orientation', 'repository', 'tags', 'type'}
