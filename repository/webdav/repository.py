@@ -1,13 +1,13 @@
 """Module for WebDAV repositories."""
 
-
 import logging
 import repository
 import tempfile
 
-from repository.webdav import RepositoryFile
 from repository import InvalidConfigurationError, IOError
 from webdav3.client import Client
+
+from .file import RepositoryFile
 
 
 class Repository(repository.Repository):

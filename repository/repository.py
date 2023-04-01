@@ -1,6 +1,5 @@
 """Module providing repository class"""
 
-
 import logging
 
 from abc import ABC, abstractmethod

@@ -1,13 +1,13 @@
 """Module for local repositories."""
 
-
 import os
 import os.path
 import logging
 import repository
 
 from repository import InvalidConfigurationError, IOError
-from repository.local import RepositoryFile
+
+from .file import RepositoryFile
 
 
 class Repository(repository.Repository):
