@@ -6,7 +6,6 @@ from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.label import Label
 from kivy.uix.widget import Widget
 
-
 from datetime import datetime
 from math import ceil
 
@@ -135,11 +134,11 @@ class LabeledContent(ContentBase):
     def adjust_label(self, *args):
         """Adjust label when the widget becomes visible and its size is set."""
         # Set font size.
-        font_size = round(self.config.get('label_font_size', 0.05) * self.height)
+        font_size = round(self.config.get('label_font_size', 0.05) * min(self.height, self.width))
         self._wlabel.font_size = font_size
         self._blabel.font_size = font_size
         # Set padding.
-        padding = round(self.config.get('label_padding', 0.05) * self.width)
+        padding = round(self.config.get('label_padding', 0.05) * min(self.height, self.width))
         self._wlabel.padding = (padding, padding)
         self._blabel.padding = (padding, padding)
         # Resize labels.

@@ -9,18 +9,9 @@ from kivy.logger import Logger
 from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.widget import Widget
 
-from . import PLAY_STATE
-
-from pyframe.content import ErrorMessage, SlideshowImage, SlideshowVideo
-
-
-class InvalidSlideshowConfigurationError(Exception):
-    """Invalid slideshow configuration error."""
-
-    def __init__(self, msg, config=None):
-        """Initialize class instance."""
-        super().__init__(msg)
-        self.config = config
+from .common import ConfigError, check_param, check_valid_required
+from .content import ErrorMessage, SlideshowImage, SlideshowVideo
+from .controller import PLAY_STATE
 
 
 class Slideshow(AnchorLayout):
@@ -51,6 +42,8 @@ class Slideshow(AnchorLayout):
 
             # Retrieve files in a specific or random order.
             if key == "sequence":
+                check_param('sequence', config, options={"random", "date", "name"})
+                check_param('order', config, options={"ascending", "descending"})
                 if value == "random":
                     self._criteria['order'] = Index.ORDER_RANDOM
                 elif value == "date" and config['order'] == "ascending":
@@ -61,80 +54,63 @@ class Slideshow(AnchorLayout):
                     self._criteria['order'] = Index.ORDER_NAME_ASC
                 elif value == "name" and config['order'] == "descending":
                     self._criteria['order'] = Index.ORDER_NAME_DESC
-                else:
-                    raise InvalidSlideshowConfigurationError(f"Invalid value '{value}' for parameter 'sequence' in slideshow '{self._name}' specified. Acceptable values are 'name', 'date' and 'random'.", config)
 
             # Limit iteration to the n most recent files based on the creation
             # date.
             if key == "most_recent":
-                if type(config['most_recent']) is int and config['most_recent'] > 0:
-                    self._criteria['most_recent'] = int(config['most_recent'])
-                else:
-                    raise InvalidSlideshowConfigurationError(f"Invalid value '{value}' for parameter 'most_recent' in slideshow '{self._name}' specified. The value must be a positive integer.", config)
+                check_param('most_recent', config, is_int=True, gr=0)
+                self._criteria['most_recent'] = config['most_recent']
 
             # Filter for orientation of content.
             if key == "orientation":
+                check_param('orientation', config, options={"landscape", "portrait"})
                 if value == "landscape":
                     self._criteria['orientation'] = RepositoryFile.ORIENTATION_LANDSCAPE
                 elif value == "portrait":
                     self._criteria['orientation'] = RepositoryFile.ORIENTATION_PORTRAIT
-                else:
-                    raise InvalidSlideshowConfigurationError(f"Invalid value '{value}' for parameter 'orientation' in slideshow '{self._name}' specified. Acceptable values are 'landscape' and 'portrait'.", config)
 
             # Filter for file type.
             if key == "file_types":
-                if value is None:
-                    raise InvalidSlideshowConfigurationError(f"At least one file type must be specified for parameter 'file_type' in slideshow '{self._name}'.", config)
+                check_param('file_types', config, recurse=True, options={"images", "videos"})
                 # Convert to list if single value specified.
-                if type(value) == str:
-                    value = [value]
+                if type(value) == str: value = [value]
                 types = list()
                 for file_type in value:
                     if file_type == "images":
                         types.append(RepositoryFile.TYPE_IMAGE)
                     elif file_type == "videos":
                         types.append(RepositoryFile.TYPE_VIDEO)
-                    else:
-                        raise InvalidSlideshowConfigurationError(f"Invalid type '{file_type}' for parameter 'file_type' in slideshow '{self._name}' specified. Acceptable values are 'images' and 'videos'.", config)
                 self._criteria['type'] = types
 
             # Filter for file tags.
             if key == "tags":
-                if value is None or value == "":
-                    raise InvalidSlideshowConfigurationError(f"At least one tag must be specified for parameter 'tags' in slideshow '{self._name}'.", config)
+                check_param('tags', config)
                 # Convert to list if single value specified.
-                if type(value) == str:
-                    value = [value]
+                if type(value) == str: value = [value]
                 Logger.debug(f"Slideshow: Filtering for tags '{value}' from criterion 'tags' in slideshow '{self._name}'.")
                 self._criteria['tags'] = value
 
             # Filter out excluded tags.
             if key == "excluded_tags":
-                if value is None or value == "":
-                    raise InvalidSlideshowConfigurationError(f"At least one tag must be specified for parameter 'excluded_tags' in slideshow '{self._name}'.", config)
+                check_param('excluded_tags', config)
                 # Convert to list if single value specified.
-                if type(value) == str:
-                    value = [value]
-                Logger.debug(f"Slideshow: Excluding tags '{value}' from criterion 'excluded_tags' in slideshow '{self._name}'.")
+                if type(value) == str: value = [value]
                 # Add or append criterion
-                if 'excluded_tags' not in self._criteria:
-                    self._criteria['excluded_tags'] = value
-                else:
-                    self._criteria['excluded_tags'] += value
+                Logger.debug(f"Slideshow: Excluding tags '{value}' from criterion 'excluded_tags' in slideshow '{self._name}'.")
+                self._criteria['excluded_tags'] = self._criteria.get('excluded_tags', []) + value
 
             # Filter out excluded tags.
             if key == "always_excluded_tags":
-                if value is None or value == "":
-                    raise InvalidSlideshowConfigurationError(f"At least one tag must be specified for parameter 'always_excluded_tags' in slideshow '{self._name}'.", config)
+                check_param('always_excluded_tags', config)
                 # Convert to list if single value specified.
-                if type(value) == str:
-                    value = [value]
+                if type(value) == str: value = [value]
                 # Add or append criterion
                 Logger.debug(f"Slideshow: Excluding tags '{value}' from criterion 'always_excluded_tags' in slideshow '{self._name}'.")
-                if 'excluded_tags' not in self._criteria:
-                    self._criteria['excluded_tags'] = value
-                else:
-                    self._criteria['excluded_tags'] += value
+                self._criteria['excluded_tags'] = self._criteria.get('excluded_tags', []) + value
+
+    # Required and valid configuration parameters
+    CONF_REQ_KEYS = {'bg_color', 'label_content', 'label_duration', 'label_font_size', 'label_mode', 'label_padding', 'pause', 'resize', 'rotation'}
+    CONF_VALID_KEYS = {'always_excluded_tags', 'excluded_tags', 'file_types', 'most_recent', 'order', 'orientation', 'repositories', 'sequence', 'tags'} | CONF_REQ_KEYS
 
     def __init__(self, name, index, config):
         """Initialize slideshow instance.
@@ -145,22 +121,29 @@ class Slideshow(AnchorLayout):
         :type index: repository.Index
         :param config: slideshow configuration from configuration file section.
         :type config: dict
-        :raises InvalidSlideshowConfigurationError:
+        :raises ConfigError:
         """
         AnchorLayout.__init__(self, anchor_x='center', anchor_y='center')
         self._name = name
         self._index = index
         self._config = config
         self._play_state = PLAY_STATE.STOPPED
-        self._next_next_event = None
+        self._next_event = None
         self._current_widget = None
         self._iterator = None
 
-        # Make sure only valid parameters have been specified.
-        valid_keys = {'always_excluded_tags', 'bg_color', 'excluded_tags', 'file_types', 'label_content', 'label_duration', 'label_font_size', 'label_mode', 'label_padding', 'most_recent', 'order', 'orientation', 'pause', 'repositories', 'sequence', 'resize', 'rotation', 'tags'}
-        keys = set(config.keys())
-        if not keys.issubset(valid_keys):
-            raise InvalidSlideshowConfigurationError(f"The configuration of slideshow '{self._name}' contains additional parameters. Only the slideshow parameters {valid_keys} are accepted, but the additional parameter(s) {keys.difference(valid_keys)} has/have been specified.", config)
+        # Check the configuration for valid and required parameters.
+        check_valid_required(config, self.CONF_VALID_KEYS, self.CONF_REQ_KEYS)
+        # Check parameter values.
+        check_param('pause', config, is_int=True, gr=0)
+        check_param('rotation', config, is_int=True, options={0, 90, 180, 270})
+        check_param('bg_color', config, is_color=True)
+        check_param('label_content', config, options={"description", "full", "short"})
+        check_param('label_duration', config, is_int=True, gr=0)
+        check_param('label_font_size', config, gr=0, le=0.2)
+        check_param('label_mode', config, options={"auto", "off", "on"})
+        check_param('label_padding', config, gr=0, le=0.2)
+        check_param('resize', config, options={"fit", "fill"})
 
         # Compile filter criteria for use with selective index iterator.
         self.__compile_filter_criteria()

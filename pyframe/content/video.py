@@ -5,7 +5,7 @@ from kivy.logger import Logger
 from kivy.uix.video import Video
 from kivy.uix.widget import Widget
 
-from pyframe.content import LabeledContent
+from .base import LabeledContent
 
 
 class SlideshowVideo(LabeledContent):

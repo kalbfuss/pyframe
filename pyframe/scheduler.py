@@ -3,21 +3,12 @@
 import schedule
 import subprocess
 
-from . import DISPLAY_MODE, PLAY_STATE
-
 from kivy.clock import Clock
 from kivy.logger import Logger, LOG_LEVELS
-
 from schedule import ScheduleValueError
 
-
-class InvalidScheduleConfigurationError(Exception):
-    """Invalid schedule configuration error."""
-
-    def __init__(self, msg, config=None):
-        """Initialize class instance."""
-        super().__init__(msg)
-        self.config = config
+from .common import ConfigError, check_valid_required
+from .controller import DISPLAY_MODE, PLAY_STATE
 
 
 class Scheduler:
@@ -33,6 +24,10 @@ class Scheduler:
     [1] https://github.com/dbader/schedule
     """
 
+    # Required and valid configuration parameters
+    CONF_REQ_KEYS = {'time'}
+    CONF_VALID_KEYS = {'display_mode', 'display_timeout', 'play_state', 'slideshow'} | CONF_REQ_KEYS
+
     def __init__(self, config, app):
         """ Initialize scheduler instance.
 
@@ -41,51 +36,44 @@ class Scheduler:
         :type config: dict
         :param app: Pyframe application
         :type app: pyframe.App
-        :raises: InvalidScheduleConfigurationError
+        :raises: ConfigError
         """
         self._app = app
         self._event = None
-
-        # Define valid and required keys per event configuration.
-        valid_keys = {"display_mode", "display_timeout", "play_state", "slideshow", "time"}
-        required_keys = {"time"}
 
         # Build schedule from configuration
         Logger.info("Scheduler: Building schedule from configuration.")
         for event, event_config in config.items():
 
-            # Make sure all required parameters have been specified.
-            keys = set(event_config.keys())
-            if not required_keys.issubset(keys):
-                raise InvalidScheduleConfigurationError(f"As a minimum, the schedule parameters {required_keys} are required, but only the parameter(s) {keys.intersection(required_keys)} has/have been specified in the configuration of event '{event}'.", event_config)
-
-            # Make sure only valid parameters have been specified.
-            if not keys.issubset(valid_keys):
-                raise InvalidScheduleConfigurationError(f"Only the schedule parameters {valid_keys} are accepted, but the additional parameter(s) {keys.difference(valid_keys)} has/have been specified in the configuration of event '{event}'.", event_config)
+            # Check the configuration for valid and required parameters.
+            try:
+                check_valid_required(event_config, self.CONF_VALID_KEYS, self.CONF_REQ_KEYS)
+            except ConfigError as e:
+                raise ConfigError(f"Error in the configuration of event '{event}'. {e}")
 
             # Check value of parameter display mode.
             display_mode = event_config.get('display_mode')
             if display_mode is not None:
-                values = [ item.value for item in DISPLAY_MODE ]
+                values = { item.value for item in DISPLAY_MODE }
                 if display_mode not in values:
-                    raise InvalidScheduleConfigurationError(f"Invalid display mode '{display_mode}' in the configuration of event '{event}'. Acceptable values are '{values}'.", event_config)
+                    raise ConfigError(f"Error in the configuration of event '{event}'. Invalid display mode '{display_mode}' specified. Valid display modes are {values}.", event_config)
 
             play_state = event_config.get('play_state')
             if play_state is not None:
                 # Check value of parameter display mode.
-                values = [ item.value for item in PLAY_STATE ]
+                values = { item.value for item in PLAY_STATE }
                 if play_state not in values:
-                    raise InvalidScheduleConfigurationError(f"Invalid play state '{play_state}' in the configuration of event '{event}'. Acceptable values are '{values}'.", event_config)
+                    raise ConfigError(f"Error in the configuration of event '{event}'. Invalid play state '{play_state}' specified. Valid play states are {values}.", event_config)
 
             # Check value of parameter slideshow if specified.
             if 'slideshow' in event_config and event_config['slideshow'] not in self._app.slideshows:
-                raise InvalidScheduleConfigurationError(f"Invalid slideshow  '{event_config['slideshow']}' in the configuration of event '{event}'. Acceptable values are '{self._app.slideshows}'.", event_config)
+                raise ConfigError(f"Error in the configuration of event '{event}'. Invalid slideshow '{event_config['slideshow']}' specified. Valid slideshows are {self._app.slideshows}.", event_config)
 
             # Check value of parameter display_timeout if specified.
             display_timeout = event_config.get('display_timeout')
             if display_timeout is not None:
                 if type(display_timeout) is not int or display_timeout < 0:
-                    raise InvalidScheduleConfigurationError(f"Invalid display timeout '{display_timeout}' in the configuration of event '{event}'. Display timeout must be a positive integer value.", event_config)
+                    raise ConfigError(f"Error in the configuration of event '{event}'. Invalid timeout '{display_timeout}' specified. Timeout must be a positive integer.", event_config)
 
             # Schedule events.
             try:
@@ -93,7 +81,7 @@ class Scheduler:
                 Logger.info(f"Scheduler: Event '{event}' scheduled at '{event_config['time']}'.")
             # Catch all schedule errors.
             except (TypeError, ScheduleValueError) as e:
-                raise InvalidScheduleConfigurationError(f"The configuration {event_config} for event '{event}' is invalid: {e}", event_config)
+                raise ConfigError(f"Error in the configuration of event '{event}'. {e}.", event_config)
 
         # Turn display off
         self._app.display_off()

@@ -6,7 +6,7 @@ from kivy.uix.image import Image
 from kivy.uix.label import Label
 from kivy.uix.widget import Widget
 
-from pyframe.content import LabeledContent
+from .base import LabeledContent
 
 
 class SlideshowImage(LabeledContent):

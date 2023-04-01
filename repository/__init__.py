@@ -13,6 +13,6 @@ Author: Bernd Kalbfuß
 License: t.b.d.
 """
 
-from . file import RepositoryFile
-from . repository import Repository, FileIterator, InvalidUuidError, InvalidConfigurationError, IOError
-from . index import Index, MetaData
+from .file import RepositoryFile
+from .repository import Repository, FileIterator, InvalidUuidError, InvalidConfigurationError, IOError
+from .index import Index, MetaData

@@ -1,6 +1,7 @@
 """Module providing Pyframe application."""
 
 import copy
+import kivy.app
 import logging
 import repository.local
 import repository.webdav
@@ -10,16 +11,20 @@ import time
 import traceback
 import yaml
 
-import kivy.app
-
 from repository import Index, Repository, InvalidConfigurationError, InvalidUuidError
-from . common import ConfigurationError
-from . import Indexer, Handler, Slideshow, Scheduler, MqttInterface, InvalidSlideshowConfigurationError, Controller, DISPLAY_MODE, DISPLAY_STATE, PLAY_STATE
 
-from kivy.base import ExceptionManager
+from kivy.base import ExceptionManager, stopTouchApp
 from kivy.core.window import Window
 from kivy.clock import Clock
 from kivy.logger import Logger, LOG_LEVELS
+
+from .common import ConfigError
+from .mylogging import Handler
+from .indexer import Indexer
+from .slideshow import Slideshow
+from .scheduler import Scheduler
+from .controller import Controller, DISPLAY_MODE, DISPLAY_STATE, PLAY_STATE
+from .mqtt import MqttInterface
 
 
 class ExceptionHandler(kivy.base.ExceptionHandler):
@@ -177,8 +182,7 @@ class App(kivy.app.App, Controller):
         index = self._index
         # Exit application if no slideshow has been defined.
         if 'slideshows' not in config or type(config['slideshows']) is not dict:
-            Logger.critical("Configuration: Exiting application as no slideshows have been defined.")
-            sys.exit(1)
+            raise ConfigError("Configuration: Exiting application as no slideshows have been defined.", config)
 
         # Create empty dictionary to collect slideshows
         self._slideshows = dict()
@@ -197,40 +201,37 @@ class App(kivy.app.App, Controller):
                 slideshow = Slideshow(name, index, combined_config)
                 slideshow.bind(on_content_change=self.on_content_change)
                 self._slideshows[name] = slideshow
-            except InvalidSlideshowConfigurationError as e:
-                Logger.critical(f"Configuration: {e}")
-                sys.exit(1)
+            except ConfigError as e:
+                raise ConfigError(f"Configuration: Error in the configuration of slideshow '{name}'. {e}", config)
+            except Exception as e:
+                raise Exception(f"Slideshow: {e}")
 
         # Exit application if no valid repositories have been defined.
         if len(self._slideshows.items()) == 0:
-            Logger.critical("Configuration: Exiting application as no valid slideshows have been defined.")
-            sys.exit(1)
+            raise ConfigError("Configuration: Exiting application as no valid slideshows have been defined.")
 
     def __init_display(self):
         """Initialize display and window."""
 
         # Check value of parameter display mode.
         display_mode = self._config['display_mode']
-        values = [ item.value for item in DISPLAY_MODE ]
+        values = { item.value for item in DISPLAY_MODE }
         if display_mode not in values:
-            Logger.critical(f"Configuration: Invalid display mode '{display_mode}' specified. Valid display modes are '{values}'.")
-            sys.exit(1)
+            raise ConfigError(f"Configuration: Invalid display mode '{display_mode}' specified. Valid display modes are {values}.", self._config)
 
         display_state = self._config['display_state']
         # Convert from booleans to "on" and "off"
         if display_state is True: display_state = "on"
         elif display_state is False: display_state = "off"
         # Check value of parameter display state.
-        values = [ item.value for item in DISPLAY_STATE ]
+        values = { item.value for item in DISPLAY_STATE }
         if display_state not in values:
-            Logger.critical(f"Configuration: Invalid display state '{display_state}' specified. Valid display states are '{values}'.")
-            sys.exit(1)
+            raise ConfigError(f"Configuration: Invalid display state '{display_state}' specified. Valid display states are {values}.", self._config)
 
         # Check value of parameter display timeout
         display_timeout = self._config['display_timeout']
         if type(display_timeout) is not int or display_timeout < 0:
-            Logger.critical(f"Configuration: Invalid value '{display_timeout}' for parameter display timeout specified. Timeout needs to be a positive integer.")
-            sys.exit(1)
+            raise ConfigError(f"Configuration: Invalid timeout '{display_timeout}' specified. Timeout must be a positive integer.", self._config)
 
         # Initialize display state and mode.
         self._display_timeout = display_timeout
@@ -247,8 +248,7 @@ class App(kivy.app.App, Controller):
         elif value == "full":
             Window.fullscreen = 'auto'
         else:
-            Logger.critical(f"Configuration: Invalid value '{value}' for parameter 'window_size' specified. Acceptable values are '[width, height]' and 'full'.")
-            sys.exit(1)
+            raise ConfigError(f"Configuration: Invalid value '{value}' for parameter 'window_size' specified. Acceptable values are [width, height] and 'full'.", self._config)
         # Disable display of mouse cursor
         Window.show_cursor = False
 
@@ -304,9 +304,6 @@ class App(kivy.app.App, Controller):
         self._mqtt_interface = None
         self._play_state = PLAY_STATE.STOPPED
 
-        # Bind to window 'on_request_close' event for safe shutdown of the
-        # application.
-        Window.bind(on_request_close=self.on_request_close)
         # Register 'state_change' event, which is fired upon content and
         # controller state changes.
         self.register_event_type('on_state_change')
@@ -335,27 +332,26 @@ class App(kivy.app.App, Controller):
         if 'mqtt' in self._config and (value == "on" or value is True):
             try:
                 self._mqtt_interface = MqttInterface(self._config['mqtt'], self)
-            except ConfigurationError as e:
-                Logger.critical(f"Configuration: The MQTT interface configuration is invalid. {e}")
-                sys.exit(1)
+            except ConfigError as e:
+                raise ConfigError(f"Configuration: The MQTT interface configuration is invalid. {e}", e.config)
             except Exception as e:
-                Logger.critical(f"MQTT: {e}")
-                sys.exit(1)
-
-        # Bind keyboard listener
-        Window.bind(on_keyboard=self.on_keyboard)
+                raise Exception(f"MQTT: {e}")
 
         # Initialize display
         self.__init_display()
+
+        # Bind keyboard listener
+        Window.bind(on_keyboard=self.on_keyboard)
 
         # Create scheduler if configured and activated.
         value = self._config.get('enable_scheduler')
         if 'schedule' in self._config and (value == "on" or value is True):
             try:
                 self._scheduler = Scheduler(self._config['schedule'], self)
+            except ConfigError as e:
+                raise ConfigError(f"Configuration: {e}", e.config)
             except Exception as e:
-                Logger.critical(f"Configuration: {e}")
-                sys.exit(1)
+                raise Exception(f"Scheduler: {e}")
         # Start playing first defined slideshow otherwise.
         else:
             self.play()
@@ -424,17 +420,6 @@ class App(kivy.app.App, Controller):
         if self._index is not None:
             Logger.info("App: Closing metadata index.")
             self._index.close()
-
-    def on_request_close(self, *largs, **kwargs):
-        """Prepare for application closure after 'on_request_close' event.
-
-        By default, the event 'on_request_close' is dispatched after the esacape
-        key has been pressed. The event is not consumed (false return value)
-        such that the application is closed by kivy afterwards.
-        """
-        Logger.info("App: Application closure requested. Preparing for safe exit.")
-        self.close()
-        return False
 
     def on_display_timeout(self, dt):
         """Handle display timeouts in motion mode."""
@@ -560,7 +545,7 @@ class App(kivy.app.App, Controller):
         :param timeout: display timeout in seconds
         :type timeout: int
         """
-        Logger.info(f"Controller: Setting display timeout to {timeout}s.")
+        Logger.info(f"Controller: Setting display timeout to {timeout} s.")
         self._display_timeout = timeout
 
     def pause(self):

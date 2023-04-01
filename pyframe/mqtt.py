@@ -1,6 +1,5 @@
 """MQTT interface of picframe."""
 
-
 import json
 import logging
 import os
@@ -8,11 +7,11 @@ import paho.mqtt.client as mqtt
 import ssl
 import time
 
-from . import Controller, DISPLAY_MODE, DISPLAY_STATE, PLAY_STATE, check_config
-from . common import APPLICATION_NAME, APPLICATION_DESCRIPTION, VERSION, PROJECT_NAME
-
 from kivy.clock import Clock
 from kivy.logger import Logger
+
+from .controller import DISPLAY_MODE, DISPLAY_STATE, PLAY_STATE, Controller
+from .common import APPLICATION_NAME, APPLICATION_DESCRIPTION, VERSION, PROJECT_NAME, check_valid_required
 
 
 # Pyframe and Home Assistant root topics
@@ -64,13 +63,13 @@ class MqttInterface:
         :type config: dict
         :type controller: pyframe.controller
         """
-        # Check the configuration for valid and required parameters.
-        check_config(config, self.CONF_VALID_KEYS, self.CONF_REQ_KEYS)
-
         self._config = config
         self._controller = controller
         self._client = None
         self._event = None
+
+        # Check the configuration for valid and required parameters.
+        check_valid_required(config, self.CONF_VALID_KEYS, self.CONF_REQ_KEYS)
 
         host = config['host']
         port = config.get('port', 8883)

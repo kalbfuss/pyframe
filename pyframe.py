@@ -15,12 +15,18 @@ app = App()
 def handler(sig, frame):
     """Close application after SIGINT and SIGTERM signals."""
     Logger.info(f"App: Signal '{signal.strsignal(sig)}' received. Preparing for safe exit.")
-    app.close()
     stopTouchApp()
+    app.close()
+
 
 if __name__ == "__main__":
     # Catch interrupt and term signals and exit gracefully.
     signal.signal(signal.SIGINT, handler)
     signal.signal(signal.SIGTERM, handler)
     # Run application.
-    app.run()
+    try:
+        app.run()
+    except Exception as e:
+        Logger.critical(e)
+    stopTouchApp()
+    app.close()

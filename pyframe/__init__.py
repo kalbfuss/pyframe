@@ -11,11 +11,11 @@ License: t.b.d.
 """
 
 
-from . common import check_config
-from . mylogging import Handler
-from . indexer import Indexer
-from . controller import Controller, DISPLAY_MODE, DISPLAY_STATE, PLAY_STATE
-from . scheduler import Scheduler
-from . slideshow import Slideshow, InvalidSlideshowConfigurationError
-from . mqtt import MqttInterface
-from . app import App
+from .common import check_param, check_valid_required, ConfigError 
+from .mylogging import Handler
+from .indexer import Indexer
+from .controller import Controller, DISPLAY_MODE, DISPLAY_STATE, PLAY_STATE
+from .scheduler import Scheduler
+from .slideshow import Slideshow
+from .mqtt import MqttInterface
+from .app import App
