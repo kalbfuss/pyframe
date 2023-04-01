@@ -487,6 +487,9 @@ class App(kivy.app.App, Controller):
         # Turn display off on Linux with X server.
         subprocess.run("/usr/bin/xset dpms force on", shell=True,  stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL)
+        # Restore window and raise top (just in case).
+        Window.restore()
+        Window.raise_window()
         # Update display state.
         self._display_state = DISPLAY_STATE.ON
         self.dispatch('on_state_change')
