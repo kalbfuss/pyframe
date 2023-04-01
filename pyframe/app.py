@@ -13,7 +13,7 @@ import yaml
 
 from repository import Index, Repository, InvalidConfigurationError, InvalidUuidError
 
-from kivy.base import ExceptionManager, stopTouchApp
+from kivy.base import ExceptionManager
 from kivy.core.window import Window
 from kivy.clock import Clock
 from kivy.logger import Logger, LOG_LEVELS
@@ -397,6 +397,8 @@ class App(kivy.app.App, Controller):
         # Consume event.
         return True
 
+
+
     def on_state_change(self, *largs):
         """Default handler for 'on_state_change' events."""
         pass
@@ -487,8 +489,7 @@ class App(kivy.app.App, Controller):
         # Turn display off on Linux with X server.
         subprocess.run("/usr/bin/xset dpms force on", shell=True,  stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL)
-        # Restore window and raise top (just in case).
-        Window.restore()
+        # Raise window to top (just in case).
         Window.raise_window()
         # Update display state.
         self._display_state = DISPLAY_STATE.ON
