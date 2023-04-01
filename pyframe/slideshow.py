@@ -64,23 +64,16 @@ class Slideshow(AnchorLayout):
             # Filter for orientation of content.
             if key == "orientation":
                 check_param('orientation', config, options={"landscape", "portrait"})
-                if value == "landscape":
-                    self._criteria['orientation'] = RepositoryFile.ORIENTATION_LANDSCAPE
-                elif value == "portrait":
-                    self._criteria['orientation'] = RepositoryFile.ORIENTATION_PORTRAIT
+                map = {'landscape': RepositoryFile.ORIENTATION_LANDSCAPE, 'portrait': RepositoryFile.ORIENTATION_PORTRAIT}
+                self._criteria['orientation'] = map[value]
 
             # Filter for file type.
             if key == "file_types":
                 check_param('file_types', config, recurse=True, options={"images", "videos"})
                 # Convert to list if single value specified.
                 if type(value) == str: value = [value]
-                types = list()
-                for file_type in value:
-                    if file_type == "images":
-                        types.append(RepositoryFile.TYPE_IMAGE)
-                    elif file_type == "videos":
-                        types.append(RepositoryFile.TYPE_VIDEO)
-                self._criteria['type'] = types
+                map = {'images': RepositoryFile.TYPE_IMAGE, 'videos': RepositoryFile.TYPE_VIDEO}
+                self._criteria['type'] = [ map[type] for type in value ]
 
             # Filter for file tags.
             if key == "tags":
