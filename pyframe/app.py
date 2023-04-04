@@ -267,7 +267,7 @@ class App(kivy.app.App, Controller):
 
     # Default configuration.
     _config = {
-        'bg_color': [0.9,0.9,0.8],
+        'bg_color': [1, 1, 1],
         'cache': "./cache",
         'display_mode': "static",
         'display_state': "on",
@@ -280,18 +280,18 @@ class App(kivy.app.App, Controller):
         'index_update_interval': 0,
         'label_mode': "off",
         'label_content': "full",
-        'label_duration': 24,
+        'label_duration': 0.2*300,
         'label_font_size': 0.08,
         'label_padding': 0.03,
         'logging': "on",
         'log_level': "warn",
         'log_dir': "./log",
         'order': "ascending",
-        'pause': 60,
+        'pause': 300,
         'resize': "fill",
         'rotation': 0,
         'sequence': "name",
-        'window_size': [ 800, 450 ]
+        'window_size': "full"
     }
 
     def build(self):
