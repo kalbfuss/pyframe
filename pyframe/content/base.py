@@ -153,9 +153,9 @@ class LabeledContent(ContentBase):
         mode = self.config.get('label_mode', "on")
         pause = self.config.get('pause')
         duration = self.config.get('label_duration', 24)
-        if mode == "auto" and pause is not None and duration < pause:
-            Clock.schedule_once(self.label_off, duration/2)
-            Clock.schedule_once(self.label_on, pause - duration/2)
+        if mode == "auto" and pause is not None and 2*duration < pause:
+            Clock.schedule_once(self.label_off, duration)
+            Clock.schedule_once(self.label_on, pause - duration)
 
     def label_off(self, dt=0):
         "Turn label off."
