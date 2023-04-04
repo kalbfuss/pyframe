@@ -213,31 +213,26 @@ The following parameters are used to configure the application.
 
 #### Basic
 
-|Parameter|Description|
-|:---|:---|
-|***window_size***|The size of the window provided as *[width, height]*. A value of *full* enables full screen mode. The default is *full*.|
-|***display_mode***| The following display modes are supported. The default is *static*.<br/>- *static*: The display is always on if a slideshow is paused or playing and off if a slideshow is stopped.</br>- *motion*: The display is turned on and the slideshow starts playing in the presence of motion. The slideshow is paused and the display turned off in the absence of motion after the display timeout interval.|
+|Parameter             |Description|
+|:---------------------|:----------|
+|***window_size***     |The size of the window provided as *[width, height]*. A value of *full* enables full screen mode. The default is *full*.|
+|***display_mode***    | The following display modes are supported. The default is *static*.<br/> - *static*: The display is always on if a slideshow is paused or playing and off if a slideshow is stopped.<br/> - *motion*: The display is turned on and the slideshow starts playing in the presence of motion. The slideshow is paused and the display turned off in the absence of motion after the display timeout interval.|
 |***display_timeout*** |The time in seconds after which the slideshow is paused and screen turned off in the absence of motion. The default is 300 seconds.|
 
 #### Advanced
 
 Parameters in this section will likely not have to be modified by the majority of users.
 
-***index:*** The index database file. The path may be absolute or relative to the current working directory. The default is *./index.sqlite*.
-
-***cache:*** The directory in which files can be cached (used by WebDAV repository). The directory path may be absolute or relative to the current working directory. The directory can be shared by multiple repositories. **Do not** use directory in which you store files as cache directory. The default is *./cache*.
-
-***enable_exception_handler:*** Set to *off* in order to disable the generic exception handler. The generic exception handler prevents the application from exiting unexpectedly. Exceptions are logged, but the execution continues. The default is *on*.
-
-***enable_scheduler***: Set to *off* in order to disable the scheduler. The scheduler is disabled even in the presence of a *schedule* configuration section. The default is *on*.
-
-***enable_mqtt***: Set to *off* in order to disable the MQTT client. The client is disabled even in the presence of an *mqtt* configuration section. The default is *on*.
-
-***enable_logging:*** Set to *off* in order to disable logging. The default is *on*.
-
-***log_level:*** The log level, which can be set to *debug*, *info*, *warn*, or *error*. The default is *warn*.
-
-***log_dir:*** The directory to which log files are written. The directory path may be absolute or relative to the current working directory. The default is *./log*.
+|Parameter                     |Description|
+|:-----------------------------|:----------|
+|***index***                   | The index database file. The path may be absolute or relative to the current working directory. The default is *./index.sqlite*.|
+|***cache***                   | The directory in which files can be cached (used by WebDAV repository). The directory path may be absolute or relative to the current working directory. The directory can be shared by multiple repositories. **Do not** use directory in which you store files as cache directory. The default is *./cache*.|
+|***enable_exception_handler***| Set to *off* in order to disable the generic exception handler. The generic exception handler prevents the application from exiting unexpectedly. Exceptions are logged, but the execution continues. The default is *on*.|
+|***enable_scheduler***        | Set to *off* in order to disable the scheduler. The scheduler is disabled even in the presence of a *schedule* configuration section. The default is *on*.|
+|***enable_mqtt***             | Set to *off* in order to disable the MQTT client. The client is disabled even in the presence of an *mqtt* configuration section. The default is *on*|
+|***enable_logging***          | Set to *off* in order to disable logging. The default is *on*.|
+|***log_level***               | The log level, which can be set to *debug*, *info*, *warn*, or *error*. The default is *warn*.|
+|***log_dir***                 | The directory to which log files are written. The directory path may be absolute or relative to the current working directory. The default is *./log*.|
 
 ### Repositories
 
@@ -272,34 +267,31 @@ The following parameters are used to configure repositories.
 
 #### General
 
-***type:*** The following repository types are supported. A values must be provided.
-
-- *local*: Repository with files on the local file system. **Note:** Even if referred to as *local*, files may be stored on a network share as long as the network is mounted and integrated into the file system hierarchy (e.g. */mnt/photos*).
-- *webdav*: Repository with files on a WebDAV accessible site (e.g. ownCloud or NextCloud).
-
-***index_update_interval:*** Interval in hours at which the metadata index for the repository is updated. If zero, the index is only updated once after start of the application. The default ist 0. Do not use in combination with *index_update_at*.
-
-***index_update_at:*** The time at which the metadata index for the repository is updated. The index is updated once per day. Do not use in combination with *index_update_interval*.
-
-***enabled:*** Set to *off* in order to disable the repository. The default is *on*.
+|Parameter                  |Description|
+|:--------------------------|:----------|
+|***type***                 | The following repository types are supported. A values must be provided.<br/> - *local*: Repository with files on the local file system. **Note:** Even if referred to as *local*, files may be stored on a network share as long as the network is mounted and integrated into the file system hierarchy (e.g. */mnt/photos*).<br/> - *webdav*: Repository with files on a WebDAV accessible site (e.g. ownCloud or NextCloud).|
+|***index_update_interval***|Interval in hours at which the metadata index for the repository is updated. If zero, the index is only updated once after start of the application. The default ist 0. Do not use in combination with *index_update_at*.|
+|***index_update_at***      |The time at which the metadata index for the repository is updated. The index is updated once per day. Do not use in combination with *index_update_interval*.|
+|***enabled***              |Set to *off* in order to disable the repository. The default is *on*.|
 
 #### Local repositories
 
 Only a single parameter is required for the definition of local repositories.
 
-***root***: The repository root directory. Root directories may be absolute or relative to the current working directory. Files in sub-folders will be included in the repository. A value must be provided.
+|Parameter |Description|
+|:---------|:----------|
+|***root***|The repository root directory. Root directories may be absolute or relative to the current working directory. Files in sub-folders will be included in the repository. A value must be provided.|
 
 #### WebDAV repositories
 
 As a minimum, the parameters *url*, *user* and *password* need to be specified for the definition of a WebDAV repository.
 
-***url:*** The URL of the WebDAV server. Use *https://* protocol prefix for secure connections. A value must be provided.
-
-***user***: Login name. A value must be provided.
-
-***password***: Login password. A value must be provided.
-
-***root***: The root directory relative to the URL. For ownCloud WebDAV access, the root directoy typically starts with */remote.php/webdav*. The default is */*.
+|Parameter|Description|
+|:---|:---|
+|***url***| The URL of the WebDAV server. Use *https://* protocol prefix for secure connections. A value must be provided.|
+|***user***|Login name. A value must be provided.|
+|***password***|Login password. A value must be provided.|
+|***root***|The root directory relative to the URL. For ownCloud WebDAV access, the root directoy typically starts with */remote.php/webdav*. The default is */*.|
 
 ### Slideshows
 
@@ -339,60 +331,33 @@ The following parameters are used to configure slideshows.
 
 #### General parameters
 
-***bg_color:*** The background color used to fill empty areas, provided as *[r, g, b]*. The default is *[1, 1, 1]* (white).
-
-***label_content:*** The following content based on file meta data is supported. The default is *full*.
-
-- *description:* only image description
-- *short:* image description, creation date and tags
-- *full:* image description, creation date and tags, file name and repository
-
-***label_duration:*** Duration in seconds for which labels are shown. The default is 60 seconds.
-
-***label_font_size:*** The relative font size of labels, expressed as percentage of the shortest file dimension. The default is 0.08.
-
-***label_mode:*** The following label modes are supported. The default is *off*.
-
-- *auto:* Labels are shown at the beginning and end of a file for the *label_duration*.
-- *off:* Labels are never shown.
-- *on:* Labels are always shown.
-
-***label_padding:*** The relative padding of labels, expressed as percentage of the shortest file dimension. The default is 0.03.
-
-***pause:*** The delay in seconds until the next file is shown. The default is 300 seconds.
-
-***resize:*** The following resize modes are supported. The default is *fill*.
-
-- *fit:* The slideshow content is zoomed to fit the screen as good as possible. Empty areas are filled with the background color.
-- *fill:* The slideshow content is zoomed and cropped to completely fill the screen. Note that images which do not have the same orientation as the screen are not zoomed and cropped, but only fit to the screen.
-
-***rotation:*** The angle by which slideshow content is rotated clockwise. Useful for picture frames/screens, which are installed in non-standard orientation. The default is 0.
+|Parameter            |Description|
+|:--------------------|:----------|
+|***bg_color***       | The background color used to fill empty areas, provided as *[r, g, b]*. The default is *[1, 1, 1]* (white).|
+|***label_content***  | The following content based on file meta data is supported. The default is *full*.<br/> - *description:* only image description<br/> - *short:* image description, creation date and tags<br/> - *full:* image description, creation date and tags, file name and repository|
+|***label_duration*** | Duration in seconds for which labels are shown. The default is 60 seconds.|
+|***label_font_size***|The relative font size of labels, expressed as percentage of the shortest file dimension. The default is 0.08.|
+|***label_mode***|The following label modes are supported. The default is *off*.<br/> - *auto:* Labels are shown at the beginning and end of a file for the *label_duration*.<br/> - *off:* Labels are never shown. <br/> - *on:* Labels are always shown.|
+|***label_padding***  | The relative padding of labels, expressed as percentage of the shortest file dimension. The default is 0.03.|
+|***pause***          | The delay in seconds until the next file is shown. The default is 300 seconds.|
+|***resize***         | The following resize modes are supported. The default is *fill*.<br/> - *fit:* The slideshow content is zoomed to fit the screen as good as possible. Empty areas are filled with the background color.<br/> - *fill:* The slideshow content is zoomed and cropped to completely fill the screen. Note that images which do not have the same orientation as the screen are not zoomed and cropped, but only fit to the screen.|
+|***rotation***       | The angle by which slideshow content is rotated clockwise. Useful for picture frames/screens, which are installed in non-standard orientation. The default is 0.|
 
 #### Filter criteria
 
 The following parameters control the files included in a slideshow and the sequence in which they are shown. The default is to include all files from all repositories. Files are sorted by their name in ascending order.
 
-***repositories:*** The repositories from which files shall be shown. The default is to show files from all repositories.
-
-***orientation:*** Valid orientations are *portrait* or *landscape*. The default is to include either orientation.
-
-***file_types:*** Supported file types are *images* and *videos*. May be a single value or list of values. The default is to include all file types.
-
-***tags:*** File tags, which shall be included. May be a single value or list of values. The default is to include all tags **and** untagged files. If set, untagged files are excluded.
-
-***excluded_tags:*** File tags, which shall be excluded. May be a single value or list of values. The default is not to exclude any tags.
-
-***always_excluded_tags:*** Same as *excluded_tags*, but not overwritten by an *excluded_tags* statement. Use in the slideshow default configuration to exclude certain tags in all slideshows (e.g. private content).
-
-***most_recent:*** Files in the slideshow are limited to the *most_recent* number of files based on the creation date **after** application of all other filter criteria.
-
-***sequence:*** The sequence in which files are shown. The default is *name*.
-
-- *date:* Files are sorted by their creation date.
-- *name:* Files are sorted by their name.
-- *random:* Files are shown in a random sequence.
-
-***order:*** Valid orders are *ascending* or *descending*. The default is *ascending*. Ignored if random sequence is configured.
+|Parameter                 |Description|
+|:-------------------------|:----------|
+|***repositories***        |The repositories from which files shall be shown. The default is to show files from all repositories.|
+|***orientation***         |Valid orientations are *portrait* or *landscape*. The default is to include either orientation.|
+|***file_types***          |Supported file types are *images* and *videos*. May be a single value or list of values. The default is to include all file types.|
+|***tags***                |File tags, which shall be included. May be a single value or list of values. The default is to include all tags **and** untagged files. If set, untagged files are excluded.|
+|***excluded_tags***       |File tags, which shall be excluded. May be a single value or list of values. The default is not to exclude any tags.|
+|***always_excluded_tags***|Same as *excluded_tags*, but not overwritten by an *excluded_tags* statement. Use in the slideshow default configuration to exclude certain tags in all slideshows (e.g. private content).|
+|***most_recent***         |Files in the slideshow are limited to the *most_recent* number of files based on the creation date **after** application of all other filter criteria.|
+|***sequence***            |The sequence in which files are shown. The default is *name*.<br/> - *date:* Files are sorted by their creation date.<br/> - *name:* Files are sorted by their name.<br/> - *random:* Files are shown in a random sequence.|
+|***order***               | Valid orders are *ascending* or *descending*. The default is *ascending*. Ignored if random sequence is configured.|
 
 ### Schedule
 
@@ -421,18 +386,13 @@ schedule:
 
 The following parameters are used to configure events in the schedule.
 
-***time:*** The time of the event. A value must be provided. Always specify in quotation marks. Hours and minutes <10 must be preceded by a 0, i.e. "08:03" and never "8:3".
-
-***slideshow:*** Start playing the specified slideshow. If no slideshow is specified, the previous or default slideshow is assumed.
-
-***play_state:*** Valid play states are *paused*, *playing* and *stopped*. The play state remains unchanged if no value is provided.
-
-***display_mode:*** The following display modes are supported. The default is *static*.
-
-- *static*: The display is always on if a slideshow is paused or playing and off if a slideshow is stopped.
-- *motion*: The display is turned on and the slideshow starts playing in the presence of motion. The slideshow is paused and the display turned off in the absence of motion after the display timeout interval.
-
-***display_timeout:*** The time in seconds after which the slideshow is paused and screen turned off in the absence of motion. The default is 300 seconds.
+|Parameter            |Description|
+|:--------------------|:----------|
+|***time***           | The time of the event. A value must be provided. Always specify in quotation marks. Hours and minutes <10 must be preceded by a 0, i.e. "08:03" and never "8:3".|
+|***slideshow***      | Start playing the specified slideshow. If no slideshow is specified, the previous or default slideshow is assumed.|
+|***play_state***     |Valid play states are *paused*, *playing* and *stopped*. The play state remains unchanged if no value is provided.|
+|***display_mode***   | The following display modes are supported. The default is *static*.<br/> - *static*: The display is always on if a slideshow is paused or playing and off if a slideshow is stopped.<br/> - *motion*: The display is turned on and the slideshow starts playing in the presence of motion. The slideshow is paused and the display turned off in the absence of motion after the display timeout interval.|
+|***display_timeout***|The time in seconds after which the slideshow is paused and screen turned off in the absence of motion. The default is 300 seconds.|
 
 ### MQTT
 
@@ -450,27 +410,16 @@ mqtt:
 
 The following parameters are used to configure the MQTT client.
 
-***host:*** Hostname of the MQTT broker. A value must be specified.
-
-***port:*** Connection port of MQTT broker. The default is 8883 (standard for secure connections).
-
-***tls:*** The following values are supported. The default is *on*.
-
-- *on*: A TLS-encrypted secure connection is used.
-- off: A non-encrypted connection is used.
-
-***tls_insecure***: The following values are supported. The default is *off*.
-
-- *on*: Insecure TLS connections with non-trusted certificates are permitted.
-- *off*: Only secure connections with trusted certificates are permitted.
-
-***user:*** Login name. A value must be provided.
-
-***password:*** Login password. A value must be provided.
-
-***device_id:*** The pyframe device ID. The default is *pyframe*. **Note:** The device ID must be unique. A different value must be specified if multiple pyframe instances connect to the same broker.
-
-***device_name:*** The human friendly device name. The default is  to use the *device_id*.
+|Parameter         |Description|
+|:-----------------|:----------|
+|***host***        |Hostname of the MQTT broker. A value must be specified.|
+|***port***        |Connection port of MQTT broker. The default is 8883 (standard for secure connections).|
+|***tls***         |The following values are supported. The default is *on*.<br/> - *on*: A TLS-encrypted secure connection is used.<br/> - off: A non-encrypted connection is used.|
+|***tls_insecure***|The following values are supported. The default is *off*.<br/> - *on*: Insecure TLS connections with non-trusted certificates are permitted.<br/> - *off*: Only secure connections with trusted certificates are permitted.|
+|***user***        |Login name. A value must be provided.|
+|***password***    |Login password. A value must be provided.|
+|***device_id:***  | The pyframe device ID. The default is *pyframe*. **Note** The device ID must be unique. A different value must be specified if multiple pyframe instances connect to the same broker.|
+|***device_name***      | The human friendly device name. The default is  to use the *device_id*.
 
 ## Home Assistant
 
