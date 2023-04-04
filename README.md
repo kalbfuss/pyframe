@@ -483,14 +483,14 @@ Pyframe implements basic support for integration with the [Home Assistant](https
 
 After the Pyframe MQTT client has been correctly configured and a connection to the MQTT broker established, Pyframe should automatically appear as a new device in Home Assistant. The device supports several push buttons and configuration selections, which allow you to control Pyframe from remote. The device further provides a *File* sensor, whose value is identical to the UUID of the currently displayed file.
 
-![home assistant - device](./docs/images/readme/home assistant - device.png)
+![home assistant - device](docs/images/readme/home assistant - device.png)
 
 In addition, the File sensor provides selected file metadata as sensor attributes.
 
-![home assistant - file](./docs/images/readme/home assistant - file.png)
+![home assistant - file](docs/images/readme/home assistant - file.png)
 
 ### Motion activation
 
 For motion activation of the display, the touch button of the Pyframe device needs to be coupled to a motion sensor via an automation. Every time motion is detected, the touch button is pressed by the automation. Pressing the touch button activates the display and resets the display timeout counter.
 
-![home assistant - automation](./docs/images/readme/home assistant - automation.png)
+![home assistant - automation](docs/images/readme/home assistant - automation.png)
