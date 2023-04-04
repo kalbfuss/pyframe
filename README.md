@@ -214,11 +214,11 @@ The following parameters are used to configure the application.
 #### Basic
 
 |Parameter|Description|
-|---|---|
+|:---|:---|
 |***window_size***|The size of the window provided as *[width, height]*. A value of *full* enables full screen mode. The default is *full*.|
 |***display_mode***| The following display modes are supported. The default is *static*.
-- *static*: The display is always on if a slideshow is paused or playing and off if a slideshow is stopped.<br/>
-- *motion*: The display is turned on and the slideshow starts playing in the presence of motion. The slideshow is paused and the display turned off in the absence of motion after the display timeout interval.|
+* *static*: The display is always on if a slideshow is paused or playing and off if a slideshow is stopped.<br/>
+* *motion*: The display is turned on and the slideshow starts playing in the presence of motion. The slideshow is paused and the display turned off in the absence of motion after the display timeout interval.|
 |***display_timeout*** |The time in seconds after which the slideshow is paused and screen turned off in the absence of motion. The default is 300 seconds.|
 
 #### Advanced
