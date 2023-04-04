@@ -2,9 +2,9 @@
 
 Pyframe is a Python-based digital photo frame application. It is capable of displaying photos and playing videos from local storage as well as WebDAV repositories.
 
-Files can be arranged in slideshows and filtered and sorted based on their metadata (EXIF and IPTC supported). Slideshows can be run continuously or scheduled.
+Files can be arranged in slideshows and filtered and sorted based on their metadata (EXIF and IPTC metadata supported). Slideshows can be run continuously or scheduled.
 
-Pyframe optionally integrates with Home Assistant via MQTT. Integration allows the display to be motion activated after coupling of the pyframe device with a motion sensor.
+Pyframe optionally integrates with Home Assistant via MQTT. Integration allows the display to be motion activated after coupling of the Pyframe device with a motion sensor.
 
 Pyframe is being developed by Bernd Kalbfuss (aka langweiler) and is published under the General Public License version 3. The latest source code is available on [GitHub](https://github.com/kalbfuss/pyframe).
 
@@ -57,7 +57,7 @@ $ git pull origin master
 
 At this stage of the project you should not expect the configuration syntax to be stable. Please, have a look at the documentation after each update and adjust the configuration as necessary.
 
-## Running Pyframe
+## Running
 
 Once Pyframe sources have been installed and all dependencies are met, the application still needs to be configured before it can be run. Please, have a look at the following section for details.
 
@@ -475,80 +475,22 @@ The following parameters are used to configure the MQTT client.
 
 ***device_name:*** The human friendly device name. The default is  to use the *device_id*.
 
-## Motion activation
+## Home Assistant
 
-![home assistant](https://user-images.githubusercontent.com/6892738/229743863-d43a4c92-4be6-4fb6-a8ab-a3336ef440b4.png)
+### General setup
 
-## Radxa Zero ##
+Pyframe implements basic support for integration with the [Home Assistant](https://www.home-assistant.io/) home automation system. Integration is achieved through the built-in Home Assistant [MQTT integration](https://www.home-assistant.io/integrations/mqtt/). As an additional pre-requisite, an MQTT broker must be installed (e.g. [Eclipse Mosquitto](https://mosquitto.org/)).
 
-While Pyframe in principle runs on any computer with Python 3 and the necessary libraries and packages installed, we typically want to run it on a single-board computer (SBC) that is strong enough to process photo files and play videos on-the-fly.
+After the Pyframe MQTT client has been correctly configured and a connection to the MQTT broker established, Pyframe should automatically appear as a new device in Home Assistant. The device supports several push buttons and configuration selections, which allow you to control Pyframe from remote. The device further provides a *File* sensor, whose value is identical to the UUID of the currently displayed file.
 
-An ARM-based SBC, which is fit for the task, is the [Radxa Zero] (https://wiki.radxa.com/Zero). It comes with a quad-core ARM Cortex-A53 CPU, 4 GB of RAM, and up to 128 GB eMMC. It further supports OpenGL ES 3.2 and is equipped with an onboard Wifi chip. Still, it is not bigger than a Raspberry Pi Zero and thus well suited for integration into a digital photo frame.
+![home assistant - device](./docs/images/readme/home assistant - device.png)
 
-### Linux installation and basic configuration ###
+In addition, the File sensor provides selected file metadata as sensor attributes.
 
-Install focal Armbian image with XFCE desktop to SD card
-Boot Radxa zero from SD card
-Set root password and create new user account
-Open shell and start Armbian configuration tool
+![home assistant - file](./docs/images/readme/home assistant - file.png)
 
-```
-$ sudo armbian-configure
-```
-Adjust the following configuration settings
+### Motion activation
 
-* Language and locale
-* Keyboard layout
-* Host name
-* WLAN
-* Auto-login
+For motion activation of the display, the touch button of the Pyframe device needs to be coupled to a motion sensor via an automation. Every time motion is detected, the touch button is pressed by the automation. Pressing the touch button activates the display and resets the display timeout counter.
 
-Install Armbian to eMMC using respective function in the System sub-menu.
-Switch off, remove SD card and restart
-
-Update all packages on the device
-```
-$ sudo apt-get update
-$ sudo apt-get upgrade
-```
-Keep old configuration files if asked (default setting)
-Reboot the device
-
-Install ufw, allow SSH and enable ufw
-```
-$ sudo apt install ufw
-$ sudo ufw allow OpenSSH
-$ sudo ufw enable
-```
-Install fail2ban
-```
-$ sudo apt install fail2ban
-```
-
-### Python configuration ###
-Install python packages via debian package manager
-```
-$ sudo apt install python3 python3-pip python3-kivy python3-sqlalchemy python3-yaml python3-exifread
-```
-Install additional packages via pip
-```
-$ pip3 install IPTCInfo3 webdavclient3 ffmpeg-python3
-```
-To enable playing of videos we further need ffmpeg and the corresponding
-gstreamer plug-in.
-```
-$ sudo apt install ffmpeg gstreamer1.0-libav
-```
-
-#### ffpyplayer ####
-
-On certain SBC it may be preferable to decode and display videos using
-ffpyplayer instead of gstreamer.
-
-$ sudo apt install ffmpeg libavcodec-dev libavdevice-dev libavfilter-dev libavformat-dev libavutil-dev libswscale-dev libswresample-dev libpostproc-dev libsdl2-dev libsdl2-2.0-0
-libsdl2-mixer-2.0-0 libsdl2-mixer-dev python3-dev
-$ pip install ffpyplayer
-
-### Netzteil ###
-
-https://www.smart-things.com/de/produkte/scharge-20w-usb-c/
+![home assistant - automation](./docs/images/readme/home assistant - automation.png)
