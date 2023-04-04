@@ -105,13 +105,13 @@ In this example, we want to continuously show all files stored in a local direct
 
 ```yaml
 repositories:
-    # Local repository with our favorite photos and videos.
-    Local storage:
-        type: local
-        root: ./local/photos
+	# Local repository with our favorite photos and videos.
+	Local storage:
+		type: local
+		root: ./local/photos
 
 slideshows:
-    # Slideshow with our favorite photos and videos.
+	# Slideshow with our favorite photos and videos.
 	Favorites:
 		repositories: Local storage
 		pause: 60
@@ -134,29 +134,29 @@ Finally, since we run Home Assistant and need the MQTT remote control for the mo
 
 ```yaml
 repositories:
-    # Local repository with our favorite photos and videos.
-    Local storage:
-        type: local
-        root: ./local/photos
-    # WebDAV repository with the latest photos from our smartphone.
-    Cloud storage:
-        type: webdav
-        url: https://mycloud.mydomain.org
-        root: /remote.php/webdav/photos
-        user: pyframe
-        password: <password>
-        index_update_at: "23:00"
-    # Test repository, which has been disabled.
-    Test repository:
-        type: local
-        root: ./local/test
-        enabled: false
+	# Local repository with our favorite photos and videos.
+	Local storage:
+		type: local
+		root: ./local/photos
+	# WebDAV repository with the latest photos from our smartphone.
+	Cloud storage:
+		type: webdav
+		url: https://mycloud.mydomain.org
+		root: /remote.php/webdav/photos
+		user: pyframe
+		password: <password>
+		index_update_at: "23:00"
+	# Test repository, which has been disabled.
+	Test repository:
+		type: local
+		root: ./local/test
+		enabled: false
 
 # Repository defaults
 index_update_interval: 24
 
 slideshows:
-    # Slideshow with our favorite photos and videos.
+	# Slideshow with our favorite photos and videos.
 	Favorites:
 		repositories: Local storage
 		pause: 60
@@ -189,7 +189,7 @@ schedule:
 		display_mode: static
 	morning stop:
 		time: "10:00"
-        play_state: stopped
+		play_state: stopped
 	# Play the slideshow "Favorites" in the period from 18:00 to 20:00. Activate the display by motion.
 	evening start:
 		time: "18:00"
@@ -249,24 +249,24 @@ Pyframe supports the configuration of one or multiple file repositories. Reposit
 ```yaml
 ...
 repositories:
-    # Local repository with our favorite photos and videos.
-    Local storage:
-        type: local
-        root: ./local/photos
-        enabled: true
-    # WebDAV repository with the latest photos from our smartphone.
-    Cloud storage:
-        type: webdav
-        url: https://mycloud.mydomain.org
-        root: /remote.php/webdav/photos
-        user: pyframe
-        password: <password>
-        enabled: false
-    # Test repository, which has been disabled.
-    Test repository:
-        type: local
-        root: ./local/test
-        enabled: false
+	# Local repository with our favorite photos and videos.
+	Local storage:
+		type: local
+		root: ./local/photos
+		enabled: true
+	# WebDAV repository with the latest photos from our smartphone.
+	Cloud storage:
+		type: webdav
+		url: https://mycloud.mydomain.org
+		root: /remote.php/webdav/photos
+		user: pyframe
+		password: <password>
+		enabled: false
+	# Test repository, which has been disabled.
+	Test repository:
+		type: local
+		root: ./local/test
+		enabled: false
 
 # Repository defaults
 index_update_interval: 24
@@ -313,7 +313,7 @@ Pyframe supports the configuration of one or multiple slideshows. Slideshows are
 ```yaml
 ...
 slideshows:
-    # Slideshow with our favorite photos and videos.
+	# Slideshow with our favorite photos and videos.
 	Favorites:
 		repositories: Local storage
 		pause: 60
@@ -412,7 +412,7 @@ schedule:
 		display_mode: static
 	morning stop:
 		time: "10:00"
-        play_state: stopped
+		play_state: stopped
 	# Play the slideshow "Favorites" in the period from 18:00 to 20:00. Activate the display by motion.
 	evening start:
 		time: "18:00"
