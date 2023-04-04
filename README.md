@@ -487,10 +487,10 @@ After the Pyframe MQTT client has been correctly configured and a connection to 
 
 In addition, the File sensor provides selected file metadata as sensor attributes.
 
-![home assistant - file](docs/images/readme/home assistant - file.png)
+![home assistant - file](docs/images/readme/home%20assistant%20-%20file.png)
 
 ### Motion activation
 
 For motion activation of the display, the touch button of the Pyframe device needs to be coupled to a motion sensor via an automation. Every time motion is detected, the touch button is pressed by the automation. Pressing the touch button activates the display and resets the display timeout counter.
 
-![home assistant - automation](docs/images/readme/home assistant - automation.png)
+![home assistant - automation](docs/images/readme/home%20assistant%20-%20automation.png)
