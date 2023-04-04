@@ -477,7 +477,7 @@ The following parameters are used to configure the MQTT client.
 
 ## Motion activation
 
-
+![home assistant](https://user-images.githubusercontent.com/6892738/229743863-d43a4c92-4be6-4fb6-a8ab-a3336ef440b4.png)
 
 ## Radxa Zero ##
 
