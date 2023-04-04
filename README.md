@@ -1,6 +1,6 @@
 # Pyframe #
 
-Pyframe is a Python-based digital photo frame application. It is capable of displaying photos and playing videos from local storage as well as WebDAV repositories. 
+Pyframe is a Python-based digital photo frame application. It is capable of displaying photos and playing videos from local storage as well as WebDAV repositories.
 
 Files can be arranged in slideshows and filtered and sorted based on their metadata (EXIF and IPTC supported). Slideshows can be run continuously or scheduled.
 
@@ -61,7 +61,7 @@ At this stage of the project you should not expect the configuration syntax to b
 
 Once Pyframe sources have been installed and all dependencies are met, the application still needs to be configured before it can be run. Please, have a look at the following section for details.
 
-Afterwards, you can change to the Pyframe directory and start the application with the following command: 
+Afterwards, you can change to the Pyframe directory and start the application with the following command:
 
 ```bash
 $ python pyframe.py
@@ -87,7 +87,7 @@ cd $SRC
 
 Unless configured otherwise, Pyframe is going to create an index database *index.sqlite* and log directory *log* in the same directory. If WebDAV repositories are configured, Pyframe will further create a *cache* directory.
 
-If you want to start Pyframe automatically after system boot, you can do so by configuring it in your desktop session manager. Alternatively, you can register a *systemctld* service via a unit file and enable it for automated start after system boot. 
+If you want to start Pyframe automatically after system boot, you can do so by configuring it in your desktop session manager. Alternatively, you can register a *systemctld* service via a unit file and enable it for automated start after system boot.
 
 You will further have to enable autologin for the user under which you intend to run the application.
 
@@ -105,17 +105,17 @@ In this example, we want to continuously show all files stored in a local direct
 
 ```yaml
 repositories:
-	# Local repository with our favorite photos and videos.
-	Local storage:
-		type: local
-		root: ./local/photos
+  # Local repository with our favorite photos and videos.
+  Local storage:
+    type: local
+    root: ./local/photos
 
 slideshows:
-	# Slideshow with our favorite photos and videos.
-	Favorites:
-		repositories: Local storage
-		pause: 60
-		sequence: random
+  # Slideshow with our favorite photos and videos.
+  Favorites:
+    repositories: Local storage
+    pause: 60
+    sequence: random
 ```
 
 #### Advanced configuration
@@ -134,43 +134,43 @@ Finally, since we run Home Assistant and need the MQTT remote control for the mo
 
 ```yaml
 repositories:
-	# Local repository with our favorite photos and videos.
-	Local storage:
-		type: local
-		root: ./local/photos
-	# WebDAV repository with the latest photos from our smartphone.
-	Cloud storage:
-		type: webdav
-		url: https://mycloud.mydomain.org
-		root: /remote.php/webdav/photos
-		user: pyframe
-		password: <password>
-		index_update_at: "23:00"
-	# Test repository, which has been disabled.
-	Test repository:
-		type: local
-		root: ./local/test
-		enabled: false
+  # Local repository with our favorite photos and videos.
+  Local storage:
+    type: local
+    root: ./local/photos
+  # WebDAV repository with the latest photos from our smartphone.
+  Cloud storage:
+    type: webdav
+    url: https://mycloud.mydomain.org
+    root: /remote.php/webdav/photos
+    user: pyframe
+    password: <password>
+    index_update_at: "23:00"
+  # Test repository, which has been disabled.
+  Test repository:
+    type: local
+    root: ./local/test
+    enabled: false
 
 # Repository defaults
 index_update_interval: 24
 
 slideshows:
-	# Slideshow with our favorite photos and videos.
-	Favorites:
-		repositories: Local storage
-		pause: 60
-		tags: favorites
-	# Slideshow with most recent photos from our smartphone.
-	Recent:
-		repositories: Cloud storage
-		excluded_tags:
-			- vacation
-			- favorites
-		file_types: images 
-		most_recent: 200
-		order: descending
-		sequence: date	
+  # Slideshow with our favorite photos and videos.
+  Favorites:
+    repositories: Local storage
+    pause: 60
+    tags: favorites
+  # Slideshow with most recent photos from our smartphone.
+  Recent:
+    repositories: Cloud storage
+    excluded_tags:
+      - vacation
+      - favorites
+    file_types: images
+    most_recent: 200
+    order: descending
+    sequence: date
 
 # Slideshow defaults
 always_excluded_tags: private
@@ -182,29 +182,29 @@ pause: 180
 rotation: -90
 
 schedule:
-	# Play the slideshow "Recent" in the period from 8:00 to 10:00.
-	morning start:
-		time: "08:00"
-		slideshow: Recent
-		display_mode: static
-	morning stop:
-		time: "10:00"
-		play_state: stopped
-	# Play the slideshow "Favorites" in the period from 18:00 to 20:00. Activate the display by motion.
-	evening start:
-		time: "18:00"
-		slideshow: Favorites
-		display_mode: motion
-		display_timeout: 300
-	evening stop:
-		time: "20:00"
-		play_state: stopped
+  # Play the slideshow "Recent" in the period from 8:00 to 10:00.
+  morning start:
+    time: "08:00"
+    slideshow: Recent
+    display_mode: static
+  morning stop:
+    time: "10:00"
+    play_state: stopped
+  # Play the slideshow "Favorites" in the period from 18:00 to 20:00. Activate the display by motion.
+  evening start:
+    time: "18:00"
+    slideshow: Favorites
+    display_mode: motion
+    display_timeout: 300
+  evening stop:
+    time: "20:00"
+    play_state: stopped
 
 mqtt:
-	host: mqtt.local
-	user: pyframe
-	password: <my password>
-	device_name: My pyframe somwhere in the house
+  host: mqtt.local
+  user: pyframe
+  password: <my password>
+  device_name: My pyframe somwhere in the house
 ```
 
 ### Application
@@ -249,24 +249,22 @@ Pyframe supports the configuration of one or multiple file repositories. Reposit
 ```yaml
 ...
 repositories:
-	# Local repository with our favorite photos and videos.
-	Local storage:
-		type: local
-		root: ./local/photos
-		enabled: true
-	# WebDAV repository with the latest photos from our smartphone.
-	Cloud storage:
-		type: webdav
-		url: https://mycloud.mydomain.org
-		root: /remote.php/webdav/photos
-		user: pyframe
-		password: <password>
-		enabled: false
-	# Test repository, which has been disabled.
-	Test repository:
-		type: local
-		root: ./local/test
-		enabled: false
+  # Local repository with our favorite photos and videos.
+  Local storage:
+    type: local
+    root: ./local/photos
+  # WebDAV repository with the latest photos from our smartphone.
+  Cloud storage:
+    type: webdav
+    url: https://mycloud.mydomain.org
+    root: /remote.php/webdav/photos
+    user: pyframe
+    password: <password>
+  # Test repository, which has been disabled.
+  Test repository:
+    type: local
+    root: ./local/test
+    enabled: false
 
 # Repository defaults
 index_update_interval: 24
@@ -313,21 +311,21 @@ Pyframe supports the configuration of one or multiple slideshows. Slideshows are
 ```yaml
 ...
 slideshows:
-	# Slideshow with our favorite photos and videos.
-	Favorites:
-		repositories: Local storage
-		pause: 60
-		tags: favorites
-	# Slideshow with most recent photos from our smartphone.
-	Recent:
-		repositories: Cloud storage
-		excluded_tags:
-			- vacation
-			- favorites
-		file_types: images 
-		most_recent: 200
-		order: descending
-		sequence: date	
+  # Slideshow with our favorite photos and videos.
+  Favorites:
+    repositories: Local storage
+    pause: 60
+    tags: favorites
+  # Slideshow with most recent photos from our smartphone.
+  Recent:
+    repositories: Cloud storage
+    excluded_tags:
+      - vacation
+      - favorites
+    file_types: images
+    most_recent: 200
+    order: descending
+    sequence: date
 
 # Slideshow defaults
 always_excluded_tags: private
@@ -405,23 +403,23 @@ Pyframe supports the configuration of a schedule. The schedule allows to alter t
 
 ```yaml
 schedule:
-	# Play the slideshow "Recent" in the period from 8:00 to 10:00.
-	morning start:
-		time: "08:00"
-		slideshow: Recent
-		display_mode: static
-	morning stop:
-		time: "10:00"
-		play_state: stopped
-	# Play the slideshow "Favorites" in the period from 18:00 to 20:00. Activate the display by motion.
-	evening start:
-		time: "18:00"
-		slideshow: Favorites
-		display_mode: motion
-		display_timeout: 30
-	evening stop:
-		time: "20:00"
-		play_state: stopped
+  # Play the slideshow "Recent" in the period from 8:00 to 10:00.
+  morning start:
+    time: "08:00"
+    slideshow: Recent
+    display_mode: static
+  morning stop:
+    time: "10:00"
+    play_state: stopped
+  # Play the slideshow "Favorites" in the period from 18:00 to 20:00. Activate the display by motion.
+  evening start:
+    time: "18:00"
+    slideshow: Favorites
+    display_mode: motion
+    display_timeout: 30
+  evening stop:
+    time: "20:00"
+    play_state: stopped
 ```
 
 The following parameters are used to configure events in the schedule.
@@ -446,10 +444,10 @@ Pyframe implements an MQTT client, which registers the device with an MQTT broke
 ```yaml
 ...
 mqtt:
-	host: <hostname of MQTT broker>
-	user: <login name>
-	password: <my password>
-	device_name: My pyframe somwhere in the house
+  host: <hostname of MQTT broker>
+  user: <login name>
+  password: <my password>
+  device_name: My pyframe somwhere in the house
 ...
 ```
 
