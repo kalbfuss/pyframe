@@ -483,7 +483,7 @@ Pyframe implements basic support for integration with the [Home Assistant](https
 
 After the Pyframe MQTT client has been correctly configured and a connection to the MQTT broker established, Pyframe should automatically appear as a new device in Home Assistant. The device supports several push buttons and configuration selections, which allow you to control Pyframe from remote. The device further provides a *File* sensor, whose value is identical to the UUID of the currently displayed file.
 
-![home assistant - device](docs/images/readme/home assistant - device.png)
+![home assistant - device](docs/images/readme/home%20assistant%20-%20device.png)
 
 In addition, the File sensor provides selected file metadata as sensor attributes.
 
