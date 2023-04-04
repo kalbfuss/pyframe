@@ -111,9 +111,6 @@ class Indexer:
 
                 # Build index for repository if due, but at least once.
                 if data.next < cur_time:
-                    # Set log prefix to uuid of current repository.
-#                    global logHandler
-#                    logHandler.setPrefix(rep.uuid)
                     # Build meta data index for current repository.
                     try:
                         self._index.build(rep)
@@ -132,10 +129,6 @@ class Indexer:
                     else:
                         logging.info(f"Removing repository '{rep.uuid}' from queue.")
                         self._rep_data.pop(rep)
-
-                    # Clear log prefix
-#                    global logHandler
-#                    logHandler.setPrefix()
 
                 if pause_until == 0 or (data.next > 0 and data.next < pause_until):
                     pause_until = data.next
