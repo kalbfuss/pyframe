@@ -18,7 +18,7 @@ from kivy.core.window import Window
 from kivy.clock import Clock
 from kivy.logger import Logger, LOG_LEVELS
 
-from .common import ConfigError
+from .common import ConfigError, check_param, check_valid_required
 from .mylogging import Handler
 from .indexer import Indexer
 from .slideshow import Slideshow
@@ -82,15 +82,18 @@ class App(kivy.app.App, Controller):
 
         Adjusts log levels based on the application configuration and adds a
         custom log handler for logging to rotating log files.
+
+        :raises: ConfigError
         """
-        # Obtain log level and verify validity.
-        level = self._config['log_level']
-        if level not in LOG_LEVELS:
-            Logger.critical(f"Configuration: The specified log level '{level}' is invalid. Valid values are {set(LOG_LEVELS.keys())}")
-            sys.exit(1)
+        config = self._config
+
+        # Check parameters.
+        check_param('logging', config, is_bool=True)
+        check_param('log_level', config, options=set(LOG_LEVELS.keys()))
+        check_param('log_dir', config, is_str=True)
 
         # Set log levels of default python and Kivy Logger.
-        numeric_level = LOG_LEVELS[level]
+        numeric_level = LOG_LEVELS[config['log_level']]
         logging.basicConfig(level=numeric_level)
         Logger.setLevel(numeric_level)
 
@@ -98,20 +101,19 @@ class App(kivy.app.App, Controller):
         # level, whatever is higher.
         logging.getLogger("iptcinfo").setLevel(max(logging.ERROR, numeric_level))
         logging.getLogger("exifread").setLevel(max(logging.ERROR, numeric_level))
-        # Reduce logging by SQLAlchemy to warnings or specified log lever,
+        # Reduce logging by SQLAlchemy to warnings or specified log level,
         # whatever is higher.
         logging.getLogger("sqlalchemy").setLevel(max(logging.WARN, numeric_level))
 
         # Write all log messages to rotating log files using a special log
         # handler if file logging is activated. A separate log file is used for
         # the background indexing thread.
-        if self._config['logging'] == "on" or self._config['logging'] == True:
+        if config['logging'] == "on" or config['logging'] == True:
             try:
-                self._logHandler = Handler(self._config['log_dir'], "indexer")
+                self._logHandler = Handler(config['log_dir'], "indexer")
                 logging.getLogger().addHandler(self._logHandler)
             except Exception as e:
-                Logger.critical(f"Configuration: {e}")
-                sys.exit(1)
+                raise Exception(f"App: An error occurred while installing the log handler. {e}")
 
     def __create_repositories(self):
         """Create file repositories from configuration."""
@@ -120,8 +122,7 @@ class App(kivy.app.App, Controller):
 
         # Exit application if no repositories have been defined.
         if 'repositories' not in config or type(config['repositories']) is not dict:
-            Logger.critical("Configuration: Exiting application as no repositories have been defined.")
-            sys.exit(1)
+            raise ConfigError("Configuration: Exiting application as no repositories have been defined.")
 
         # Extract global repository configuration.
         global_config = {key: config[key] for key in ('index_update_interval', 'index_update_at', 'cache') if key in config}
@@ -132,10 +133,16 @@ class App(kivy.app.App, Controller):
             if rep_config.get('enabled') is False:
                 Logger.info(f"Configuration: Skipping repository '{uuid}' as it has been disabled.")
                 continue
+
             # Combine global and local configuration. Local configuration
             # settings supersede global settings.
             combined_config = copy.deepcopy(global_config)
             combined_config.update(rep_config)
+            # Check parameters
+            check_param('type', combined_config, options={"local", "webdav"})
+            check_param('index_update_interval', combined_config, required=False, is_int=True, ge=0)
+            check_param('index_update_at', combined_config, required=False, is_time=True)
+
             rep_type = combined_config.get('type')
             try:
                 # Create local repository.
@@ -146,29 +153,19 @@ class App(kivy.app.App, Controller):
                 elif rep_type == "webdav":
                     Logger.info(f"Configuration: Creating WebDAV repository '{uuid}'.")
                     rep = repository.webdav.Repository(uuid, combined_config, index=index)
-                # Catch any invalid repository types.
-                else:
-                    Logger.critical(f"Configuration: The type '{rep_type}' of repository '{uuid}' is invalid. Acceptable values are 'local' or 'webdav'.")
-                    sys.exit(1)
 
                 # Queue the repository for indexing.
                 interval = combined_config.get('index_update_interval', 0)
                 at = combined_config.get('index_update_at', None)
                 self._indexer.queue(rep, interval, at)
 
-            # Catch any invalid configuration errors.
-            except InvalidConfigurationError as e:
-                Logger.critical(f"Configuration: {e}")
-                sys.exit(1)
-            # Catch any invalid UUID errors.
-            except InvalidUuidError:
-                Logger.error(f"Configuration: The repository UUID '{uuid}' is invalid.")
-                sys.exit(1)
+            # Catch any invalid configuration and UUID errors.
+            except (ConfigError, InvalidConfigurationError, InvalidUuidError) as e:
+                raise ConfigError(f"Configuration: Error in the configuration of repository '{uuid}'. {e}", combined_config)
 
         # Exit application if no valid repositories have been defined.
         if len(Repository._repositories.items()) == 0:
-            Logger.critical("Configuration: Exiting application as no valid repositories have been defined.")
-            sys.exit(1)
+            raise ConfigError("Configuration: Exiting application as no valid repositories have been defined.", config['repositories'])
 
     def __create_slideshows(self):
         """Create slideshows from configuration.
@@ -177,6 +174,8 @@ class App(kivy.app.App, Controller):
         in the configuration file. One slideshow is created per has entry.
         Slideshow instances are collected in the hash _slideshows, with the key
         being identical to the slideshow name in the configuration file.
+
+        :raises: ConfigError
         """
         config = self._config
         index = self._index
@@ -187,7 +186,7 @@ class App(kivy.app.App, Controller):
         # Create empty dictionary to collect slideshows
         self._slideshows = dict()
         # Extract global slideshow configuration
-        global_config = {key: config[key] for key in ('always_excluded_tags', 'bg_color', 'excluded_tags', 'file_types', 'label_content', 'label_duration', 'label_font_size', 'label_mode',  'label_padding', 'most_recent', 'order', 'orientation', 'pause', 'resize', 'rotation', 'sequence', 'tags') if key in config}
+        global_config = {key: config[key] for key in Slideshow.CONF_VALID_KEYS if key in config}
 
         # Create slideshows from configuration.
         for name, config in config['slideshows'].items():
@@ -211,44 +210,39 @@ class App(kivy.app.App, Controller):
             raise ConfigError("Configuration: Exiting application as no valid slideshows have been defined.")
 
     def __init_display(self):
-        """Initialize display and window."""
+        """Initialize display and window.
 
-        # Check value of parameter display mode.
-        display_mode = self._config['display_mode']
-        values = { item.value for item in DISPLAY_MODE }
-        if display_mode not in values:
-            raise ConfigError(f"Configuration: Invalid display mode '{display_mode}' specified. Valid display modes are {values}.", self._config)
+        :raises: ConfigError
+        """
+        config = self._config
 
-        display_state = self._config['display_state']
-        # Convert from booleans to "on" and "off"
-        if display_state is True: display_state = "on"
-        elif display_state is False: display_state = "off"
-        # Check value of parameter display state.
-        values = { item.value for item in DISPLAY_STATE }
-        if display_state not in values:
-            raise ConfigError(f"Configuration: Invalid display state '{display_state}' specified. Valid display states are {values}.", self._config)
+        # Check parameters.
+        check_param('display_mode', config, options={ item.value for item in DISPLAY_MODE })
+        check_param('display_state', config, is_bool=True)
+        check_param('display_timeout', config, is_int=True, gr=0)
 
-        # Check value of parameter display timeout
-        display_timeout = self._config['display_timeout']
-        if type(display_timeout) is not int or display_timeout < 0:
-            raise ConfigError(f"Configuration: Invalid timeout '{display_timeout}' specified. Timeout must be a positive integer.", self._config)
+        # Convert from boolean to "on" (True) and "off" (False) if necessary.
+        # This is a pecularity of the YAML 1.1 standard, which interprets "on"
+        # and "off" as boolean values.
+        map = {True: "on", False: "off", "on": "on", "off": "off"}
+        display_state = map[config['display_state']]
 
-        # Initialize display state and mode.
-        self._display_timeout = display_timeout
+        # Initialize display timeout, state and mode.
+        self._display_timeout = config['display_timeout']
         self._timeout_event = None
         self._display_mode = ""
         self._display_state = ""
         self.display_state = display_state
-        self.display_mode = display_mode
+        self.display_mode = config['display_mode']
 
         # Set window size.
-        value = self._config['window_size']
+        value = config['window_size']
         if type(value) is list and len(value) == 2 and value[0] > 0 and value[1] > 0:
             Window.size = (value)
         elif value == "full":
             Window.fullscreen = 'auto'
         else:
-            raise ConfigError(f"Configuration: Invalid value '{value}' for parameter 'window_size' specified. Acceptable values are [width, height] and 'full'.", self._config)
+            raise ConfigError(f"Configuration: Invalid value '{value}' for parameter 'window_size' specified. Valid values are [width, height] and 'full'.", config)
         # Disable display of mouse cursor
         Window.show_cursor = False
 
@@ -541,7 +535,7 @@ class App(kivy.app.App, Controller):
         :return: display timeout in seconds
         :rtype: int
         """
-        return _display_timeout
+        return self._display_timeout
 
     @display_timeout.setter
     def display_timeout(self, timeout):

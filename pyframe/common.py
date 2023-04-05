@@ -1,5 +1,8 @@
 """Module providing common definitions."""
 
+import re
+
+
 APPLICATION_NAME = "Pyframe"
 APPLICATION_DESCRIPTION = "Digital photo frame"
 VERSION = "0.x"
@@ -46,7 +49,7 @@ def check_valid_required(config, valid_keys, required_keys):
     if not required_keys.issubset(keys):
         raise ConfigError(f"As a minimum, the parameters {required_keys} are required, but the parameter(s) {required_keys.difference(keys)} has/have not been specified.")
 
-def check_param(name, value, recurse=False, required=True, is_int=False, is_color=False, gr=None, ge=None, lo=None, le=None, options=None):
+def check_param(name, value, recurse=False, required=True, is_int=False, is_bool=False, is_str=False, is_color=False, is_time=False, gr=None, ge=None, lo=None, le=None, options=None):
     """Check validity of configuration parameter.
 
     Checks the validity of a configuration parameter based on specified
@@ -71,8 +74,14 @@ def check_param(name, value, recurse=False, required=True, is_int=False, is_colo
     :type required: bool
     :param is_int: True if value must be integer
     :type is_int: bool
-    :param is_color: True if value must be color definition
+    :param is_bool: True if value must be boolean
+    :type is_bool: bool
+    :param is_time: True if value must be a non-empty string
+    :type is_time: bool
+    :param is_color: True if value must be valid color definition
     :type is_color: bool
+    :param is_time: True if value must be valid time definition
+    :type is_time: bool
     :param gr: parameter value must be > gr
     :type gr: numeric
     :param ge: parameter value must be >= ge
@@ -99,6 +108,21 @@ def check_param(name, value, recurse=False, required=True, is_int=False, is_colo
     # Compile generic error message prefix.
     prefix = f"Invalid value '{value}' for parameter '{name}' specified."
 
+    # Ensure that value is boolean.
+    if is_bool:
+        if not (isinstance(value, bool) or value == "on" or value == "off"):
+            raise ConfigError(f"{prefix} Value must be boolean (true/on or false/off).", config)
+        # Prevent all further tests.
+        return
+
+    # Ensure that value is a valid, non-empty string.
+    if is_str:
+        # Check string format.
+        if not isinstance(value, str) or len(value) == 0:
+            raise ConfigError(f"{prefix} Value must be a non-empty string.", config)
+        # Prevent all further tests.
+        return
+
     # Ensure that value is valid color definition.
     if is_color:
         if not isinstance(value, list) or len(value) != 3:
@@ -109,11 +133,23 @@ def check_param(name, value, recurse=False, required=True, is_int=False, is_colo
         # Prevent all further tests.
         return
 
+    # Ensure that value is a valid time string.
+    if is_time:
+        # Check string format.
+        if not isinstance(value, str) or not re.match("[0-2][0-9]:[0-5][0-9]", value):
+            raise ConfigError(f"{prefix} Value must be valid time definition of type [HH:MM].", config)
+        # Verify that hour and minute values are within range.
+        time = [int(x) for x in value.split(":")]
+        if not (time[0] >= 0 and time[0] <= 23 and time[1] >= 0 and time[1] <= 59):
+            raise ConfigError(f"{prefix} Hour or minute value is out of bounds.", config)
+        # Prevent all further tests.
+        return
+
     # Recurse into list items if requested.
     if isinstance(value, (list,set)):
         if recurse:
             for v in value:
-                check_param(name, v, False, required, is_int, is_color, gr, ge, lo, le, options)
+                check_param(name, v, False, required, is_int, is_bool, is_str, is_color, is_time, gr, ge, lo, le, options)
         # Prevent all further tests.
         return
 
@@ -124,7 +160,7 @@ def check_param(name, value, recurse=False, required=True, is_int=False, is_colo
     if gr is not None and not value > gr:
         raise ConfigError(f"{prefix} Value must be > {gr}.", config)
     # Ensure that value is greater than or equal to a certain value.
-    if ge is not None  and not value > ge:
+    if ge is not None  and not value >= ge:
         raise ConfigError(f"{prefix} Value must be >= {ge}.", config)
     # Ensure that value is lower than a certain value.
     if lo is not None  and not value < lo:
