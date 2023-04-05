@@ -85,8 +85,8 @@ class App(kivy.app.App, Controller):
         """
         # Obtain log level and verify validity.
         level = self._config['log_level']
-        if level not in ['debug', 'info', 'warn', 'error']:
-            Logger.critical(f"Configuration: The specified log level '{level}' is invalid. Acceptable values are 'debug', 'info', 'warn', 'error' and 'critical'.")
+        if level not in LOG_LEVELS:
+            Logger.critical(f"Configuration: The specified log level '{level}' is invalid. Valid values are {set(LOG_LEVELS.keys())}")
             sys.exit(1)
 
         # Set log levels of default python and Kivy Logger.
@@ -280,11 +280,11 @@ class App(kivy.app.App, Controller):
         'index_update_interval': 0,
         'label_mode': "off",
         'label_content': "full",
-        'label_duration': 0.2*300,
+        'label_duration': 60,
         'label_font_size': 0.08,
         'label_padding': 0.03,
         'logging': "on",
-        'log_level': "warn",
+        'log_level': "warning",
         'log_dir': "./log",
         'order': "ascending",
         'pause': 300,
@@ -300,6 +300,7 @@ class App(kivy.app.App, Controller):
         Loads the application configuration from the default configuration file.
         Creates configured repositories and builds an index across the latter.
         """
+        self._index = None
         self._scheduler = None
         self._mqtt_interface = None
         self._play_state = PLAY_STATE.STOPPED
