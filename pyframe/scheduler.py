@@ -7,7 +7,7 @@ from kivy.clock import Clock
 from kivy.logger import Logger, LOG_LEVELS
 from schedule import ScheduleValueError
 
-from .common import ConfigError, check_valid_required
+from .common import ConfigError, check_param, check_valid_required
 from .controller import DISPLAY_MODE, PLAY_STATE
 
 
@@ -45,43 +45,20 @@ class Scheduler:
         Logger.info("Scheduler: Building schedule from configuration.")
         for event, event_config in config.items():
 
-            # Check the configuration for valid and required parameters.
             try:
+                # Check the configuration for valid and required parameters.
                 check_valid_required(event_config, self.CONF_VALID_KEYS, self.CONF_REQ_KEYS)
-            except ConfigError as e:
-                raise ConfigError(f"Error in the configuration of event '{event}'. {e}")
-
-            # Check value of parameter display mode.
-            display_mode = event_config.get('display_mode')
-            if display_mode is not None:
-                values = { item.value for item in DISPLAY_MODE }
-                if display_mode not in values:
-                    raise ConfigError(f"Error in the configuration of event '{event}'. Invalid display mode '{display_mode}' specified. Valid display modes are {values}.", event_config)
-
-            play_state = event_config.get('play_state')
-            if play_state is not None:
-                # Check value of parameter display mode.
-                values = { item.value for item in PLAY_STATE }
-                if play_state not in values:
-                    raise ConfigError(f"Error in the configuration of event '{event}'. Invalid play state '{play_state}' specified. Valid play states are {values}.", event_config)
-
-            # Check value of parameter slideshow if specified.
-            if 'slideshow' in event_config and event_config['slideshow'] not in self._app.slideshows:
-                raise ConfigError(f"Error in the configuration of event '{event}'. Invalid slideshow '{event_config['slideshow']}' specified. Valid slideshows are {self._app.slideshows}.", event_config)
-
-            # Check value of parameter display_timeout if specified.
-            display_timeout = event_config.get('display_timeout')
-            if display_timeout is not None:
-                if type(display_timeout) is not int or display_timeout < 0:
-                    raise ConfigError(f"Error in the configuration of event '{event}'. Invalid timeout '{display_timeout}' specified. Timeout must be a positive integer.", event_config)
-
-            # Schedule events.
-            try:
+                # Check parameter values.
+                check_param('display_mode', event_config, required=False, options={ item.value for item in DISPLAY_MODE })
+                check_param('play_state', event_config, required=False, options={ item.value for item in PLAY_STATE })
+                check_param('slideshow', event_config, required=False, options=self._app.slideshows)
+                check_param('display_timeout', event_config, required=False, is_int=True, gr=0)
+                # Schedule event.
                 schedule.every().day.at(event_config['time']).do(self.on_event, event, event_config)
                 Logger.info(f"Scheduler: Event '{event}' scheduled at '{event_config['time']}'.")
-            # Catch all schedule errors.
-            except (TypeError, ScheduleValueError) as e:
-                raise ConfigError(f"Error in the configuration of event '{event}'. {e}.", event_config)
+            # Catch all configuration and schedule errors.
+            except (ConfigError, TypeError, ScheduleValueError) as e:
+                raise ConfigError(f"Error in the configuration of event '{event}'. {e}", event_config)
 
         # Turn display off
         self._app.display_off()
