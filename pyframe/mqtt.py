@@ -62,6 +62,7 @@ class MqttInterface:
         :param controller: Pyframe controller
         :type config: dict
         :type controller: pyframe.controller
+        :raises: ConfigError
         """
         self._config = config
         self._controller = controller
