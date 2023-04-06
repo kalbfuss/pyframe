@@ -111,7 +111,7 @@ def check_param(name, value, recurse=False, required=True, is_int=False, is_bool
     # Ensure that value is boolean.
     if is_bool:
         if not (isinstance(value, bool) or value == "on" or value == "off"):
-            raise ConfigError(f"{prefix} Value must be boolean (true/on or false/off).", config)
+            raise ConfigError(f"{prefix} Value must be boolean (true or false).", config)
         # Prevent all further tests.
         return
 

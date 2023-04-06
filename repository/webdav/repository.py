@@ -11,7 +11,11 @@ from .file import RepositoryFile
 
 
 class Repository(repository.Repository):
-    """Repository with WebDav file base."""
+    """Repository with WebDAV file base."""
+
+    # Required and valid configuration parameters
+    CONF_REQ_KEYS = {'url', 'user', 'password', 'cache'}
+    CONF_VALID_KEYS = {'root'} | CONF_REQ_KEYS
 
     def __init__(self, uuid, config, index=None):
         """Initialize repository with WebDav file base.
@@ -53,14 +57,12 @@ class Repository(repository.Repository):
         """
         # Raise exception if minimum required parameters have not been defined.
         keys = set(config.keys())
-        required_keys = {'url', 'user', 'password', 'cache'}
-        valid_keys = required_keys.union({'root'})
         # Make sure required parameters have been specified.
-        if not required_keys.issubset(keys):
-            raise InvalidConfigurationError(f"The configuration of repository '{self.uuid}' is incomplete. As a minimum, the parameters {required_keys} are required, but only the parameter(s) {keys.intersection(required_keys)} has/have been specified.", config)
+        if not self.CONF_REQ_KEYS.issubset(keys):
+            raise InvalidConfigurationError(f"The configuration of repository '{self.uuid}' is incomplete. As a minimum, the parameters {self.CONF_REQ_KEYS} are required, but only the parameter(s) {keys.intersection(self.CONF_REQ_KEYS)} has/have been specified.", config)
         # Make sure only valid parameters have been specified.
-        if not keys.issubset(valid_keys):
-            logging.warn(f"The configuration of repository '{self.uuid}' includes additional parameters. Only the parameters {valid_keys} are accepted, but the additional parameter(s) {keys.difference(valid_keys)} has/have been specified.", config)
+        if not keys.issubset(self.CONF_VALID_KEYS):
+            logging.warn(f"The configuration of repository '{self.uuid}' includes additional parameters. Only the parameters {self.CONF_VALID_KEYS} are accepted, but the additional parameter(s) {keys.difference(self.CONF_VALID_KEYS)} has/have been specified.", config)
 
     @property
     def cache_dir(self):

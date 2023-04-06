@@ -41,6 +41,11 @@ class Repository(ABC):
     # Dictionary of all repositories by uuid
     _repositories = dict()
 
+    # Required and valid configuration parameters. Need to be re-defined by
+    # implementing sub-class.
+    CONF_REQ_KEYS = {}
+    CONF_VALID_KEYS = {}
+
     def __init__(self, uuid, config, index=None):
         """Initialize the repository.
 
@@ -158,6 +163,15 @@ class Repository(ABC):
         :type index: repository.Index
         """
         self._index = index
+
+    @staticmethod
+    def repositories():
+        """Return set of UUIDs of existing repositories.
+
+        :return: UUIDs of existing repositories.
+        :rtype: set
+        """
+        return set(Repository._repositories.keys())
 
     @property
     def uuid(self):

@@ -11,6 +11,7 @@ import time
 import traceback
 import yaml
 
+from importlib import import_module
 from repository import Index, Repository, InvalidConfigurationError, InvalidUuidError
 
 from kivy.base import ExceptionManager
@@ -119,49 +120,64 @@ class App(kivy.app.App, Controller):
         """Create file repositories from configuration."""
         config = self._config
         index = self._index
+        # Dictionary used to map type names to repository classes.
+        supported_types = { 'local': ("repository.local", "Repository"), 'webdav': ("repository.webdav", "Repository")}
 
         # Exit application if no repositories have been defined.
         if 'repositories' not in config or type(config['repositories']) is not dict:
             raise ConfigError("Configuration: Exiting application as no repositories have been defined.")
 
-        # Extract global repository configuration.
-        global_config = {key: config[key] for key in ('index_update_interval', 'index_update_at', 'cache') if key in config}
+        # Extract global repository index configuration.
+        global_index_config = {key: config[key] for key in ('index_update_interval', 'index_update_at') if key in config}
 
         # Create repositories based on the configuration.
-        for uuid, rep_config in config['repositories'].items():
+        for uuid, local_config in config['repositories'].items():
+
             # Skip disabled repositories.
-            if rep_config.get('enabled') is False:
+            enabled_flag = local_config.get('enabled')
+            if enabled_flag is False or enabled_flag == "off":
                 Logger.info(f"Configuration: Skipping repository '{uuid}' as it has been disabled.")
                 continue
 
-            # Combine global and local configuration. Local configuration
-            # settings supersede global settings.
-            combined_config = copy.deepcopy(global_config)
-            combined_config.update(rep_config)
-            # Check parameters
-            check_param('type', combined_config, options={"local", "webdav"})
-            check_param('index_update_interval', combined_config, required=False, is_int=True, ge=0)
-            check_param('index_update_at', combined_config, required=False, is_time=True)
+            # Combine global and local repository index configuration. Local
+            # configuration settings supersede global settings.
+            index_config = copy.deepcopy(global_index_config)
+            index_config.update(local_config)
 
-            rep_type = combined_config.get('type')
+            # Check parameters.
+            check_param('type', local_config, options=set(supported_types.keys()))
+            check_param('enabled', local_config, is_bool=True)
+            check_param('index_update_interval', index_config, required=False, is_int=True, ge=0)
+            check_param('index_update_at', index_config, required=False, is_time=True)
+
+            # Retrieve repository class from type.
+            ref = supported_types[local_config.get('type')]
+            module = import_module(ref[0])
+            rep_class = getattr(module, ref[1])
+
+            # Combine global and local repository configuration. Local
+            # configuration settings supersede global settings.
+            rep_config = {key: config[key] for key in (rep_class.CONF_VALID_KEYS) if key in config}
+            rep_config.update(local_config)
+            rep_config.pop('type')
+            rep_config.pop('enabled')
+
             try:
-                # Create local repository.
-                if rep_type == "local":
-                    Logger.info(f"Configuration: Creating local repository '{uuid}'.")
-                    rep = repository.local.Repository(uuid, combined_config, index=index)
-                # Create webdav repository.
-                elif rep_type == "webdav":
-                    Logger.info(f"Configuration: Creating WebDAV repository '{uuid}'.")
-                    rep = repository.webdav.Repository(uuid, combined_config, index=index)
-
-                # Queue the repository for indexing.
-                interval = combined_config.get('index_update_interval', 0)
-                at = combined_config.get('index_update_at', None)
-                self._indexer.queue(rep, interval, at)
-
+                # Create repository instance.
+                Logger.info(f"Configuration: Creating {local_config.get('type')} repository '{uuid}'.")
+                rep = rep_class(uuid, rep_config, index=index)
             # Catch any invalid configuration and UUID errors.
-            except (ConfigError, InvalidConfigurationError, InvalidUuidError) as e:
-                raise ConfigError(f"Configuration: Error in the configuration of repository '{uuid}'. {e}", combined_config)
+            except (InvalidConfigurationError, InvalidUuidError) as e:
+                raise ConfigError(f"Configuration: Error in the configuration of repository '{uuid}'. {e}", rep_config)
+
+            try:
+                # Queue the repository for indexing.
+                interval = index_config.get('index_update_interval', 0)
+                at = index_config.get('index_update_at', None)
+                self._indexer.queue(rep, interval, at)
+            # Catch any invalid configuration and UUID errors.
+            except (ConfigError) as e:
+                raise ConfigError(f"Configuration: Error in the configuration of repository '{uuid}'. {e}", index_config)
 
         # Exit application if no valid repositories have been defined.
         if len(Repository._repositories.items()) == 0:
@@ -194,12 +210,18 @@ class App(kivy.app.App, Controller):
             # settings supersede global settings.
             combined_config = copy.deepcopy(global_config)
             combined_config.update(config)
+
             # Create new slideshow, bind 'on_content_change' event and add to
             # slideshow do dictionary.
             try:
+                # Verify that only existing/enabled repositories have been defined.
+                check_param('repositories', combined_config, required=False, recurse=True, options=Repository.repositories())
+                # Create slideshow and add to the list of slideshows.
                 slideshow = Slideshow(name, index, combined_config)
-                slideshow.bind(on_content_change=self.on_content_change)
                 self._slideshows[name] = slideshow
+                # Make sure we receive all content change events.
+                slideshow.bind(on_content_change=self.on_content_change)
+
             except ConfigError as e:
                 raise ConfigError(f"Configuration: Error in the configuration of slideshow '{name}'. {e}", config)
             except Exception as e:
