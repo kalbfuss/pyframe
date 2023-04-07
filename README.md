@@ -167,10 +167,10 @@ slideshows:
     excluded_tags:
       - vacation
       - favorites
-    file_types: images
+    types: images
     most_recent: 200
-    order: descending
-    sequence: date
+    order: date
+	direction: descending
 
 # Slideshow defaults
 always_excluded_tags: private
@@ -311,10 +311,10 @@ slideshows:
     excluded_tags:
       - vacation
       - favorites
-    file_types: images
+    types: images
     most_recent: 200
-    order: descending
-    sequence: date
+    order: date
+    direction: descending
 
 # Slideshow defaults
 always_excluded_tags: private
@@ -347,17 +347,17 @@ The following parameters are used to configure slideshows.
 
 The following parameters control the files included in a slideshow and the sequence in which they are shown. The default is to include all files from all repositories. Files are sorted by their name in ascending order.
 
-|Parameter                 |Description|
-|:-------------------------|:----------|
-|***repositories***        |The repositories from which files shall be shown. The default is to show files from all repositories.|
-|***orientation***         |Valid orientations are *portrait* or *landscape*. The default is to include either orientation.|
-|***file_types***          |Supported file types are *images* and *videos*. May be a single value or list of values. The default is to include all file types.|
-|***tags***                |File tags, which shall be included. May be a single value or list of values. The default is to include all tags **and** untagged files. If set, untagged files are excluded.|
-|***excluded_tags***       |File tags, which shall be excluded. May be a single value or list of values. The default is not to exclude any tags.|
-|***always_excluded_tags***|Same as *excluded_tags*, but not overwritten by an *excluded_tags* statement. Use in the slideshow default configuration to exclude certain tags in all slideshows (e.g. private content).|
-|***most_recent***         |Files in the slideshow are limited to the *most_recent* number of files based on the creation date **after** application of all other filter criteria.|
-|***sequence***            |The sequence in which files are shown. The default is *name*.<br/> - *date:* Files are sorted by their creation date.<br/> - *name:* Files are sorted by their name.<br/> - *random:* Files are shown in a random sequence.|
-|***order***               | Valid orders are *ascending* or *descending*. The default is *ascending*. Ignored if random sequence is configured.|
+| Parameter                  | Description                                                  |
+| :------------------------- | :----------------------------------------------------------- |
+| ***repositories***         | The repositories from which files shall be shown. The default is to show files from all repositories. |
+| ***orientation***          | Valid orientations are *portrait* or *landscape*. The default is to include either orientation. |
+| ***types***                | Supported file types are *images* and *videos*. May be a single value or list of values. The default is to include all file types. |
+| ***tags***                 | File tags, which shall be included. May be a single value or list of values. The default is to include all tags **and** untagged files. If set, untagged files are excluded. |
+| ***excluded_tags***        | File tags, which shall be excluded. May be a single value or list of values. The default is not to exclude any tags. |
+| ***always_excluded_tags*** | Same as *excluded_tags*, but not overwritten by an *excluded_tags* statement. Use in the slideshow default configuration to exclude certain tags in all slideshows (e.g. private content). |
+| ***most_recent***          | Files in the slideshow are limited to the *most_recent* number of files based on the creation date **after** application of all other filter criteria. |
+| ***order***                | The sort order in which files are shown. The default is *name*.<br/> - *date:* Files are sorted by their creation date.<br/> - *name:* Files are sorted by their name.<br/> - *random:* Files are shown in a random sequence. |
+| ***direction***            | Valid sort directions are *ascending* or *descending*. The default is *ascending*. Ignored if random order is configured. |
 
 ### Schedule
 
