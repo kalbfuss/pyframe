@@ -80,7 +80,7 @@ def check_param(name, value, recurse=False, required=True, is_int=False, is_bool
     :type value: type of parameter value or dict
     :param recurse: True if function shall recurse into sets and lists
     :type recurse: bool
-    :param required: True if parameter must have value
+    :param required: True if parameter must exist in dictionary
     :type required: bool
     :param is_int: True if value must be integer
     :type is_int: bool
@@ -106,14 +106,23 @@ def check_param(name, value, recurse=False, required=True, is_int=False, is_bool
     """
     config = value
     # Obtain parameter value from dictionary if dictionary specified.
-    if isinstance(value, dict): value = config.get(name)
+    if isinstance(value, dict):
+        if name in config:
+            value = config.get(name)
+            # Check for non-type and empty lists/sets.
+            if value is None or (isinstance(value, (list,set)) and len(value) ==0):
+                raise ConfigError(f"Parameter '{name}' does not have a value.", config)
+        else:
+            if required is True: raise ConfigError(f"No value for required parameter '{name}' specified.", config)
+            else: return
 
-    # Check for non-type and empty lists/sets.
-    if value is None or (isinstance(value, (list,set)) and len(value) ==0):
-        # Return immediately if value is not required.
-        if required is False: return
-        # Rais exception otherwise.
-        else: raise ConfigError(f"No value for parameter '{name}' specified.", config)
+    # Recurse into list items if requested.
+    if isinstance(value, (list,set)):
+        if recurse:
+            for v in value:
+                check_param(name, v, False, required, is_int, is_bool, is_str, is_color, is_time, gr, ge, lo, le, options)
+        # Prevent all further tests.
+        return
 
     # Compile generic error message prefix.
     prefix = f"Invalid value '{value}' for parameter '{name}' specified."
@@ -152,14 +161,6 @@ def check_param(name, value, recurse=False, required=True, is_int=False, is_bool
         time = [int(x) for x in value.split(":")]
         if not (time[0] >= 0 and time[0] <= 23 and time[1] >= 0 and time[1] <= 59):
             raise ConfigError(f"{prefix} Hour or minute value is out of bounds.", config)
-        # Prevent all further tests.
-        return
-
-    # Recurse into list items if requested.
-    if isinstance(value, (list,set)):
-        if recurse:
-            for v in value:
-                check_param(name, v, False, required, is_int, is_bool, is_str, is_color, is_time, gr, ge, lo, le, options)
         # Prevent all further tests.
         return
 

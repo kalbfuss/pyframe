@@ -1,7 +1,5 @@
 """Module providing common definitions."""
 
-import re
-
 
 APPLICATION_NAME = "Pyframe"
 APPLICATION_DESCRIPTION = "Digital photo frame"

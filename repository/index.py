@@ -11,14 +11,15 @@ References;
 
 import logging
 
-from .common import UuidError, check_valid_required
-from .file import RepositoryFile
-from .repository import Repository
-
-from sqlalchemy import create_engine, desc, event, func, update, delete, or_, Column, DateTime, ForeignKey, Integer, String, Boolean
+from enum import Enum
+from sqlalchemy import asc, create_engine, desc, event, func, update, delete, or_, Column, DateTime, ForeignKey, Integer, String, Boolean
 from sqlalchemy.engine import Engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import backref, relationship, sessionmaker, scoped_session
+
+from .common import ConfigError, UuidError, check_param, check_valid_required
+from .file import RepositoryFile
+from .repository import Repository
 
 
 # Install listener for connection events to automatically enable foreign key
@@ -110,6 +111,20 @@ class Link(Base):
     file_id = Column(Integer, ForeignKey('files.id', ondelete="CASCADE"), primary_key=True)
 
 
+class SORT_DIR(str, Enum):
+    """Enumeration of index sort directions."""
+    ASC = "ascending"
+    DESC = "descending"
+
+
+class SORT_ORDER(str, Enum):
+    """Enumeration of index sort orders."""
+    DATE = "date"
+    NAME = "name"
+    RANDOM = "random"
+    SMART = "smart"
+
+
 class Index:
     """File metadata index.
 
@@ -120,6 +135,10 @@ class Index:
     Use method build() to build metadata index. Method build() may be run in
     the background from a different thread.
     """
+
+    # Required and valid index filter and sort criteria
+    CRIT_REQ_KEYS = set()
+    CRIT_VALID_KEYS = {'direction', 'excluded_tags', 'most_recent', 'order', 'orientation', 'repositories', 'tags', 'types'} | CRIT_REQ_KEYS
 
     def __init__(self, dbname="index.sqlite"):
         """Initialize file index.
@@ -283,13 +302,6 @@ class Index:
         """
         return self._session.query(MetaData).count()
 
-    # Order type definitions
-    ORDER_RANDOM = 0
-    ORDER_DATE_ASC = 1
-    ORDER_DATE_DESC = 2
-    ORDER_NAME_ASC = 3
-    ORDER_NAME_DESC = 4
-
     def iterator(self, **criteria):
         """Return selective iterator.
 
@@ -299,21 +311,17 @@ class Index:
         :param criteria: Selection criteria
         :type criteria: dict
         :return: Selective iterator
-        :return type: repository.SelectiveIndexIterator
+        :return type: repository.IndexIterator
         """
-        return SelectiveIndexIterator(self._session, **criteria)
+        return IndexIterator(self._session, **criteria)
 
 
-class SelectiveIndexIterator:
+class IndexIterator:
     """Selective index iterator.
 
     Selective iterator which allows to traverse through a sub-population of
     files in the index according to specified filter and order criteria.
     """
-
-    # Required and valid configuration parameters
-    CRIT_REQ_KEYS = set()
-    CRIT_VALID_KEYS = {'excluded_tags', 'most_recent', 'order', 'orientation', 'repository', 'tags', 'type'} | CRIT_REQ_KEYS
 
     def __init__(self, session, **criteria):
         """Initialize selective index iterator.
@@ -328,43 +336,41 @@ class SelectiveIndexIterator:
         self._length = 0
         self._position = 0
 
+        # Check the configuration for valid and required parameters.
+        check_valid_required(criteria, Index.CRIT_VALID_KEYS, Index.CRIT_REQ_KEYS)
+        # Check parameters.
+        check_param('repositories', criteria, required=False, recurse=True, is_str=True)
+        check_param('types', criteria, required=False, options={ RepositoryFile.TYPE_IMAGE, RepositoryFile.TYPE_VIDEO })
+        check_param('orientation', criteria, required=False, options={ RepositoryFile.ORIENTATION_PORTRAIT, RepositoryFile.ORIENTATION_LANDSCAPE })
+        check_param('tags', criteria, required=False, recurse=True, is_str=True)
+        check_param('excluded_tags', criteria, required=False, recurse=True, is_str=True)
+        check_param('most_recent', criteria, required=False, gr=0)
+        check_param('order', criteria, required=False, options={ item.value for item in SORT_ORDER })
+        check_param('direction', criteria, required=False, options={ item.value for item in SORT_DIR })
+
         # Initialize query.
         query = session.query(MetaData.file_uuid, MetaData.rep_uuid, MetaData.creation_date)
-
-        # Make sure only valid parameters have been specified.
-        check_valid_required(criteria, self.CRIT_VALID_KEYS, self.CRIT_REQ_KEYS)
-
-        # Helper function to raise error.
-        def __raise():
-            raise ConfigError(f"Invalid value '{value}' for parameter '{key}' specified.", criteria)
 
         # Extend query based on iteration criteria.
         for key, value in criteria.items():
 
             # Filter for repository by UUID
-            if key == "repository":
-                if type(value) is str:
-                    query = query.filter(MetaData.rep_uuid == value)
-                elif type(value) is list:
+            if key == "repositories":
+                if isinstance(value, (list, set)):
                     query = query.filter(MetaData.rep_uuid.in_(value))
                 else:
-                    __raise()
+                    query = query.filter(MetaData.rep_uuid == value)
 
             # Filter for file type.
-            elif key == "type":
-                if type(value) is int:
-                    query = query.filter(MetaData.type == value)
-                elif type(value) is list:
+            elif key == "types":
+                if isinstance(value, (list, set)):
                     query = query.filter(MetaData.type.in_(value))
                 else:
-                    __raise()
+                    query = query.filter(MetaData.type == value)
 
             # Filter for orientation of content.
             elif key == "orientation":
-                if value in [RepositoryFile.ORIENTATION_LANDSCAPE, RepositoryFile.ORIENTATION_PORTRAIT]:
-                    query = query.filter(MetaData.orientation == value)
-                else:
-                    __raise()
+                query = query.filter(MetaData.orientation == value)
 
             # Limit iteration to files with specified tags.
             elif key == "tags":
@@ -380,29 +386,20 @@ class SelectiveIndexIterator:
         # (see below).
         if 'most_recent' in criteria:
             value = criteria['most_recent']
-            if type(value) is int and value > 0:
-                # Sort relevant entries by creation date in descending order and
-                # limit to n most recent entries. Save the creation date of the
-                # last result to obtain the creation date limit.
-                date_limit = query.order_by(desc(MetaData.creation_date)).limit(value).all()[-1].creation_date
-            else:
-                __raise()
+            date_limit = query.order_by(desc(MetaData.creation_date)).limit(value).all()[-1].creation_date
 
         # Retrieve files in a specific or random order.
         if 'order' in criteria:
-            value = criteria['order']
-            if value == Index.ORDER_RANDOM:
+            order = criteria['order']
+            dir = criteria.get('direction', SORT_DIR.ASC)
+            map = { SORT_DIR.ASC: asc, SORT_DIR.DESC: desc }
+            dir_fun = map[dir]
+            if order == SORT_ORDER.RANDOM:
                 query = query.order_by(func.random())
-            elif value == Index.ORDER_DATE_ASC:
-                query = query.order_by(MetaData.creation_date)
-            elif value == Index.ORDER_DATE_DESC:
-                query = query.order_by(desc(MetaData.creation_date))
-            elif value == Index.ORDER_NAME_ASC:
-                query = query.order_by(func.upper(MetaData.name))
-            elif value == Index.ORDER_NAME_DESC:
-                query = query.order_by(desc(func.upper(MetaData.name)))
-            else:
-                __raise()
+            elif order == SORT_ORDER.DATE:
+                query = query.order_by(dir_fun(MetaData.creation_date))
+            elif order == SORT_ORDER.NAME:
+                query = query.order_by(dir_fun(func.upper(MetaData.name)))
 
         # Limit iteration to the n most recent files based on the creation
         # date. An additional limit is specified since in theory multiple images
@@ -419,7 +416,7 @@ class SelectiveIndexIterator:
         """Return self as iterator.
 
         :return: self
-        :return type: repository.SelectiveIndexIterator
+        :return type: repository.IndexIterator
         """
         return self
 

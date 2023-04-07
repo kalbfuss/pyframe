@@ -9,7 +9,7 @@ from kivy.logger import Logger
 from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.widget import Widget
 
-from repository import ConfigError, check_param, check_valid_required
+from repository import SORT_DIR, SORT_ORDER, check_param, check_valid_required
 
 from .content import ErrorMessage, SlideshowImage, SlideshowVideo
 from .controller import PLAY_STATE
@@ -24,6 +24,10 @@ class Slideshow(AnchorLayout):
     optional parameters, which are passed to the constructor.
     """
 
+    # Required and valid configuration parameters
+    CONF_REQ_KEYS = {'bg_color', 'label_content', 'label_duration', 'label_font_size', 'label_mode', 'label_padding', 'pause', 'resize', 'rotation'} | Index.CRIT_REQ_KEYS
+    CONF_VALID_KEYS = {'always_excluded_tags'} | CONF_REQ_KEYS | Index.CRIT_VALID_KEYS
+
     def __compile_filter_criteria(self):
         """Compile filter criteria.
 
@@ -33,78 +37,35 @@ class Slideshow(AnchorLayout):
         of the object.
         """
         config = self._config
-        self._criteria = dict()
+        # Extract all relevant parameters from the slideshow configuration.
+        self._criteria = { key: config[key] for key in Index.CRIT_VALID_KEYS if key in config }
 
-        for key, value in config.items():
+        # Map file type.
+        if 'types' in config:
+            check_param('types', config, recurse=True, options={"images", "videos"})
+            value = config['types']
+            # Convert to list if single value specified.
+            if type(value) == str: value = [value]
+            map = {'images': RepositoryFile.TYPE_IMAGE, 'videos': RepositoryFile.TYPE_VIDEO}
+            self._criteria['types'] = [ map[type] for type in value ]
 
-            # Filter repository by uuid.
-            if key == "repositories":
-                self._criteria['repository'] = value
+        # Map orientation.
+        if 'orientation' in config:
+            check_param('orientation', config, options={"landscape", "portrait"})
+            value = config['orientation']
+            map = {'landscape': RepositoryFile.ORIENTATION_LANDSCAPE, 'portrait': RepositoryFile.ORIENTATION_PORTRAIT}
+            self._criteria['orientation'] = map[value]
 
-            # Retrieve files in a specific or random order.
-            if key == "sequence":
-                check_param('sequence', config, options={"random", "date", "name"})
-                check_param('order', config, options={"ascending", "descending"})
-                if value == "random":
-                    self._criteria['order'] = Index.ORDER_RANDOM
-                elif value == "date" and config['order'] == "ascending":
-                    self._criteria['order'] = Index.ORDER_DATE_ASC
-                elif value == "date" and config['order'] == "descending":
-                    self._criteria['order'] = Index.ORDER_DATE_DESC
-                elif value == "name" and config['order'] == "ascending":
-                    self._criteria['order'] = Index.ORDER_NAME_ASC
-                elif value == "name" and config['order'] == "descending":
-                    self._criteria['order'] = Index.ORDER_NAME_DESC
-
-            # Limit iteration to the n most recent files based on the creation
-            # date.
-            if key == "most_recent":
-                check_param('most_recent', config, is_int=True, gr=0)
-                self._criteria['most_recent'] = config['most_recent']
-
-            # Filter for orientation of content.
-            if key == "orientation":
-                check_param('orientation', config, options={"landscape", "portrait"})
-                map = {'landscape': RepositoryFile.ORIENTATION_LANDSCAPE, 'portrait': RepositoryFile.ORIENTATION_PORTRAIT}
-                self._criteria['orientation'] = map[value]
-
-            # Filter for file type.
-            if key == "file_types":
-                check_param('file_types', config, recurse=True, options={"images", "videos"})
-                # Convert to list if single value specified.
-                if type(value) == str: value = [value]
-                map = {'images': RepositoryFile.TYPE_IMAGE, 'videos': RepositoryFile.TYPE_VIDEO}
-                self._criteria['type'] = [ map[type] for type in value ]
-
-            # Filter for file tags.
-            if key == "tags":
-                check_param('tags', config)
-                # Convert to list if single value specified.
-                if type(value) == str: value = [value]
-                Logger.debug(f"Slideshow: Filtering for tags '{value}' from criterion 'tags' in slideshow '{self._name}'.")
-                self._criteria['tags'] = value
-
-            # Filter out excluded tags.
-            if key == "excluded_tags":
-                check_param('excluded_tags', config)
-                # Convert to list if single value specified.
-                if type(value) == str: value = [value]
-                # Add or append criterion
-                Logger.debug(f"Slideshow: Excluding tags '{value}' from criterion 'excluded_tags' in slideshow '{self._name}'.")
-                self._criteria['excluded_tags'] = self._criteria.get('excluded_tags', []) + value
-
-            # Filter out excluded tags.
-            if key == "always_excluded_tags":
-                check_param('always_excluded_tags', config)
-                # Convert to list if single value specified.
-                if type(value) == str: value = [value]
-                # Add or append criterion
-                Logger.debug(f"Slideshow: Excluding tags '{value}' from criterion 'always_excluded_tags' in slideshow '{self._name}'.")
-                self._criteria['excluded_tags'] = self._criteria.get('excluded_tags', []) + value
-
-    # Required and valid configuration parameters
-    CONF_REQ_KEYS = {'bg_color', 'label_content', 'label_duration', 'label_font_size', 'label_mode', 'label_padding', 'pause', 'resize', 'rotation'}
-    CONF_VALID_KEYS = {'always_excluded_tags', 'excluded_tags', 'file_types', 'most_recent', 'order', 'orientation', 'repositories', 'sequence', 'tags'} | CONF_REQ_KEYS
+        # Filter out excluded tags.
+        if 'always_excluded_tags' in config:
+            check_param('always_excluded_tags', config, recurse=True, is_str=True)
+            check_param('excluded_tags', config, required=False, recurse=True, is_str=True)
+            print(config['excluded_tags'])
+            value = config['always_excluded_tags']
+            # Convert to list if single value specified.
+            if type(value) == str: value = [value]
+            # Add or append criterion.
+            self._criteria['excluded_tags'] = self._criteria.get('excluded_tags', []) + value
 
     def __init__(self, name, index, config):
         """Initialize slideshow instance.

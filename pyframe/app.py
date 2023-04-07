@@ -284,6 +284,7 @@ class App(kivy.app.App, Controller):
     _config = {
         'bg_color': [1, 1, 1],
         'cache': "./cache",
+        'direction': "ascending",
         'display_mode': "static",
         'display_state': "on",
         'display_timeout': 300,
@@ -301,11 +302,10 @@ class App(kivy.app.App, Controller):
         'label_padding': 0.03,
         'log_level': "warning",
         'log_dir': "./log",
-        'order': "ascending",
         'pause': 300,
         'resize': "fill",
         'rotation': 0,
-        'sequence': "name",
+        'order': "name",
         'window_size': "full"
     }
 
