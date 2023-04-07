@@ -11,7 +11,10 @@ References;
 
 import logging
 
-from repository import RepositoryFile, InvalidUuidError, Repository
+from .common import check_valid_required
+from .file import RepositoryFile
+from .repository import InvalidUuidError, Repository
+
 from sqlalchemy import create_engine, desc, event, func, update, delete, or_, Column, DateTime, ForeignKey, Integer, String, Boolean
 from sqlalchemy.engine import Engine
 from sqlalchemy.ext.declarative import declarative_base
@@ -317,6 +320,10 @@ class SelectiveIndexIterator:
     files in the index according to specified filter and order criteria.
     """
 
+    # Required and valid configuration parameters
+    CRIT_REQ_KEYS = set()
+    CRIT_VALID_KEYS = {'excluded_tags', 'most_recent', 'order', 'orientation', 'repository', 'tags', 'type'} | CRIT_REQ_KEYS
+
     def __init__(self, session, **criteria):
         """Initialize selective index iterator.
 
@@ -334,10 +341,7 @@ class SelectiveIndexIterator:
         query = session.query(MetaData.file_uuid, MetaData.rep_uuid, MetaData.creation_date)
 
         # Make sure only valid parameters have been specified.
-        valid_keys = {'excluded_tags', 'most_recent', 'order', 'orientation', 'repository', 'tags', 'type'}
-        keys = set(criteria.keys())
-        if not keys.issubset(valid_keys):
-            raise InvalidIterationCriteriaError(f"Only the parameters {valid_keys} are accepted, but the additional parameter(s) {keys.difference(valid_keys)} has/have been specified.")
+        check_valid_required(criteria, self.CRIT_VALID_KEYS, self.CRIT_REQ_KEYS)
 
         # Helper function to raise error.
         def __raise():
