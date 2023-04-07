@@ -89,7 +89,7 @@ class App(kivy.app.App, Controller):
         config = self._config
 
         # Check parameters.
-        check_param('logging', config, is_bool=True)
+        check_param('enable_logging', config, is_bool=True)
         check_param('log_level', config, options=set(LOG_LEVELS.keys()))
         check_param('log_dir', config, is_str=True)
 
@@ -109,7 +109,7 @@ class App(kivy.app.App, Controller):
         # Write all log messages to rotating log files using a special log
         # handler if file logging is activated. A separate log file is used for
         # the background indexing thread.
-        if config['logging'] == "on" or config['logging'] == True:
+        if config['enable_logging'] == "on" or config['enable_logging'] == True:
             try:
                 self._logHandler = Handler(config['log_dir'], "indexer")
                 logging.getLogger().addHandler(self._logHandler)
@@ -289,6 +289,7 @@ class App(kivy.app.App, Controller):
         'display_state': "on",
         'display_timeout': 300,
         'enable_exception_handler': "on",
+        'enable_logging': "on",
         'enable_scheduler': "on",
         'enable_mqtt': "on",
         'file_types': [ "images", "videos" ],
@@ -299,7 +300,6 @@ class App(kivy.app.App, Controller):
         'label_duration': 60,
         'label_font_size': 0.08,
         'label_padding': 0.03,
-        'logging': "on",
         'log_level': "warning",
         'log_dir': "./log",
         'order': "ascending",
