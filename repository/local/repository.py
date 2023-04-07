@@ -5,7 +5,7 @@ import os.path
 import logging
 import repository
 
-from repository import InvalidConfigurationError, IOError
+from repository import ConfigError, IoError
 
 from .file import RepositoryFile
 
@@ -26,7 +26,7 @@ class Repository(repository.Repository):
         :type root: str
         :param index: Optional file metadata index. Default is None.
         :type index: repository.Index
-        :raises: InvalidUuidError
+        :raises: UuidError
         """
         # Call constructor of parent class
         repository.Repository.__init__(self, uuid, config, index)
@@ -47,19 +47,20 @@ class Repository(repository.Repository):
         return FileIterator(self, index_lookup, extract_metadata)
 
     def _check_config(self, config):
-        """Check the configuration for the repository from the configuration file.
+        """Check the configuration for the repository from the configuration
+        file.
 
         :param config:
         :type config: dict
-        :raises: InvalidConfigurationError
+        :raises: ConfigError
         """
         keys = set(config.keys())
         # Make sure required parameters have been specified.
         if not self.CONF_REQ_KEYS.issubset(keys):
-            raise InvalidConfigurationError(f"The configuration of repository '{self.uuid}' is incomplete. As a minimum, the parameters {self.CONF_REQ_KEYS} are required, but only the parameter(s) {keys.intersection(self.CONF_REQ_KEYS)} has/have been specified.", config)
+            raise ConfigError(f"The configuration of repository '{self.uuid}' is incomplete. As a minimum, the parameters {self.CONF_REQ_KEYS} are required, but only the parameter(s) {keys.intersection(self.CONF_REQ_KEYS)} has/have been specified.", config)
         # Make sure only valid parameters have been specified.
         if not keys.issubset(self.CONF_VALID_KEYS):
-            raise InvalidConfigurationError(f"The configuration of repository '{self.uuid}' includes additional parameters. Only the parameters {self.CONF_VALID_KEYS} are accepted, but the additional parameter(s) {keys.difference(self.CONF_VALID_KEYS)} has/have been specified.", config)
+            raise ConfigError(f"The configuration of repository '{self.uuid}' includes additional parameters. Only the parameters {self.CONF_VALID_KEYS} are accepted, but the additional parameter(s) {keys.difference(self.CONF_VALID_KEYS)} has/have been specified.", config)
 
     def file_by_uuid(self, uuid, index_lookup=True, extract_metadata=True):
         """Return a file within the repository by its UUID.
@@ -73,7 +74,7 @@ class Repository(repository.Repository):
         :type extract_metadata: bool
         :return: File with matching UUID.
         :rtype: repository.RepositoryFile
-        :raises: InvalidUuidError
+        :raises: UuidError
         """
         return RepositoryFile(uuid, self, self._index, index_lookup, extract_metadata)
 

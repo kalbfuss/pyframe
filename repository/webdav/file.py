@@ -28,6 +28,7 @@ import repository
 import tempfile
 
 from datetime import datetime
+from repository import UuidError
 
 
 class RepositoryFile(repository.RepositoryFile):
@@ -54,7 +55,7 @@ class RepositoryFile(repository.RepositoryFile):
             try:
                 info = self._rep.client.info(self.uuid)
             except Exception as e:
-                raise IOError(f"An exception occurred while retrieving webdav file information: {e}", e.exception)
+                raise IoError(f"An exception occurred while retrieving webdav file information: {e}", e.exception)
             logging.debug(f"Webdav info record of file '{self.uuid}': {info}")
             try:
                 modified = info.get('modified', None)
@@ -90,7 +91,7 @@ class RepositoryFile(repository.RepositoryFile):
     def _download(self):
         """Download file from WebDav repository to local cache file.
 
-        :raises: IOError
+        :raises: IoError
         """
         if self._cache_file is None:
             # Create temporary file for local caching inside cache directory
@@ -104,7 +105,7 @@ class RepositoryFile(repository.RepositoryFile):
             try:
                 self._rep.client.download_from(self._cache_file, self._uuid)
             except Exception as e:
-                raise repository.IOError("An exception occurred while downloading file from webdav repository:", e)
+                raise repository.IoError("An exception occurred while downloading file from webdav repository:", e)
 
     def extract_metadata(self):
         """Extract metadata from file content."""

@@ -4,7 +4,7 @@ import logging
 import repository
 import tempfile
 
-from repository import InvalidConfigurationError, IOError
+from repository import ConfigError, IoError
 from webdav3.client import Client
 
 from .file import RepositoryFile
@@ -26,7 +26,7 @@ class Repository(repository.Repository):
         :type index: repository.Index
         :param config: Dictionary with repository Configuration
         :type config: dict
-        :raises: InvalidUuidError
+        :raises: UuidError
         """
         # Call constructor of parent class.
         repository.Repository.__init__(self, uuid, config, index)
@@ -49,20 +49,21 @@ class Repository(repository.Repository):
         self._client = Client(options)
 
     def _check_config(self, config):
-        """Check the configuration for the repository from the configuration file.
+        """Check the configuration for the repository from the configuration
+        file.
 
         :param config:
         :type config: dict
-        :raises: InvalidConfigurationError
+        :raises: ConfigError
         """
         # Raise exception if minimum required parameters have not been defined.
         keys = set(config.keys())
         # Make sure required parameters have been specified.
         if not self.CONF_REQ_KEYS.issubset(keys):
-            raise InvalidConfigurationError(f"The configuration of repository '{self.uuid}' is incomplete. As a minimum, the parameters {self.CONF_REQ_KEYS} are required, but only the parameter(s) {keys.intersection(self.CONF_REQ_KEYS)} has/have been specified.", config)
+            raise ConfigError(f"The configuration of repository '{self.uuid}' is incomplete. As a minimum, the parameters {self.CONF_REQ_KEYS} are required, but only the parameter(s) {keys.intersection(self.CONF_REQ_KEYS)} has/have been specified.", config)
         # Make sure only valid parameters have been specified.
         if not keys.issubset(self.CONF_VALID_KEYS):
-            logging.warn(f"The configuration of repository '{self.uuid}' includes additional parameters. Only the parameters {self.CONF_VALID_KEYS} are accepted, but the additional parameter(s) {keys.difference(self.CONF_VALID_KEYS)} has/have been specified.", config)
+            raise ConfigError(f"The configuration of repository '{self.uuid}' includes additional parameters. Only the parameters {self.CONF_VALID_KEYS} are accepted, but the additional parameter(s) {keys.difference(self.CONF_VALID_KEYS)} has/have been specified.", config)
 
     @property
     def cache_dir(self):
@@ -115,7 +116,7 @@ class Repository(repository.Repository):
         :type extract_metadata: bool
         :return: File with matching UUID.
         :rtype: repository.RepositoryFile
-        :raises: InvalidUuirError
+        :raises: UuidError
         """
         return RepositoryFile(uuid, self, self._index, index_lookup, extract_metadata)
 

@@ -12,7 +12,7 @@ import traceback
 import yaml
 
 from importlib import import_module
-from repository import ConfigError, check_param, check_valid_required, Index, Repository, InvalidConfigurationError, InvalidUuidError
+from repository import ConfigError, Index, Repository, UuidError, check_param, check_valid_required
 
 from kivy.base import ExceptionManager
 from kivy.core.window import Window
@@ -166,7 +166,7 @@ class App(kivy.app.App, Controller):
                 Logger.info(f"Configuration: Creating {local_config.get('type')} repository '{uuid}'.")
                 rep = rep_class(uuid, rep_config, index=index)
             # Catch any invalid configuration and UUID errors.
-            except (InvalidConfigurationError, InvalidUuidError) as e:
+            except (ConfigError, UuidError) as e:
                 raise ConfigError(f"Configuration: Error in the configuration of repository '{uuid}'. {e}", rep_config)
 
             try:

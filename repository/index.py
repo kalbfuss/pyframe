@@ -11,7 +11,7 @@ References;
 
 import logging
 
-from .common import InvalidUuidError, check_valid_required
+from .common import UuidError, check_valid_required
 from .file import RepositoryFile
 from .repository import Repository
 
@@ -304,15 +304,6 @@ class Index:
         return SelectiveIndexIterator(self._session, **criteria)
 
 
-class InvalidIterationCriteriaError(Exception):
-    """Invalid index iteration criteria error."""
-
-    def __init__(self, msg, criteria=None):
-        """Initialize class instance."""
-        super().__init__(msg)
-        self.criteria = criteria
-
-
 class SelectiveIndexIterator:
     """Selective index iterator.
 
@@ -331,7 +322,7 @@ class SelectiveIndexIterator:
         :type session: sqlalchemy.orm.Session
         :param criteria: dictionary containing iteration criteria
         :type criteria: dict
-        :raises: InvalidIterationCriteriaError
+        :raises: ConfigError
         """
         self._result = None
         self._length = 0
@@ -345,7 +336,7 @@ class SelectiveIndexIterator:
 
         # Helper function to raise error.
         def __raise():
-            raise InvalidIterationCriteriaError(f"Invalid value '{value}' for parameter '{key}' specified.", criteria)
+            raise ConfigError(f"Invalid value '{value}' for parameter '{key}' specified.", criteria)
 
         # Extend query based on iteration criteria.
         for key, value in criteria.items():
@@ -453,7 +444,7 @@ class SelectiveIndexIterator:
                 return Repository.by_uuid(mdata.rep_uuid).file_by_uuid(mdata.file_uuid)
             # Catch any invalid uuid errors in case the file is no longer
             # available in the repository and continue.
-            except InvalidUuidError:
+            except UuidError:
                 pass
 
     @property

@@ -20,7 +20,7 @@ class ConfigError(Exception):
         self.config = config
 
 
-class InvalidUuidError(Exception):
+class UuidError(Exception):
     """Invalid universal unique identifier (UUID) error."""
 
     def __init__(self, msg, uuid=None):
@@ -28,15 +28,7 @@ class InvalidUuidError(Exception):
         self.uuid = uuid
 
 
-class InvalidConfigurationError(Exception):
-    """Invalid configuration error."""
-
-    def __init__(self, msg, config=None):
-        super().__init__(msg)
-        self.config = config
-
-
-class IOError(Exception):
+class IoError(Exception):
     """Input/Outout error."""
 
     def __init__(self, msg, e):

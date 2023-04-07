@@ -1,6 +1,6 @@
 """Module providing slideshow class."""
 
-from repository import Index, RepositoryFile, IOError
+from repository import Index, RepositoryFile, IoError
 
 from kivy.app import App
 from kivy.clock import Clock
@@ -206,7 +206,7 @@ class Slideshow(AnchorLayout):
                 previous = False
                 continue
             # Log error if any other exception occurred and try again.
-            except IOError as e:
+            except IoError as e:
                 Logger.error(f"Slideshow: An I/O error occurred while retrieving the next file: {e.exception}.")
                 continue
             finally:

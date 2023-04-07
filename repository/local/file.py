@@ -5,7 +5,7 @@ import os
 import os.path
 import repository
 
-from repository import InvalidUuidError, IOError
+from repository import UuidError
 from datetime import datetime
 
 
@@ -25,7 +25,7 @@ class RepositoryFile(repository.RepositoryFile):
         # Throw exception if file does not exist
         self._path = os.path.join(rep.root, uuid)
         if not os.path.isfile(self._path):
-            raise InvalidUuidError("There is no file with UUID '{uuid}'.", uuid)
+            raise UuidError("There is no file with UUID '{uuid}'.", uuid)
 
         # Set file name from uuid
         self._name = os.path.basename(uuid)

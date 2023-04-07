@@ -4,6 +4,8 @@ import logging
 
 from abc import ABC, abstractmethod
 
+from .common import ConfigError, UuidError
+
 
 class Repository(ABC):
     """Repository of files.
@@ -31,7 +33,7 @@ class Repository(ABC):
         :type config: dict
         :param index: Optional file metadata index. Default is None.
         :type index: repository.Index
-        :raises: InvalidUuidError
+        :raises: UuidError
         """
         # Basic intialization.
         self._uuid = uuid
@@ -42,7 +44,7 @@ class Repository(ABC):
 
         # Test uuid for validity.
         if len(uuid) >= Repository.MAX_LEN_UUID:
-            raise InvalidUuidError(f"UUID for repository too long. Maximum of {Repository.MAX_LEN_UUID} characters allowed.", uuid)
+            raise UuidError(f"UUID for repository too long. Maximum of {Repository.MAX_LEN_UUID} characters allowed.", uuid)
         # Warn if uuid already in use, but do not throw execption.
         if uuid in Repository._repositories:
             logging.warn(f"UUID for repository '{uuid}' is already in use.")
@@ -82,31 +84,30 @@ class Repository(ABC):
 
         :param config: repository configuration
         :type config: dict
-        :raises: InvalidConfigurationError
+        :raises: ConfigError
         """
         pass
 
     @staticmethod
     def by_uuid(uuid):
-        """Return an existing repository instance by its UUID. Raises an
-        InvalidUuidError if no repository with the specified UUID exists.
+        """Return an existing repository instance by its UUID. Raises a
+        UuidError if no repository with the specified UUID exists.
 
         :param uuid: UUID of the repository.
         :type uuid: str
         :return: Repository with matching UUID.
         :rtype: repository.Repository
-        :raises: InvalidUuidError
+        :raises: UuidError
         """
         if uuid in Repository._repositories:
             return Repository._repositories[uuid]
         else:
-            raise InvalidUuidError(f"There is no repository with UUID '{uuid}'", uuid)
+            raise UuidError(f"There is no repository with UUID '{uuid}'", uuid)
 
     @abstractmethod
     def file_by_uuid(self, uuid, index_lookup=True, extract_metadata=True):
-        """Return a file within the repository by its UUID. Raises an
-        InvalidUuidError if the repository does not contain a file with the
-        specified UUID.
+        """Return a file within the repository by its UUID. Raises a UuidError
+        if the repository does not contain a file with the specified UUID.
 
         :param uuid: UUID of the file.
         :type uuid: str
@@ -117,7 +118,7 @@ class Repository(ABC):
         :type extract_metadata: bool
         :return: File with matching UUID.
         :rtype: repository.RepositoryFile
-        :raises: InvalidUuidError
+        :raises: UuidError
         """
         pass
 

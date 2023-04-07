@@ -2,7 +2,7 @@
 
 import logging
 
-from repository import IOError
+from repository import IoError
 from threading import Thread
 from time import asctime, localtime, mktime, time, sleep
 
@@ -114,7 +114,7 @@ class Indexer:
                     # Build meta data index for current repository.
                     try:
                         self._index.build(rep)
-                    except IOError as e:
+                    except IoError as e:
                         logging.error(f"An I/O error occurred while indexing the repository: {e.exception}")
                     # Log duration of indexing run.
                     end_time = time()

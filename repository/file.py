@@ -185,7 +185,7 @@ class RepositoryFile:
                 creation_date = tags["Image DateTime"].values
                 self._creation_date = datetime.strptime(creation_date, "%Y:%m:%d %H:%M:%S")
         except ValueError:
-            logging.error(f"Invalid creation time format {creation_date}")
+            logging.error(f"Invalid creation time format {creation_date}.")
 
         # Extract rating if available
         # Tag is currently not supported by exifread
@@ -238,7 +238,7 @@ class RepositoryFile:
             try:
                 self._creation_date = datetime.strptime(creation_date, "%Y-%m-%dT%H:%M:%S.%fZ")
             except ValueError:
-                logging.error(f"Invalid creation time format {creation_date}")
+                logging.error(f"Invalid creation time format {creation_date}.")
 
         # Log debug information
 #        logging.debug(f"\twidth: {self._width}")
