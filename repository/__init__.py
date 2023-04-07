@@ -13,7 +13,7 @@ Author: Bernd Kalbfuß
 License: t.b.d.
 """
 
-from .common import ConfigError, check_valid_required, check_param
+from .common import ConfigError, InvalidUuidError, InvalidConfigurationError, IOError, check_valid_required, check_param
 from .file import RepositoryFile
-from .repository import Repository, FileIterator, InvalidUuidError, InvalidConfigurationError, IOError
+from .repository import Repository, FileIterator
 from .index import Index, MetaData

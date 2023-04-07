@@ -5,30 +5,6 @@ import logging
 from abc import ABC, abstractmethod
 
 
-class InvalidUuidError(Exception):
-    """Invalid universal unique identifier (UUID) error."""
-
-    def __init__(self, msg, uuid=None):
-        super().__init__(msg)
-        self.uuid = uuid
-
-
-class InvalidConfigurationError(Exception):
-    """Invalid configuration error."""
-
-    def __init__(self, msg, config=None):
-        super().__init__(msg)
-        self.config = config
-
-
-class IOError(Exception):
-    """Input/Outout error."""
-
-    def __init__(self, msg, e):
-        super().__init__(msg)
-        self.exception = e
-
-
 class Repository(ABC):
     """Repository of files.
 

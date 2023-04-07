@@ -20,6 +20,30 @@ class ConfigError(Exception):
         self.config = config
 
 
+class InvalidUuidError(Exception):
+    """Invalid universal unique identifier (UUID) error."""
+
+    def __init__(self, msg, uuid=None):
+        super().__init__(msg)
+        self.uuid = uuid
+
+
+class InvalidConfigurationError(Exception):
+    """Invalid configuration error."""
+
+    def __init__(self, msg, config=None):
+        super().__init__(msg)
+        self.config = config
+
+
+class IOError(Exception):
+    """Input/Outout error."""
+
+    def __init__(self, msg, e):
+        super().__init__(msg)
+        self.exception = e
+
+
 def check_valid_required(config, valid_keys, required_keys):
     """Check for valid and required configuration parameters.
 
