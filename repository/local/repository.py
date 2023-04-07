@@ -5,7 +5,7 @@ import os.path
 import logging
 import repository
 
-from repository import ConfigError, IoError
+from repository import ConfigError, IoError, check_valid_required
 
 from .file import RepositoryFile
 
@@ -54,13 +54,8 @@ class Repository(repository.Repository):
         :type config: dict
         :raises: ConfigError
         """
-        keys = set(config.keys())
-        # Make sure required parameters have been specified.
-        if not self.CONF_REQ_KEYS.issubset(keys):
-            raise ConfigError(f"The configuration of repository '{self.uuid}' is incomplete. As a minimum, the parameters {self.CONF_REQ_KEYS} are required, but only the parameter(s) {keys.intersection(self.CONF_REQ_KEYS)} has/have been specified.", config)
-        # Make sure only valid parameters have been specified.
-        if not keys.issubset(self.CONF_VALID_KEYS):
-            raise ConfigError(f"The configuration of repository '{self.uuid}' includes additional parameters. Only the parameters {self.CONF_VALID_KEYS} are accepted, but the additional parameter(s) {keys.difference(self.CONF_VALID_KEYS)} has/have been specified.", config)
+        # Make sure valid and required parameters have been specified.
+        check_valid_required(config, self.CONF_VALID_KEYS, self.CONF_REQ_KEYS)
 
     def file_by_uuid(self, uuid, index_lookup=True, extract_metadata=True):
         """Return a file within the repository by its UUID.

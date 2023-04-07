@@ -4,7 +4,7 @@ import logging
 import repository
 import tempfile
 
-from repository import ConfigError, IoError
+from repository import ConfigError, IoError, check_valid_required
 from webdav3.client import Client
 
 from .file import RepositoryFile
@@ -58,12 +58,8 @@ class Repository(repository.Repository):
         """
         # Raise exception if minimum required parameters have not been defined.
         keys = set(config.keys())
-        # Make sure required parameters have been specified.
-        if not self.CONF_REQ_KEYS.issubset(keys):
-            raise ConfigError(f"The configuration of repository '{self.uuid}' is incomplete. As a minimum, the parameters {self.CONF_REQ_KEYS} are required, but only the parameter(s) {keys.intersection(self.CONF_REQ_KEYS)} has/have been specified.", config)
-        # Make sure only valid parameters have been specified.
-        if not keys.issubset(self.CONF_VALID_KEYS):
-            raise ConfigError(f"The configuration of repository '{self.uuid}' includes additional parameters. Only the parameters {self.CONF_VALID_KEYS} are accepted, but the additional parameter(s) {keys.difference(self.CONF_VALID_KEYS)} has/have been specified.", config)
+        # Make sure all valid and required parameters have been specified.
+        check_valid_required(config, self.CONF_VALID_KEYS, self.CONF_REQ_KEYS)
 
     @property
     def cache_dir(self):
