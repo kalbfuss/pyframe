@@ -7,7 +7,8 @@ from kivy.clock import Clock
 from kivy.logger import Logger, LOG_LEVELS
 from schedule import ScheduleValueError
 
-from .common import ConfigError, check_param, check_valid_required
+from repository import ConfigError, check_param, check_valid_required
+
 from .controller import DISPLAY_MODE, PLAY_STATE
 
 

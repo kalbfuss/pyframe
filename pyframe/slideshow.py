@@ -9,7 +9,8 @@ from kivy.logger import Logger
 from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.widget import Widget
 
-from .common import ConfigError, check_param, check_valid_required
+from repository import ConfigError, check_param, check_valid_required
+
 from .content import ErrorMessage, SlideshowImage, SlideshowVideo
 from .controller import PLAY_STATE
 

@@ -12,14 +12,13 @@ import traceback
 import yaml
 
 from importlib import import_module
-from repository import Index, Repository, InvalidConfigurationError, InvalidUuidError
+from repository import ConfigError, check_param, check_valid_required, Index, Repository, InvalidConfigurationError, InvalidUuidError
 
 from kivy.base import ExceptionManager
 from kivy.core.window import Window
 from kivy.clock import Clock
 from kivy.logger import Logger, LOG_LEVELS
 
-from .common import ConfigError, check_param, check_valid_required
 from .mylogging import Handler
 from .indexer import Indexer
 from .slideshow import Slideshow

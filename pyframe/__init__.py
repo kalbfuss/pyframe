@@ -11,7 +11,7 @@ License: t.b.d.
 """
 
 
-from .common import check_param, check_valid_required, ConfigError 
+from .common import APPLICATION_NAME, APPLICATION_DESCRIPTION, VERSION, PROJECT_NAME
 from .mylogging import Handler
 from .indexer import Indexer
 from .controller import Controller, DISPLAY_MODE, DISPLAY_STATE, PLAY_STATE

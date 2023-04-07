@@ -10,8 +10,10 @@ import time
 from kivy.clock import Clock
 from kivy.logger import Logger
 
+from repository import check_valid_required
+
 from .controller import DISPLAY_MODE, DISPLAY_STATE, PLAY_STATE, Controller
-from .common import APPLICATION_NAME, APPLICATION_DESCRIPTION, VERSION, PROJECT_NAME, check_valid_required
+from .common import APPLICATION_NAME, APPLICATION_DESCRIPTION, VERSION, PROJECT_NAME
 
 
 # Pyframe and Home Assistant root topics
