@@ -28,45 +28,6 @@ class Slideshow(AnchorLayout):
     CONF_REQ_KEYS = {'bg_color', 'label_content', 'label_duration', 'label_font_size', 'label_mode', 'label_padding', 'pause', 'resize', 'rotation'} | Index.CRIT_REQ_KEYS
     CONF_VALID_KEYS = {'always_excluded_tags'} | CONF_REQ_KEYS | Index.CRIT_VALID_KEYS
 
-    def __compile_filter_criteria(self):
-        """Compile filter criteria.
-
-        Helper function to compile filter criteria from the slideshow
-        configuration and convert them into criteria compatible with a selective
-        index iterator. Filter criteria are stored in the attribute _criteria
-        of the object.
-        """
-        config = self._config
-        # Extract all relevant parameters from the slideshow configuration.
-        self._criteria = { key: config[key] for key in Index.CRIT_VALID_KEYS if key in config }
-
-        # Map file type.
-        if 'types' in config:
-            check_param('types', config, recurse=True, options={"images", "videos"})
-            value = config['types']
-            # Convert to list if single value specified.
-            if type(value) == str: value = [value]
-            map = {'images': RepositoryFile.TYPE_IMAGE, 'videos': RepositoryFile.TYPE_VIDEO}
-            self._criteria['types'] = [ map[type] for type in value ]
-
-        # Map orientation.
-        if 'orientation' in config:
-            check_param('orientation', config, options={"landscape", "portrait"})
-            value = config['orientation']
-            map = {'landscape': RepositoryFile.ORIENTATION_LANDSCAPE, 'portrait': RepositoryFile.ORIENTATION_PORTRAIT}
-            self._criteria['orientation'] = map[value]
-
-        # Filter out excluded tags.
-        if 'always_excluded_tags' in config:
-            check_param('always_excluded_tags', config, recurse=True, is_str=True)
-            check_param('excluded_tags', config, required=False, recurse=True, is_str=True)
-            print(config['excluded_tags'])
-            value = config['always_excluded_tags']
-            # Convert to list if single value specified.
-            if type(value) == str: value = [value]
-            # Add or append criterion.
-            self._criteria['excluded_tags'] = self._criteria.get('excluded_tags', []) + value
-
     def __init__(self, name, index, config):
         """Initialize slideshow instance.
 
@@ -100,8 +61,37 @@ class Slideshow(AnchorLayout):
         check_param('label_padding', config, gr=0, le=0.2)
         check_param('resize', config, options={"fit", "fill"})
 
-        # Compile filter criteria for use with selective index iterator.
-        self.__compile_filter_criteria()
+        # Compile filter criteria for index iteration.
+        # Extract all relevant parameters from the slideshow configuration.
+        self._criteria = { key: config[key] for key in Index.CRIT_VALID_KEYS if key in config }
+
+        # Map file types.
+        if 'types' in config:
+            check_param('types', config, recurse=True, options={"images", "videos"})
+            value = config['types']
+            # Convert to list if single value specified.
+            if type(value) == str: value = [value]
+            map = {'images': RepositoryFile.TYPE_IMAGE, 'videos': RepositoryFile.TYPE_VIDEO}
+            self._criteria['types'] = [ map[type] for type in value ]
+
+        # Map orientation.
+        if 'orientation' in config:
+            check_param('orientation', config, options={"landscape", "portrait"})
+            value = config['orientation']
+            map = {'landscape': RepositoryFile.ORIENTATION_LANDSCAPE, 'portrait': RepositoryFile.ORIENTATION_PORTRAIT}
+            self._criteria['orientation'] = map[value]
+
+        # Add always excluded tags.
+        if 'always_excluded_tags' in config:
+            check_param('always_excluded_tags', config, recurse=True, is_str=True)
+            check_param('excluded_tags', config, required=False, recurse=True, is_str=True)
+            print(config['excluded_tags'])
+            value = config['always_excluded_tags']
+            # Convert to list if single value specified.
+            if type(value) == str: value = [value]
+            # Add or append criterion.
+            self._criteria['excluded_tags'] = self._criteria.get('excluded_tags', []) + value
+
         # Register event fired upon slideshow content changes.
         self.register_event_type('on_content_change')
 
