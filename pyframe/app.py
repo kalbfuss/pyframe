@@ -77,6 +77,10 @@ class ExceptionHandler(kivy.base.ExceptionHandler):
 class App(kivy.app.App, Controller):
     """Pyframe main application."""
 
+    # Required and valid configuration parameters
+    CONF_REQ_KEYS = {'display_mode', 'display_state', 'display_timeout', 'enable_exception_handler', 'enable_mqtt', 'enable_logging', 'enable_scheduler', 'index', 'log_level', 'log_dir', 'repositories', 'slideshows', 'window_size'} | Slideshow.CONF_REQ_KEYS
+    CONF_VALID_KEYS = {'cache', 'index_update_at', 'index_update_interval', 'mqtt', 'schedule' } | CONF_REQ_KEYS | Slideshow.CONF_VALID_KEYS
+
     def __configure_logging(self):
         """Configure logging.
 
@@ -292,7 +296,6 @@ class App(kivy.app.App, Controller):
         'enable_logging': True,
         'enable_scheduler': True,
         'enable_mqtt': True,
-        'file_types': [ "images", "videos" ],
         'index': "./index.sqlite",
         'index_update_interval': 0,
         'label_mode': "off",
@@ -326,9 +329,11 @@ class App(kivy.app.App, Controller):
 
         # Load configuration.
         self.__load_config()
+        # Check the configuration for valid and required parameters.
+        check_valid_required(self._config, self.CONF_VALID_KEYS, self.CONF_REQ_KEYS)
+
         # Configure logging.
         self.__configure_logging()
-
         # Create/load index.
         self._index = Index(self._config['index'])
         # Create background indexer.
