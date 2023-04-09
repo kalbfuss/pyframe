@@ -70,6 +70,8 @@ class MqttInterface:
         self._controller = controller
         self._client = None
         self._event = None
+        self._connection_lost = False
+        self._reconnect_time = time.time()
 
         # Check the configuration for valid and required parameters.
         check_valid_required(config, self.CONF_VALID_KEYS, self.CONF_REQ_KEYS)
@@ -99,8 +101,8 @@ class MqttInterface:
             client.on_connect = self.on_connect
             client.on_disconnect = self.on_disconnect
             client.on_message = self.on_message
-            # Make client attempt to reconnect up to 36.4h (i.e. 2^17s)
-            client.reconnect_delay_set(min_delay=1, max_delay=131072)
+            # Make client attempt to reconnect up to 60 s.
+            client.reconnect_delay_set(min_delay=1, max_delay=60)
             # Publish initial availabiliy as "offline".
             client.will_set(self._availability_topic, "offline", qos=0, retain=True)
             # Establish connection.
@@ -243,7 +245,27 @@ class MqttInterface:
         client.publish(config_topic, payload, qos=0, retain=True)
 
     def loop(self, dt):
-        self._client.loop(timeout=0)
+        """Loop function."""
+        client = self._client
+        # Attempt to reconnect if connection has been lost.
+        if self._connection_lost:
+            # Skip iteration if last attempt was less than 60s ago.
+            if (time.time() - self._reconnect_time) < 60: return
+            Logger.info(f"MQTT: Attempting to reconnect to broker.")
+            try:
+                self._reconnect_time = time.time()
+                rc = client.reconnect()
+                if rc != mqtt.MQTT_ERR_SUCCESS:
+                    Logger.error(f"MQTT: Connection to broker failed with error code {rc}.")
+                    return
+                self._connection_lost = False
+                # Ensure new state is published automatically after content change.
+                self._controller.bind(on_state_change=self.publish_state)
+            except Exception as e:
+                Logger.error(f"MQTT: Reconnection to the broker failed. {e}")
+                return
+        # Process messages.
+        client.loop(timeout=0)
 
     def on_connect(self, client, userdata, flags, rc):
         """Update availability and setup sensors/controls after successful
@@ -307,8 +329,8 @@ class MqttInterface:
         """
         self._controller.unbind(on_state_change=self.publish_state)
         if rc != mqtt.MQTT_ERR_SUCCESS:
-            Logger.error(f"MQTT: Connection to broker lost with error code {rc}. Attempting to reconnect.")
-            client.reconnect()
+            Logger.error(f"MQTT: Connection to broker lost with error code {rc}.")
+            self._connection_lost = True
 
     def on_message(self, client, userdata, message):
         """Process messages from subscribed topics.
