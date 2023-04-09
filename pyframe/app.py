@@ -308,6 +308,8 @@ class App(kivy.app.App, Controller):
         'pause': 300,
         'resize': "fill",
         'rotation': 0,
+        'smart_limit': 10,
+        'smart_time': 24,
         'order': "name",
         'window_size': "full"
     }
@@ -417,8 +419,6 @@ class App(kivy.app.App, Controller):
             self.previous()
         # Consume event.
         return True
-
-
 
     def on_state_change(self, *largs):
         """Default handler for 'on_state_change' events."""

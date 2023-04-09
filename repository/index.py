@@ -138,7 +138,7 @@ class Index:
 
     # Required and valid index filter and sort criteria
     CRIT_REQ_KEYS = set()
-    CRIT_VALID_KEYS = {'direction', 'excluded_tags', 'most_recent', 'order', 'orientation', 'repositories', 'tags', 'types'} | CRIT_REQ_KEYS
+    CRIT_VALID_KEYS = {'direction', 'excluded_tags', 'most_recent', 'order', 'orientation', 'repositories', 'smart_limit', 'smart_time', 'tags', 'types'} | CRIT_REQ_KEYS
 
     def __init__(self, dbname="index.sqlite"):
         """Initialize file index.
@@ -332,6 +332,7 @@ class IndexIterator:
         :type criteria: dict
         :raises: ConfigError
         """
+        self._criteria = criteria
         self._result = None
         self._length = 0
         self._position = 0
@@ -339,14 +340,18 @@ class IndexIterator:
         # Check the configuration for valid and required parameters.
         check_valid_required(criteria, Index.CRIT_VALID_KEYS, Index.CRIT_REQ_KEYS)
         # Check parameters.
-        check_param('repositories', criteria, required=False, recurse=True, is_str=True)
-        check_param('types', criteria, required=False, options={ RepositoryFile.TYPE_IMAGE, RepositoryFile.TYPE_VIDEO })
-        check_param('orientation', criteria, required=False, options={ RepositoryFile.ORIENTATION_PORTRAIT, RepositoryFile.ORIENTATION_LANDSCAPE })
-        check_param('tags', criteria, required=False, recurse=True, is_str=True)
+        check_param('direction', criteria, required=False, options={ item.value for item in SORT_DIR })
         check_param('excluded_tags', criteria, required=False, recurse=True, is_str=True)
         check_param('most_recent', criteria, required=False, gr=0)
         check_param('order', criteria, required=False, options={ item.value for item in SORT_ORDER })
-        check_param('direction', criteria, required=False, options={ item.value for item in SORT_DIR })
+        check_param('orientation', criteria, required=False, options={ RepositoryFile.ORIENTATION_PORTRAIT, RepositoryFile.ORIENTATION_LANDSCAPE })
+        check_param('repositories', criteria, required=False, recurse=True, is_str=True)
+        check_param('tags', criteria, required=False, recurse=True, is_str=True)
+        check_param('types', criteria, required=False, options={ RepositoryFile.TYPE_IMAGE, RepositoryFile.TYPE_VIDEO })
+        # Check smart order related parameters.
+        if criteria.get('orientation') == SORT_ORDER.SMART:
+            check_param('smart_limit', criteria, required=True, is_int=True, gr=0)
+            check_param('smart_time', criteria, required=True, gr=0)
 
         # Initialize query.
         query = session.query(MetaData.file_uuid, MetaData.rep_uuid, MetaData.creation_date)
@@ -387,6 +392,7 @@ class IndexIterator:
         if 'most_recent' in criteria:
             value = criteria['most_recent']
             date_limit = query.order_by(desc(MetaData.creation_date)).limit(value).all()[-1].creation_date
+            query = query.filter(MetaData.creation_date >= date_limit)
 
         # Retrieve files in a specific or random order.
         if 'order' in criteria:
@@ -400,17 +406,14 @@ class IndexIterator:
                 query = query.order_by(dir_fun(MetaData.creation_date))
             elif order == SORT_ORDER.NAME:
                 query = query.order_by(dir_fun(func.upper(MetaData.name)))
-
-        # Limit iteration to the n most recent files based on the creation
-        # date. An additional limit is specified since in theory multiple images
-        # may have the very same creation date. Processed last since limit must
-        # be applied at the very end of the query.
-        if 'most_recent' in criteria:
-            value = criteria['most_recent']
-            query = query.filter(MetaData.creation_date >= date_limit).limit(value)
+            elif order == SORT_ORDER.SMART:
+                start_date = query.order_by(func.random()).first().creation_date
+                query = query.order_by(MetaData.creation_date).filter(MetaData.creation_date >= start_date).limit(criteria['smart_limit'])
+#                logging.debug(f"New smart iteration with creation date > {start_date}.")
 
         # Query data and save list of metadata objects.
         self._result = query.all()
+#        logging.debug(f"New iteration has {len(self._result)} files.")
 
     def __iter__(self):
         """Return self as iterator.
@@ -436,12 +439,26 @@ class IndexIterator:
             # Raise exception if end of iteration is reached.
             else:
                 raise StopIteration()
+            # Evaluate smart order termination criteria from second file onwards.
+            if self._criteria.get('order') == SORT_ORDER.SMART and self._position > 1:
+                # Obtain meta data of previous file.
+                prev_mdata = self._result[self._position - 2]
+                # Stop iteration if delta in creation date between current and
+                # previous file exceeds smart time limit.
+                delta = mdata.creation_date - prev_mdata.creation_date
+                delta = delta.seconds/3600 + delta.days*24
+                if delta > self._criteria['smart_time']:
+#                    logging.debug("Ending iteration preliminarily due to smart time criterion.")
+                    raise StopIteration()
+                # We additionally plan to implement a smart distance criterion
+                # at a later point in time once location meta data are supported.
             # Try to obtain corresponding file.
             try:
                 return Repository.by_uuid(mdata.rep_uuid).file_by_uuid(mdata.file_uuid)
             # Catch any invalid uuid errors in case the file is no longer
             # available in the repository and continue.
             except UuidError:
+                logger.warn(f"Skipping invalid file '{mdata.file_uuid}' in repository '{mdata.rep_uuid}'. The metadata index may be outdated.")
                 pass
 
     @property

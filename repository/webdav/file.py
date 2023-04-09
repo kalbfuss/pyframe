@@ -28,7 +28,7 @@ import repository
 import tempfile
 
 from datetime import datetime
-from repository import UuidError
+from repository import IoError, UuidError
 
 
 class RepositoryFile(repository.RepositoryFile):
