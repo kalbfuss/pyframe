@@ -85,7 +85,6 @@ class Slideshow(AnchorLayout):
         if 'always_excluded_tags' in config:
             check_param('always_excluded_tags', config, recurse=True, is_str=True)
             check_param('excluded_tags', config, required=False, recurse=True, is_str=True)
-            print(config['excluded_tags'])
             value = config['always_excluded_tags']
             # Convert to list if single value specified.
             if type(value) == str: value = [value]
