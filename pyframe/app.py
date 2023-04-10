@@ -160,10 +160,9 @@ class App(kivy.app.App, Controller):
 
             # Combine global and local repository configuration. Local
             # configuration settings supersede global settings.
-            rep_config = {key: config[key] for key in (rep_class.CONF_VALID_KEYS) if key in config}
+            rep_config = copy.deepcopy(config)
             rep_config.update(local_config)
-            rep_config.pop('type')
-            rep_config.pop('enabled')
+            rep_config = { key: rep_config[key] for key in rep_class.CONF_VALID_KEYS if key in rep_config }
 
             try:
                 # Create repository instance.
