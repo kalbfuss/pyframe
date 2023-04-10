@@ -10,7 +10,7 @@ import time
 from kivy.clock import Clock
 from kivy.logger import Logger
 
-from repository import check_valid_required
+from repository import check_param, check_valid_required
 
 from .controller import DISPLAY_MODE, DISPLAY_STATE, PLAY_STATE, Controller
 from .common import APPLICATION_NAME, APPLICATION_DESCRIPTION, VERSION, PROJECT_NAME
@@ -75,6 +75,15 @@ class MqttInterface:
 
         # Check the configuration for valid and required parameters.
         check_valid_required(config, self.CONF_VALID_KEYS, self.CONF_REQ_KEYS)
+        # Check paramaters
+        check_param('host', config, is_str=True)
+        check_param('port', config, required=False, is_int=True, gr=0)
+        check_param('tls', config, required=False, is_bool=True)
+        check_param('tls_insecure', config, required=False, is_bool=True)
+        check_param('user', config, is_str=True)
+        check_param('password', config, is_str=True)
+        check_param('device_id', config, required=False, is_str=True)
+        check_param('device_name', config, required=False, is_str=True)
 
         host = config['host']
         port = config.get('port', 8883)
@@ -111,7 +120,7 @@ class MqttInterface:
             # Call network loop every x seconds.
             self._event = Clock.schedule_interval(self.loop, 0.2)
         except Exception as e:
-            raise Exception(f"An exception occured during setup of the connection: {e}")
+            raise Exception(f"An exception occured during setup of the connection. {e}.")
 
     def __setup_select(self, client, name, options, icon=None, category=None):
         """Helper function to setup selections in Home Assistant.
@@ -245,27 +254,39 @@ class MqttInterface:
         client.publish(config_topic, payload, qos=0, retain=True)
 
     def loop(self, dt):
-        """Loop function."""
+        """Loop function.
+
+        Processes MQTT messages via the Paho MQTT client loop function. Called
+        regularly from the Kivy loop (scheduled via Clock). In the beginning,
+        the method checks for disconnects and if necessary attempts to reconnect
+        to the broker. Reconnection attempts are limited to once every 60s.
+        """
         client = self._client
-        # Attempt to reconnect if connection has been lost.
+        # Attempt to reconnect if connection has been lost. The flag is set by
+        # the on_disconnect callback function.
         if self._connection_lost:
             # Skip iteration if last attempt was less than 60s ago.
             if (time.time() - self._reconnect_time) < 60: return
             Logger.info(f"MQTT: Attempting to reconnect to broker.")
             try:
+                # Update time of last reconnect attempt.
                 self._reconnect_time = time.time()
+                # Attempt to reconnect.
                 rc = client.reconnect()
                 if rc != mqtt.MQTT_ERR_SUCCESS:
-                    Logger.error(f"MQTT: Connection to broker failed with error code {rc}.")
+                    Logger.error(f"MQTT: Reconnection to broker failed with error code {rc}.")
                     return
                 self._connection_lost = False
                 # Ensure new state is published automatically after content change.
                 self._controller.bind(on_state_change=self.publish_state)
             except Exception as e:
-                Logger.error(f"MQTT: Reconnection to the broker failed. {e}")
+                Logger.error(f"MQTT: Reconnection to broker failed. {e}.")
                 return
         # Process messages.
-        client.loop(timeout=0)
+        try:
+            client.loop(timeout=0)
+        except Exception as e:
+            Logger.error(f"MQTT: An exception occurred while processing messages. {e}.")
 
     def on_connect(self, client, userdata, flags, rc):
         """Update availability and setup sensors/controls after successful

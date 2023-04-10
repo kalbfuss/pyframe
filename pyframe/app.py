@@ -356,7 +356,7 @@ class App(kivy.app.App, Controller):
             try:
                 self._mqtt_interface = MqttInterface(self._config['mqtt'], self)
             except ConfigError as e:
-                raise ConfigError(f"Configuration: The MQTT interface configuration is invalid. {e}", e.config)
+                raise ConfigError(f"Configuration: Error in the MQTT interface configuration. {e}", e.config)
             except Exception as e:
                 raise Exception(f"MQTT: {e}")
 
