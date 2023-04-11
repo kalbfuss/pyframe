@@ -458,7 +458,7 @@ class IndexIterator:
             # Catch any invalid uuid errors in case the file is no longer
             # available in the repository and continue.
             except UuidError:
-                logger.warn(f"Skipping invalid file '{mdata.file_uuid}' in repository '{mdata.rep_uuid}'. The metadata index may be outdated.")
+                logging.warn(f"Skipping invalid file '{mdata.file_uuid}' in repository '{mdata.rep_uuid}'. The metadata index may be outdated.")
                 pass
 
     @property
