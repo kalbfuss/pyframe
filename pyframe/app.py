@@ -506,7 +506,7 @@ class App(kivy.app.App, Controller):
         # Return if already on.
         if self._display_state == DISPLAY_STATE.ON: return
         Logger.info("Controller: Turning display on.")
-        # Turn display off on Linux with X server.
+        # Turn display on on Linux with X server.
         subprocess.run("/usr/bin/xset dpms force on", shell=True,  stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL)
         # Raise window to top (just in case).
@@ -520,7 +520,7 @@ class App(kivy.app.App, Controller):
         # Return if already off.
         if self._display_state == DISPLAY_STATE.OFF: return
         Logger.info("Controller: Turning display off.")
-        # Turn display on Linux with X server.
+        # Turn display off on Linux with X server.
         subprocess.run("/usr/bin/xset dpms force off", shell=True, stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL)
         # Update display state.
