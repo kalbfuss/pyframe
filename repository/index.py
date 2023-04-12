@@ -379,10 +379,14 @@ class IndexIterator:
 
             # Limit iteration to files with specified tags.
             elif key == "tags":
+                # Convert to list if single value specified.
+                if type(value) == str: value = [value]
                 query = query.filter(MetaData.tags.any(func.lower(MetaDataTag.name).in_([tag.lower() for tag in value])))
 
             # Exclude files with excluded tags from iteration.
             elif key == "excluded_tags":
+                # Convert to list if single value specified.
+                if type(value) == str: value = [value]
                 query = query.filter(or_(~MetaData.tags.any(func.lower(MetaDataTag.name).in_([tag.lower() for tag in value])), MetaData.tags == None))
 
         # Determine limiting date to limit iteration to the n most recent files
