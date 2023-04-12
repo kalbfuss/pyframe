@@ -391,8 +391,10 @@ class IndexIterator:
         # (see below).
         if 'most_recent' in criteria:
             value = criteria['most_recent']
-            date_limit = query.order_by(desc(MetaData.creation_date)).limit(value).all()[-1].creation_date
-            query = query.filter(MetaData.creation_date >= date_limit)
+            result = query.order_by(desc(MetaData.creation_date)).limit(value).all()
+            if len(result) > 0:
+                date_limit = result[-1].creation_date
+                query = query.filter(MetaData.creation_date >= date_limit)
 
         # Retrieve files in a specific or random order.
         if 'order' in criteria:
@@ -407,8 +409,9 @@ class IndexIterator:
             elif order == SORT_ORDER.NAME:
                 query = query.order_by(dir_fun(func.upper(MetaData.name)))
             elif order == SORT_ORDER.SMART:
-                start_date = query.order_by(func.random()).first().creation_date
-                query = query.order_by(MetaData.creation_date).filter(MetaData.creation_date >= start_date).limit(criteria['smart_limit'])
+                result = query.order_by(func.random()).first()
+                if result is not None:
+                    query = query.order_by(MetaData.creation_date).filter(MetaData.creation_date >= result.creation_date).limit(criteria['smart_limit'])
 #                logging.debug(f"New smart iteration with creation date > {start_date}.")
 
         # Query data and save list of metadata objects.
