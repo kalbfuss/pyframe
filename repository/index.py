@@ -10,14 +10,16 @@ References;
 """
 
 import logging
+import random
+import time
 
 from enum import Enum
-from sqlalchemy import asc, create_engine, desc, event, func, update, delete, or_, Column, DateTime, ForeignKey, Integer, String, Boolean
+from sqlalchemy import asc, create_engine, desc, event, func, update, delete, or_, Column, DateTime, Float, ForeignKey, Integer, String, Boolean
 from sqlalchemy.engine import Engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import backref, relationship, sessionmaker, scoped_session
 
-from .common import ConfigError, UuidError, check_param, check_valid_required
+from .common import UuidError, check_param, check_valid_required
 from .file import RepositoryFile
 from .repository import Repository
 
@@ -25,14 +27,27 @@ from .repository import Repository
 # Install listener for connection events to automatically enable foreign key
 # constraint checking by SQLite.
 @event.listens_for(Engine, "connect")
-def set_sqlite_pragma(dbapi_connection, connection_record):
-    """Enable foreign key constraint checking by sqlite."""
+def set_sqlite_pragma(conn, *largs):
+    """Enable foreign key constraint checking and write-ahead logging (WAL)
+    in SQLite."""
 #    logging.debug("Enable foreign key database constraints.")
-    cursor = dbapi_connection.cursor()
+    cursor = conn.cursor()
     cursor.execute("PRAGMA journal_mode=WAL")
     cursor.execute("PRAGMA foreign_keys=ON")
     cursor.close()
 
+"""
+# Install listener to record time prior to execution of statements.
+@event.listens_for(Engine, "before_cursor_execute")
+def before_cursor_execute(conn, *largs):
+    conn.info.setdefault("query_start_time", []).append(time.time())
+
+# Install listener to calculate and log total execution time.
+@event.listens_for(Engine, "after_cursor_execute")
+def after_cursor_execute(conn, *largs):
+    total = time.time() - conn.info["query_start_time"].pop(-1)
+    logging.debug(f"SQL query executed within {round(total*1000, 2)} ms.")
+"""
 
 Base = declarative_base()
 
@@ -60,7 +75,9 @@ class MetaData(Base):
         last_modified(DateTime): Date of last file modification.
         last_updated(DateTime): Date of last metadata update.
         description(String(255)): Description of the file.
-        rating(Integer): Rating of the file content.
+        rating(Integer): Star rating of the file content.
+        random_number(Float): Random number between 0..1. Used for creating
+          starting points of smart order index iterations.
         verified(Boolean): Verification flag set during index building. True if
             file exists. False if not yet verified or does not exist.
     """
@@ -71,15 +88,16 @@ class MetaData(Base):
     # File uuid needs to be unique within a repository, but not across repositories.
 #    file_uuid = Column(String(255), unique=True, nullable=False)
     file_uuid = Column(String(255), nullable=False)
-    name = Column(String(255), nullable=False)
+    name = Column(String(255), nullable=False, index=True)
     type = Column(Integer)
     width = Column(Integer)
     height = Column(Integer)
     rotation = Column(Integer)
     orientation = Column(Integer)
-    creation_date = Column(DateTime)
+    creation_date = Column(DateTime, index=True)
     description = Column(String(255))
     rating = Column(Integer)
+    random_number = Column(Float, index=True)
     last_modified = Column(DateTime)
     last_updated = Column(DateTime)
     verified = Column(Boolean)
@@ -238,11 +256,7 @@ class Index:
                         logging.info(f"Adding metadata of file '{file.uuid}' to index.")
                     else:
                         logging.info(f"Updating metadata of file '{file.uuid}' in index.")
-                    mdata = MetaData(rep_uuid=file.rep.uuid, file_uuid=file.uuid, name=file.name, type=file.type, width=file.width, height=file.height, rotation=file.rotation,
-                                     orientation=file.orientation, creation_date=file.creation_date,
-                                     last_modified=file.last_modified,
-                                     last_updated=file.last_updated, description=file.description, rating=file.rating,
-                                     verified=True, tags=tags)
+                    mdata = MetaData(rep_uuid=file.rep.uuid, file_uuid=file.uuid, name=file.name, type=file.type, width=file.width, height=file.height, rotation=file.rotation, orientation=file.orientation, creation_date=file.creation_date, last_modified=file.last_modified, last_updated=file.last_updated, description=file.description, rating=file.rating, random_number=random.random(), verified=True, tags=tags)
                     session.add(mdata)
                     # Commit all changes to the database.
                     session.commit()
@@ -413,14 +427,22 @@ class IndexIterator:
             elif order == SORT_ORDER.NAME:
                 query = query.order_by(dir_fun(func.upper(MetaData.name)))
             elif order == SORT_ORDER.SMART:
-                result = query.order_by(func.random()).first()
+                logging.debug("Determine start date for smart order iteration.")
+                # Metadata entries have been assigned a random number in the
+                # range from 0..1 during creation. We now generate another
+                # random number in the same range and retrieve the metadata
+                # entry with the closest match as starting point for the series.
+                random_number = random.random()
+                result = query.filter(MetaData.random_number >= random_number).order_by(MetaData.random_number).first()
+                if result is None:
+                    result = query.filter(MetaData.random_number <= random_number).order_by(desc(MetaData.random_number)).first()
                 if result is not None:
                     query = query.order_by(MetaData.creation_date).filter(MetaData.creation_date >= result.creation_date).limit(criteria['smart_limit'])
-#                logging.debug(f"New smart iteration with creation date > {start_date}.")
 
         # Query data and save list of metadata objects.
+        logging.debug("Querying files for new iteration.")
         self._result = query.all()
-#        logging.debug(f"New iteration has {len(self._result)} files.")
+        logging.debug(f"New iteration has {len(self._result)} files.")
 
     def __iter__(self):
         """Return self as iterator.
@@ -455,7 +477,7 @@ class IndexIterator:
                 delta = mdata.creation_date - prev_mdata.creation_date
                 delta = delta.seconds/3600 + delta.days*24
                 if delta > self._criteria['smart_time']:
-#                    logging.debug("Ending iteration preliminarily due to smart time criterion.")
+                    logging.debug("Ending iteration early due to smart time criterion.")
                     raise StopIteration()
                 # We additionally plan to implement a smart distance criterion
                 # at a later point in time once location meta data are supported.
