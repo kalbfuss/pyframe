@@ -205,7 +205,11 @@ class RepositoryFile:
         # Save current datetime in property last_updated.
         self._last_updated = datetime.today()
 
-        data = ffmpeg.probe(path)['streams'][0]
+        # Obtain meta data of all streams (video and audio).
+        streams = ffmpeg.probe(path)['streams']
+        # Find first video stream and return corresponding meta data.
+        for data in streams:
+            if data.get('codec_type') == 'video': break
 #        logging.debug(data)
 
         # Try to obtain image dimensions from metadata.
@@ -213,6 +217,9 @@ class RepositoryFile:
             self._width = int(data.get('width'))
         if data.get('height') is not None:
             self._height = int(data.get('height'))
+
+        # Stop here if meta data does not contain any tags.
+        if data.get('tags') is None: return
 
         # Try to obtain rotation from metadata.
         rotate = data['tags'].get('rotate')
