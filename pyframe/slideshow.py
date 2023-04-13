@@ -105,6 +105,8 @@ class Slideshow(AnchorLayout):
             widget = SlideshowImage(file, self._config)
         elif file.type == RepositoryFile.TYPE_VIDEO:
             widget = SlideshowVideo(file, self._config)
+        else:
+            widget = ErrorMessage(f"Type of file '{file.uuid}' is not supported.", self._config)
         return widget
 
     def _create_next_widget(self, previous=False):
