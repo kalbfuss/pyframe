@@ -3,8 +3,8 @@
 /log/
 /__pycache__/
 __pycache__/
-/*.sqlite
-/*.sqlite-shm
-/*.sqlite-wal
+/*.sqlite*
+/*.sqlite-shm*
+/*.sqlite-wal*
 /config.yaml*
 
