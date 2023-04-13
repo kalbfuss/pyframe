@@ -81,7 +81,6 @@ class Scheduler:
         slideshow = config.get('slideshow')
         if slideshow is not None:
             self._app.slideshow = slideshow
-            self._app.play()
         # Set display state if specified.
         play_state = config.get('play_state')
         if play_state is not None:
