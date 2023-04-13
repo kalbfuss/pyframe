@@ -120,7 +120,7 @@ class RepositoryFile:
 
     # Extensions of supported files
     EXT_IMAGE = ("*.jpg", "*.jpeg", "*.png")
-    EXT_VIDEO = ("*.mp4", "*.mv4")
+    EXT_VIDEO = ("*.mp4", "*.mv4", "*.mov")
 
     def _extract_image_metadata(self, path):
         """Extract image metadata from file content.
