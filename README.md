@@ -2,7 +2,9 @@
 
 Pyframe is a Python-based digital photo frame application. It is capable of displaying photos and playing videos from local storage as well as WebDAV repositories.
 
-Files can be arranged in slideshows and filtered and sorted based on their metadata (EXIF and IPTC metadata supported). Slideshows can be run continuously or scheduled.
+Pyframe has been designed to run slideshows from image and video repositories with several thousand files. No conversion is required. Files remain in your repositories and fully under your control.
+
+Files in slideshows can be dynamically arranged and filtered based on their metadata (EXIF and IPTC metadata supported). Slideshows can be run continuously or scheduled.
 
 Pyframe optionally integrates with Home Assistant via MQTT. Integration allows the display to be motion activated after coupling of the Pyframe device with a motion sensor.
 
