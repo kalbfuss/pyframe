@@ -34,10 +34,6 @@ from repository import IoError, UuidError
 class RepositoryFile(repository.RepositoryFile):
     """File within a webdav repository."""
 
-    # Extensions of supported files
-    EXT_IMAGE = ("*.jpg", "*.jpeg", "*.png")
-    EXT_VIDEO = ("*.mp4", "*.mv4")
-
     def __init__(self, uuid, rep, index=None, index_lookup=True, extract_metadata=True):
         """Initialize file."""
         # Call constructor of parent class.
