@@ -509,8 +509,10 @@ class App(kivy.app.App, Controller):
         # Turn display on on Linux with X server.
         subprocess.run("/usr/bin/xset dpms force on", shell=True,  stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL)
-        # Raise window to top (just in case).
+        # Raise window to top (just in case) and make full screen again.
         Window.raise_window()
+        if self._config['window_size'] == "full":
+            Window.fullscreen = 'auto'
         # Update display state.
         self._display_state = DISPLAY_STATE.ON
         self.dispatch('on_state_change')
