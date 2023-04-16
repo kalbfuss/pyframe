@@ -50,6 +50,9 @@ class RepositoryFile:
         last_updated (datetime): Date of last metadata update.
         description (str): Description of the file content. Default is None.
         rating (int): Rating of the file content. Default is None.
+        coordinates (list of float): Geographical coordinates of location [ latitude,
+          longitude, altitude ]. Default is [ None, None, None ].
+        location (str): Human-readable location (address). Default is None.
         source (str): Source of the file (e.g. full path or URL).
         tags (set of str): User defined tags on the file. Not to be confounded
             with EXIF tags in image files. Default is None.

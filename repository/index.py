@@ -76,6 +76,9 @@ class MetaData(Base):
         last_updated(DateTime): Date of last metadata update.
         description(String(255)): Description of the file.
         rating(Integer): Star rating of the file content.
+        latitude(Float): Latitude of geographical coordinates
+        longitude(Float): Longitude of geographical coordinates
+        altitude(Float): Altitude of geopgraphical coordinates
         random_number(Float): Random number between 0..1. Used for creating
           starting points of smart order index iterations.
         verified(Boolean): Verification flag set during index building. True if
