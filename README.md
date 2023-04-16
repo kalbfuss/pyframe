@@ -189,15 +189,18 @@ schedule:
     time: "08:00"
     slideshow: Recent
     display_mode: static
+    play_state: playing
   morning stop:
     time: "10:00"
     play_state: stopped
-  # Play the slideshow "Favorites" in the period from 18:00 to 20:00. Activate the display by motion.
+  # Play the slideshow "Favorites" in the period from 18:00 to 20:00.
+  # Activate the display by motion.
   evening start:
     time: "18:00"
     slideshow: Favorites
     display_mode: motion
     display_timeout: 300
+    play_state: playing
   evening stop:
     time: "20:00"
     play_state: stopped
@@ -358,8 +361,10 @@ The following parameters control the files included in a slideshow and the seque
 | ***excluded_tags***        | File tags, which shall be excluded. May be a single value or list of values. The default is not to exclude any tags. |
 | ***always_excluded_tags*** | Same as *excluded_tags*, but not overwritten by an *excluded_tags* statement. Use in the slideshow default configuration to exclude certain tags in all slideshows (e.g. private content). |
 | ***most_recent***          | Files in the slideshow are limited to the *most_recent* number of files based on the creation date **after** application of all other filter criteria. |
-| ***order***                | The sort order in which files are shown. The default is *name*.<br/> - *date:* Files are sorted by their creation date.<br/> - *name:* Files are sorted by their name.<br/> - *random:* Files are shown in a random sequence. |
+| ***order***                | The sort order in which files are shown. The default is *name*.<br/> - *date:* Files are sorted by their creation date.<br/> - *name:* Files are sorted by their name.<br/> - *random:* Files are shown in a random sequence.<br/> - *smart*: A short sequence with random starting point, sorted by date in ascending order. |
 | ***direction***            | Valid sort directions are *ascending* or *descending*. The default is *ascending*. Ignored if random order is configured. |
+| ***smart_limit***          | The (maximum) number of files in a smart sequence. If the *smart_time* criterion is not met, the sequence may be shorter. The default is 10. |
+| ***smart_time***           | The maximum time allowed in-between subsequent files of a smart sequence. If exceeded, the sequence is terminated early and a new sequence initiated. |
 
 ### Schedule
 
@@ -372,15 +377,18 @@ schedule:
     time: "08:00"
     slideshow: Recent
     display_mode: static
+    play_state: playing
   morning stop:
     time: "10:00"
     play_state: stopped
-  # Play the slideshow "Favorites" in the period from 18:00 to 20:00. Activate the display by motion.
+  # Play the slideshow "Favorites" in the period from 18:00 to 20:00.
+  # Activate the display by motion.
   evening start:
     time: "18:00"
     slideshow: Favorites
     display_mode: motion
     display_timeout: 30
+    play_state: playing
   evening stop:
     time: "20:00"
     play_state: stopped
@@ -388,13 +396,13 @@ schedule:
 
 The following parameters are used to configure events in the schedule.
 
-|Parameter            |Description|
-|:--------------------|:----------|
-|***time***           | The time of the event. A value must be provided. Always specify in quotation marks. Hours and minutes <10 must be preceded by a 0, i.e. "08:03" and never "8:3".|
-|***slideshow***      | Start playing the specified slideshow. If no slideshow is specified, the previous or default slideshow is assumed.|
-|***play_state***     |Valid play states are *paused*, *playing* and *stopped*. The play state remains unchanged if no value is provided.|
-|***display_mode***   | The following display modes are supported. The default is *static*.<br/> - *static*: The display is always on if a slideshow is paused or playing and off if a slideshow is stopped.<br/> - *motion*: The display is turned on and the slideshow starts playing in the presence of motion. The slideshow is paused and the display turned off in the absence of motion after the display timeout interval.|
-|***display_timeout***|The time in seconds after which the slideshow is paused and screen turned off in the absence of motion. The default is 300 seconds.|
+| Parameter             | Description                                                  |
+| :-------------------- | :----------------------------------------------------------- |
+| ***time***            | The time of the event. A value must be provided. Always specify in quotation marks. ***Note:*** Hours and minutes <10 must be preceded by a 0, i.e. "08:03" and never "8:3". |
+| ***slideshow***       | Start playing the specified slideshow. If no slideshow is specified, the previous or default slideshow is assumed. ***Note:*** Slideshows do not start playing automatically. |
+| ***play_state***      | Valid play states are *paused*, *playing* and *stopped*. The play state remains unchanged if no value is provided. |
+| ***display_mode***    | The following display modes are supported. The default is *static*.<br/> - *static*: The display is always on if a slideshow is paused or playing and off if a slideshow is stopped.<br/> - *motion*: The display is turned on and the slideshow starts playing in the presence of motion. The slideshow is paused and the display turned off in the absence of motion after the display timeout interval. |
+| ***display_timeout*** | The time in seconds after which the slideshow is paused and screen turned off in the absence of motion. The default is 300 seconds. |
 
 ### MQTT
 
