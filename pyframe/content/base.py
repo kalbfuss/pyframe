@@ -114,7 +114,7 @@ class LabeledContent(ContentBase):
     """
 
     def __init__(self, file, config):
-        """Initialize the slideshow content instance."""
+        """Initialize the labeled content instance."""
         super().__init__(file, config)
 
         # Create and add white (foreground) and black (shadow) labels.
@@ -130,6 +130,12 @@ class LabeledContent(ContentBase):
             self._blabel.text = label
         # Call _adjust_label method after the widget's size has been set.
         self.bind(size=self.adjust_label)
+
+    def __del__(self):
+        """Delete the labeled content instance."""
+        # Cancel any clock events.
+        for i in self._events:
+            self._events[i].cancel()
 
     def adjust_label(self, *args):
         """Adjust label when the widget becomes visible and its size is set."""
@@ -150,12 +156,13 @@ class LabeledContent(ContentBase):
         self._blabel.size = (self.width - offset, self.height - offset)
         self._blabel.text_size = self._blabel.size
         # Schedule events to turn labels off and on.
+        self._events = list()
         mode = self.config.get('label_mode', "on")
         pause = self.config.get('pause')
         duration = self.config.get('label_duration', 24)
         if mode == "auto" and pause is not None and 2*duration < pause:
-            Clock.schedule_once(self.label_off, duration)
-            Clock.schedule_once(self.label_on, pause - duration)
+            self._events.append(Clock.schedule_once(self.label_off, duration))
+            self._events.append(Clock.schedule_once(self.label_on, pause - duration))
 
     def label_off(self, dt=0):
         "Turn label off."
