@@ -451,10 +451,15 @@ class RepositoryFile:
 
         # Try to obtain location from geocoding service otherwise.
         try:
-            # Retrieve default languate from locale.
+            # Retrieve default language from locale.
             lc = locale.getdefaultlocale()
-            lang = lc[0][0:2]
+            if len(lc) >= 1 and len(lc[0]) >= 2:
+                lang = lc[0][0:2]
+            else:
+                lang = "en"
             self._location = geolocator.reverse(self._coordinates[0:2], exactly_one=True, language=lang).address
+        except GeopyError as e:
+            logging.error(f"An error occurred while looking up the location. {e}")
         finally:
             return self._location
 
