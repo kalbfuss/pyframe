@@ -134,8 +134,9 @@ class LabeledContent(ContentBase):
     def __del__(self):
         """Delete the labeled content instance."""
         # Cancel any clock events.
-        for i in self._events:
-            self._events[i].cancel()
+        while self._events:
+            event = self._events.pop()
+            event.cancel()
 
     def adjust_label(self, *args):
         """Adjust label when the widget becomes visible and its size is set."""
@@ -221,9 +222,11 @@ class LabeledContent(ContentBase):
                 label = label + f"{country.strip()} · "
             else:
                 label = label + f"{city.strip()}, {country.strip()} · "
-
         # Format and append creation date.
-        date_str = self.file.creation_date.strftime("%Y-%m-%d %H:%M:%S")
+        if label_content == "short":
+            date_str = self.file.creation_date.strftime("%Y-%m-%d")
+        else:
+            date_str = self.file.creation_date.strftime("%Y-%m-%d %H:%M")
         label = label + f"{date_str}"
         # Return if only short label requested.
         if label_content == "short": return label
@@ -233,3 +236,16 @@ class LabeledContent(ContentBase):
         # Append file and repository uuid.
         label = label + f" · {self.file.uuid} [i]in[/i] {self.file.rep.uuid}"
         return label
+
+    def on_parent(self, *largs):
+        """Unschedule all clock events upon loss of parent.
+
+        Callback function for parent property change events. Cancels all
+        scheduled clock events if widget is removed from parent, i.e. parent
+        is set to None.
+        """
+        # Cancel any clock events.
+        if self.parent is None:
+            while self._events:
+                event = self._events.pop()
+                event.cancel()
