@@ -3,13 +3,20 @@
 import exifread
 import ffmpeg
 import fnmatch
+import locale
 import logging
 
 from abc import ABC, abstractmethod
 from datetime import datetime
+from geopy.geocoders import Photon
+from geopy.exc import GeopyError
 from iptcinfo3 import IPTCInfo
+
 from PIL import Image
 
+
+# Global geolocator instance for reverse location lookups.
+geolocator = Photon()
 
 class RepositoryFile:
     """File within a repository.
@@ -85,6 +92,8 @@ class RepositoryFile:
         self._last_updated = datetime.today()
         self._description = str()
         self._rating = None
+        self._coordinates = [ None, None, None ]
+        self._location = None
         self._tags = list()
 
         # Attempt to determine type from extension.
@@ -108,6 +117,7 @@ class RepositoryFile:
             self._last_updated = mdata.last_updated
             self._description = mdata.description
             self._rating = mdata.rating
+            self._coordinates = [ mdata.latitude, mdata.longitude, mdata.altitude ]
             self._tags = [tag.name for tag in mdata.tags]
 
     def __repr__(self):
@@ -138,23 +148,14 @@ class RepositoryFile:
         # Use PIL to determine image size.
         with Image.open(path) as image:
             self._width, self._height = image.size
-#        logging.debug(f"Image size: {str(self._width)}x{str(self._height)}")
 
         # Open image file for reading (binary mode) and extract EXIF information.
         with open(path, 'rb') as file:
             tags = exifread.process_file(file)
-#        logging.debug(f"{self.uuid}: {tags}")
-
-        # Obtain width from metadata if available
-#        if "EXIF ExifImageWidth" in tags:
-#            self._width = tags["EXIF ExifImageWidth"].values[0]
-        # Obtain height from metadata if available
-#        if "EXIF ExifImageLength" in tags:
-#            self._height = tags["EXIF ExifImageLength"].values[0]
 
         # Obtain rotation from metadata if available
-        if "Image Orientation" in tags:
-            orientation = tags["Image Orientation"].values[0]
+        if 'Image Orientation' in tags:
+            orientation = tags['Image Orientation'].values[0]
             if orientation == 8:
                 self._rotation = 90
             elif orientation == 3:
@@ -169,28 +170,44 @@ class RepositoryFile:
             self._orientation = RepositoryFile.ORIENTATION_LANDSCAPE
 
         # Etract image description if available.
-        if "Image ImageDescription" in tags:
-            self._description = tags["Image ImageDescription"].values
+        if 'Image ImageDescription' in tags:
+            self._description = tags['Image ImageDescription'].values
 
         # Extract image rating if available.
-        if "Image Rating" in tags:
-            self._rating = tags["Image Rating"].values[0]
+        if 'Image Rating' in tags:
+            self._rating = tags['Image Rating'].values[0]
 
         # Extract creation date if available.
         try:
-            if "EXIF DateTimeOriginal" in tags:
-                creation_date = tags["EXIF DateTimeOriginal"].values
+            if 'EXIF DateTimeOriginal' in tags:
+                creation_date = tags['EXIF DateTimeOriginal'].values
                 self._creation_date = datetime.strptime(creation_date, "%Y:%m:%d %H:%M:%S")
-            elif "Image DateTime" in tags:
-                creation_date = tags["Image DateTime"].values
+            elif 'Image DateTime' in tags:
+                creation_date = tags['Image DateTime'].values
                 self._creation_date = datetime.strptime(creation_date, "%Y:%m:%d %H:%M:%S")
         except ValueError:
-            logging.error(f"Invalid creation time format {creation_date}.")
+            logging.error(f"Invalid creation time format '{creation_date}'.")
 
-        # Extract rating if available
-        # Tag is currently not supported by exifread
-#        if "Image Rating" in data.exif_keys:
-#            self._rating = data["Image Rating"].value
+        # Extract latitude and longitude from GPS data.
+        if tags.keys() >= {'GPS GPSLatitude', 'GPS GPSLatitudeRef', 'GPS GPSLongitude', 'GPS GPSLongitudeRef'}:
+            try:
+                # Latitude
+                values = tags['GPS GPSLatitude'].values
+                latitude = float(values[0] + values[1]/60 + values[2]/3600)
+                if tags['GPS GPSLatitudeRef'].values[0] == "S": latitude = -latitude
+                self._coordinates[0] = latitude
+                # Longitude
+                values = tags['GPS GPSLongitude'].values
+                longitude = float(values[0] + values[1]/60 + values[2]/3600)
+                if tags['GPS GPSLongitudeRef'].values[0] == "W": longitude = -longitude
+                self._coordinates[1] = longitude
+            except Exception:
+                logging.error(f"Invalid format of GPS coodinates.")
+
+        # Extract altitude from GPS data.
+        if 'GPS GPSAltitude' in tags:
+            altitude = float(tags['GPS GPSAltitude'].values[0])
+            self._coordinates[2] = altitude
 
         # Extract image tags(keywords) from IPTC tag if available
         info = IPTCInfo(path, force=True, inp_charset="utf8")
@@ -210,7 +227,6 @@ class RepositoryFile:
         # Find first video stream and return corresponding meta data.
         for data in streams:
             if data.get('codec_type') == 'video': break
-#        logging.debug(data)
 
         # Try to obtain image dimensions from metadata.
         if data.get('width') is not None:
@@ -246,13 +262,6 @@ class RepositoryFile:
                 self._creation_date = datetime.strptime(creation_date, "%Y-%m-%dT%H:%M:%S.%fZ")
             except ValueError:
                 logging.error(f"Invalid creation time format {creation_date}.")
-
-        # Log debug information
-#        logging.debug(f"\twidth: {self._width}")
-#        logging.debug(f"\theight: {self._height}")
-#        logging.debug(f"\torientation: {self._orientation}")
-#        logging.debug(f"\trotation: {self._rotation}")
-#        logging.debug(f"\tcreation_date: {self._creation_date}")
 
     def _type_from_extension(self):
         """Determine file type based on file extension."""
@@ -410,6 +419,44 @@ class RepositoryFile:
         :rtype: int
         """
         return self._rating
+
+    @property
+    def coordinates(self):
+        """Return coordinates where the file content was created.
+
+        :return: [ latitude, longitude, height ]. Note that elements may be None if information is not available.
+        :rtype: list of floats
+        """
+        return self._coordinates
+
+    @property
+    def location(self):
+        """Return location (address) where the file content was created.
+
+        May return None if the geographical location is not available.
+
+        The geographical location is not stored as part of the file meta data.
+        Since all free geocoding services implement a rate limit, reverse
+        location lookups would slow down the indexing process. The geographical
+        location is thus only looked up once requested.
+
+        :return: city/country
+        :rtype: str
+        """
+        # Return cached value if avaialable.
+        if self._location is not None: return self._location
+        # Return None if no coordinates available.
+        if self._coordinates[0] is None or self._coordinates[1] is None:
+            return None
+
+        # Try to obtain location from geocoding service otherwise.
+        try:
+            # Retrieve default languate from locale.
+            lc = locale.getdefaultlocale()
+            lang = lc[0][0:2]
+            self._location = geolocator.reverse(self._coordinates[0:2], exactly_one=True, language=lang).address
+        finally:
+            return self._location
 
     @property
     def tags(self):

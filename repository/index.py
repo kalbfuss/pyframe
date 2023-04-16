@@ -97,6 +97,9 @@ class MetaData(Base):
     creation_date = Column(DateTime, index=True)
     description = Column(String(255))
     rating = Column(Integer)
+    latitude = Column(Float)
+    longitude = Column(Float)
+    altitude = Column(Float)
     random_number = Column(Float, index=True)
     last_modified = Column(DateTime)
     last_updated = Column(DateTime)
@@ -256,7 +259,7 @@ class Index:
                         logging.info(f"Adding metadata of file '{file.uuid}' to index.")
                     else:
                         logging.info(f"Updating metadata of file '{file.uuid}' in index.")
-                    mdata = MetaData(rep_uuid=file.rep.uuid, file_uuid=file.uuid, name=file.name, type=file.type, width=file.width, height=file.height, rotation=file.rotation, orientation=file.orientation, creation_date=file.creation_date, last_modified=file.last_modified, last_updated=file.last_updated, description=file.description, rating=file.rating, random_number=random.random(), verified=True, tags=tags)
+                    mdata = MetaData(rep_uuid=file.rep.uuid, file_uuid=file.uuid, name=file.name, type=file.type, width=file.width, height=file.height, rotation=file.rotation, orientation=file.orientation, creation_date=file.creation_date, last_modified=file.last_modified, last_updated=file.last_updated, description=file.description, rating=file.rating, latitude=file._coordinates[0], longitude=file._coordinates[1], altitude=file._coordinates[2], random_number=random.random(), verified=True, tags=tags)
                     session.add(mdata)
                     # Commit all changes to the database.
                     session.commit()

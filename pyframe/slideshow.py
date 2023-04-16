@@ -50,6 +50,12 @@ class Slideshow(AnchorLayout):
 
         # Check the configuration for valid and required parameters.
         check_valid_required(config, self.CONF_VALID_KEYS, self.CONF_REQ_KEYS)
+        # Convert from boolean to "on" (True) and "off" (False) if necessary.
+        # This is a pecularity of the YAML 1.1 standard, which interprets "on"
+        # and "off" as boolean values.
+        if 'label_mode' in config:
+            map = {True: "on", False: "off", "on": "on", "off": "off", "auto": "auto"}
+            config['label_mode'] = map[config['label_mode']]
         # Check parameter values.
         check_param('pause', config, is_int=True, gr=0)
         check_param('rotation', config, is_int=True, options={0, 90, 180, 270})

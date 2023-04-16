@@ -203,6 +203,18 @@ class LabeledContent(ContentBase):
             label= f"[b]{description}[/b] · "
         # Return if only description requested.
         if label_content == "description": return
+        # Add shortened geopgraphical location (if available)
+        location = self.file.location
+        if location is not None:
+            location, _, country = str.rpartition(location, ",")
+            location, _, region = str.rpartition(location, ",")
+            location, _, city = str.rpartition(location, ",")
+            # Dirty hack to replace lengthy
+            if city == "":
+                label = label + f"{country.strip()} · "
+            else:
+                label = label + f"{city.strip()}, {country.strip()} · "
+
         # Format and append creation date.
         date_str = self.file.creation_date.strftime("%Y-%m-%d %H:%M:%S")
         label = label + f"{date_str}"
