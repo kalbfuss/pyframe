@@ -429,10 +429,12 @@ class MqttInterface:
             attributes_topic = f"{topic_head}/attributes"
             payload = {
                 'Description': file.description,
-                'Tags': "".join(f"#{tag} " for tag in file.tags),
-                'Size': f"{file.width} x {file.height}",
+                'Location': file.location,
                 'Creation date': file.creation_date.strftime("%Y-%m-%d %H:%M:%S"),
                 'Last modified': file.last_modified.strftime("%Y-%m-%d %H:%M:%S"),
+                'Rating': file.rating,
+                'Tags': "".join(f"#{tag} " for tag in file.tags),
+                'Size': f"{file.width} x {file.height}",
                 'Repository': file.rep.uuid
             }
             payload = json.dumps(payload)
