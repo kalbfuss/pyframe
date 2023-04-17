@@ -48,24 +48,24 @@ class RepositoryFile(repository.RepositoryFile):
         self._name = os.path.basename(uuid)
 
         # Attempt to determine last modification date.
-        try:
-            info = rclone.ls(f'"{os.path.join(rep.root, uuid)}"', max_depth=1)[0]
-        except Exception as e:
-            raise IoError(f"An exception occurred while retrieving attributes of file {'uuid'}. {e}", e)
-        try:
-            last_modified = info.get('ModTime')
-            last_modified = datetime.strptime(last_modified, "%Y-%m-%dT%H:%M:%SZ")
-            if not self._in_index or self.last_updated < last_modified:
+        if not self._in_index:
+            try:
+                info = rclone.ls(f'"{os.path.join(rep.root, uuid)}"', max_depth=1)[0]
+            except Exception as e:
+                raise IoError(f"An exception occurred while retrieving attributes of file {'uuid'}. {e}", e)
+            try:
+                last_modified = info.get('ModTime')
+                last_modified = datetime.strptime(last_modified, "%Y-%m-%dT%H:%M:%SZ")
                 self._last_modified = last_modified
-                # We use the same value as for the last modified date
-                # since rclone does not report the creation date.
-                self._cration_date = last_modified
-        except (ValueError, TypeError):
-            logging.warn(f"Failed to convert last modified date string '{last_modified}' to datetime. Using current datetime instead.")
-            last_modified = self.last_modified
+                # We use the same value for the creation date since rclone
+                # does not report the creation date.
+                self._creation_date = last_modified
+            except (ValueError, TypeError):
+                logging.warn(f"Failed to convert last modified date string '{last_modified}' to datetime.")
+                last_modified = self.last_modified
 
         # Attempt to extract metadata from file content.
-        if (not self._in_index or self.last_updated < last_modified) and extract_metadata:
+        if not self._in_index and extract_metadata:
             self.extract_metadata()
 
     def __del__(self):
@@ -97,7 +97,7 @@ class RepositoryFile(repository.RepositoryFile):
             try:
                 rclone.copy(f'"{os.path.join(self._rep.root, self._uuid)}"', f'"{self._path}"', show_progress=False)
             except Exception as e:
-                raise repository.IoError(f"An exception occurred while downloading file from rclone remote. {e}", e)
+                raise repository.IoError(f"An exception occurred while downloading file '{self._uuid}' from rclone remote. {e}", e)
 
     def extract_metadata(self):
         """Extract metadata from file content."""
