@@ -1,7 +1,6 @@
 """"Module for rclone repository files."""
 
 import logging
-import os
 import os.path
 import repository
 import tempfile
@@ -12,10 +11,32 @@ from repository import IoError, UuidError
 
 
 class RepositoryFile(repository.RepositoryFile):
-    """File within an rclone repository."""
+    """File within an rclone repository.
 
-    def __init__(self, uuid, rep, index=None, index_lookup=True, extract_metadata=True, info=None):
-        """Initialize file."""
+    See repository.File for documentation of properties.
+    """
+
+    def __init__(self, uuid, rep, index=None, index_lookup=True, extract_metadata=True):
+        """Initialize the repository file.
+
+        The python rclone wrapper does not distinguish between failure modes,
+        but raises only a generic exception. An IoError means that the file
+        could not be accessed for whichever reason.
+
+        :param rep: rclone repository
+        :type rep: repository.rclone.Repository
+        :param uuid: UUID of repository file
+        :type uuid: str
+        :param index: Optional file metadata index. Default is None.
+        :type index: repository.Index
+        :param index_lookup: Flag indicating whether file metadata shall be
+            looked up from index. Default is True.
+        :type index_lookup: bool
+        :param extract_metadata: Flag indicating whether file metadata shall be
+            extracted from file if not available from index. Default is True.
+        :type extract_metadata: bool
+        :raises: repository.IoError
+        """
         # Call constructor of parent class.
         super().__init__(uuid, rep, index, index_lookup)
 
@@ -27,20 +48,24 @@ class RepositoryFile(repository.RepositoryFile):
         self._name = os.path.basename(uuid)
 
         # Attempt to determine last modification date.
-        if not self._in_index and info is not None:
-            try:
-                info = rclone.ls(f'"{os.path.join(rep.root, uuid)}"', max_depth=1)[0]
-            except Exception as e:
-                raise IoError(f"An exception occurred while scanning the rclone root directory. {e}", e)
-            try:
-                modified = info.get('ModTime', None)
-                if modified is not None:
-                    self._last_modified = datetime.strptime(modified, "%a, %d %b %Y %H:%M:%S %Z")
-            except (ValueError, TypeError):
-                logging.warn(f"Failed to convert last modified date string '{modified}' to datetime. Using current datetime instead.")
+        try:
+            info = rclone.ls(f'"{os.path.join(rep.root, uuid)}"', max_depth=1)[0]
+        except Exception as e:
+            raise IoError(f"An exception occurred while retrieving attributes of file {'uuid'}. {e}", e)
+        try:
+            last_modified = info.get('ModTime')
+            last_modified = datetime.strptime(last_modified, "%Y-%m-%dT%H:%M:%SZ")
+            if not self._in_index or self.last_updated < last_modified:
+                self._last_modified = last_modified
+                # We use the same value as for the last modified date
+                # since rclone does not report the creation date.
+                self._cration_date = last_modified
+        except (ValueError, TypeError):
+            logging.warn(f"Failed to convert last modified date string '{last_modified}' to datetime. Using current datetime instead.")
+            last_modified = self.last_modified
 
         # Attempt to extract metadata from file content.
-        if not self._in_index and extract_metadata:
+        if (not self._in_index or self.last_updated < last_modified) and extract_metadata:
             self.extract_metadata()
 
     def __del__(self):
@@ -56,23 +81,23 @@ class RepositoryFile(repository.RepositoryFile):
                 pass
 
     def _download(self):
-        """Download file from WebDav repository to local cache file.
+        """Download file from rclone remote to local cache file.
 
-        :raises: IoError
+        :raises: repository.IoError
         """
         if self._cache_file is None:
             # Create temporary file for local caching inside cache directory
-            # of the WebDav repository.
+            # of rclone repository.
             self._cache_file = tempfile.NamedTemporaryFile(dir=self._rep.cache_dir)
             self._path = self._cache_file.name
             logging.debug(f"Local cache file '{self._path}' created.")
 
             # Download file from WebDav repository.
-            logging.info(f"Downloading file '{self.uuid}' from rclone repository to local cache file.")
+            logging.info(f"Downloading file '{self.uuid}' from rclone remote to local cache file.")
             try:
-                rclone.copy(f'"{os.path.join(self._rep.root, self._uuid)}"', f'"{self._path}"')
+                rclone.copy(f'"{os.path.join(self._rep.root, self._uuid)}"', f'"{self._path}"', show_progress=False)
             except Exception as e:
-                raise repository.IoError(f"An exception occurred while downloading file from rclone repository. {e}", e)
+                raise repository.IoError(f"An exception occurred while downloading file from rclone remote. {e}", e)
 
     def extract_metadata(self):
         """Extract metadata from file content."""
@@ -89,10 +114,10 @@ class RepositoryFile(repository.RepositoryFile):
 
     @property
     def source(self):
-        """Return the full path of the local cache file.
+        """Return full path of the local cache file.
 
-        : return: Full path of local cache file.
-        : rtype: str
+        :return: full path
+        :rtype: str
         """
         # Make sure to download file before returning path.
         self._download()

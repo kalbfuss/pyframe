@@ -2,7 +2,6 @@
 
 import logging
 import repository
-import os
 import tempfile
 
 from rclone_python import rclone
@@ -12,7 +11,12 @@ from .file import RepositoryFile
 
 
 class Repository(repository.Repository):
-    """Repository with rclone file base."""
+    """Repository with rclone file base.
+
+    The rclone repository class currently does not provide any functionality
+    to configure rclone remotes. Remotes must have been configured before in
+    the rclone configuration file, e.g. by using the *rclone config* command.
+    """
 
     # Required and valid configuration parameters
     CONF_REQ_KEYS = {'root', 'cache'}
@@ -23,10 +27,10 @@ class Repository(repository.Repository):
 
         :param uuid: UUID of the repository.
         :type name: str
-        :param index: optional file metadata index. Default is None.
-        :type index: repository.Index
         :param config: dictionary with repository configuration
         :type config: dict
+        :param index: optional file metadata index. Default is None.
+        :type index: repository.Index
         :raises: repository.UuidError, repository.ConfigError
         """
         # Call constructor of parent class.
@@ -51,32 +55,20 @@ class Repository(repository.Repository):
 
     @property
     def cache_dir(self):
-        """Return path to cache directory for the temporary storage of files.
+        """Return path of cache directory for the temporary storage of files.
 
-        :return: Path to cache directory.
+        :return: path of cache directory
         :rtype: str
         """
         return self._cache_dir.name
 
-    @property
-    def root(self):
-        """Return root directory of the repository.
-
-        The root directory needs to include the rclone remote (e.g.
-        "owncloud:<myroot>").
-
-        :return: root directory
-        :rtype: str
-        """
-        return self._root
-
     def iterator(self, index_lookup=True, extract_metadata=True):
         """Provide iterator to traverse through files in the repository.
 
-        :param index_lookup: True if file metadata shall be looked up from index.
+        :param index_lookup: True if file metadata shall be looked up from index
         :type index_lookup: bool
         :param extract_metadata: True if file metadata shall be extracted from
-            file if not available from index.
+            file if not available from index
         :return: file iterator
         :return type: repository.FileIterator
         """
@@ -100,6 +92,18 @@ class Repository(repository.Repository):
         """
         return RepositoryFile(uuid, self, self._index, index_lookup, extract_metadata)
 
+    @property
+    def root(self):
+        """Return root directory of the repository.
+
+        The root directory needs to include the rclone remote (e.g.
+        "owncloud:<myroot>").
+
+        :return: root directory
+        :rtype: str
+        """
+        return self._root
+
 
 class FileIterator(repository.FileIterator):
     """Iterator to traverse through files in an rclone repository."""
@@ -107,12 +111,12 @@ class FileIterator(repository.FileIterator):
     def __init__(self, rep, index_lookup=True, extract_metadata=True):
         """Initialize file iterator.
 
-        :param rep: rclone repository.
+        :param rep: rclone repository
         :type rep: repository.rclone.Repository
-        :param index_lookup: True if file metadata shall be looked up from index.
+        :param index_lookup: True if file metadata shall be looked up from index
         :type index_lookup: bool
         :param extract_metadata: True if file metadata shall be extracted from
-            file if not available from index.
+            file if not available from index
         :type extract_metadata: bool
         :raises: repository.IoError
         """
@@ -142,13 +146,12 @@ class FileIterator(repository.FileIterator):
         entry = self._iterator.__next__()
         # Skip all directories.
         while entry['IsDir']:
-            logging.debug(f"Skipping directory {entry}.")
+            logging.debug(f"Skipping directory '{entry['Path']}'.")
             # Save all sub-directories for later.
             entry = self._iterator.__next__()
 
-        logging.debug(f"Processing directory entry {entry}.")
         # Derive uuid from path.
         uuid = entry['Path']
         # Return the next file.
-        logging.debug(f"Creating repository file '{uuid}'.")
+        logging.debug(f"Creating rclone repository file '{uuid}'.")
         return self._rep.file_by_uuid(uuid, self._index_lookup, self._extract_metadata)
