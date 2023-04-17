@@ -18,9 +18,11 @@ Pyframe requires the following Python packages to be installed:
 
 - exifread
 - ffmpeg-python
+- geopy
 - IPTCInfo3
 - Kivy
 - paho-mqtt
+- rclone-python
 - schedule
 - SQLAlchemy
 - webdavclient3
