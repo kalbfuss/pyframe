@@ -45,14 +45,15 @@ class Repository(repository.Repository):
         # Check parameter values.
         check_param('root', config, is_str=True)
 
-
     def iterator(self, index_lookup=True, extract_metadata=True):
         """Provide iterator to traverse through files in the repository.
 
-        :param index_lookup: True if file metadata shall be looked up from index
+        :param index_lookup: Flag indicating whether file metadata shall be
+            looked up from index. Default is True.
         :type index_lookup: bool
-        :param extract_metadata: True if file metadata shall be extracted from
-            file if not available from index
+        :param extract_metadata: Flag indicating whether file metadata shall be
+            extracted from file if not available from index. Default is True.
+        :type extract_metadata: bool
         :return: file iterator
         :return type: repository.FileIterator
         """
