@@ -1,25 +1,4 @@
-""""...
-
-
-The following test script is based on instructions provided as part of the
-project description [1]. An overview of common EXIF tags is provided in [2].
-
-Dependencies;
--------------
-- boost (indirectly via py3exiv2)
-- ffmpeg-python
-- webdavclient3
-
-Requires the following ubuntu/debian packages libexiv2, libexiv2-dev,
-libboost-all-dev
-
-References;
-----------
-1. https://py3exiv2.tuxfamily.org/
-2. https://www.exiv2.org/tags.html
-3. https://github.com/kkroening/ffmpeg-python
-4. https://pypi.org/project/webdavclient3/
-"""
+"""Module for WebDAV repository files."""
 
 import logging
 import os
@@ -32,10 +11,28 @@ from repository import IoError, UuidError
 
 
 class RepositoryFile(repository.RepositoryFile):
-    """File within a webdav repository."""
+    """File within a webdav repository.
+
+    See repository.File for documentation of properties.
+    """
 
     def __init__(self, uuid, rep, index=None, index_lookup=True, extract_metadata=True):
-        """Initialize file."""
+        """Initialize the repository file.
+
+        :param rep: WebDAV repository
+        :type rep: repository.webdav.Repository
+        :param uuid: UUID of repository file
+        :type uuid: str
+        :param index: Optional file metadata index. Default is None.
+        :type index: repository.Index
+        :param index_lookup: Flag indicating whether file metadata shall be
+            looked up from index. Default is True.
+        :type index_lookup: bool
+        :param extract_metadata: Flag indicating whether file metadata shall be
+            extracted from file if not available from index. Default is True.
+        :type extract_metadata: bool
+        :raises: repository.UuidError, repository.IoError
+        """
         # Call constructor of parent class.
         super().__init__(uuid, rep, index, index_lookup)
 
@@ -48,25 +45,26 @@ class RepositoryFile(repository.RepositoryFile):
 
         # Attempt to determine last modification and file creation date.
         if not self._in_index:
+            # Attempt to retrieve file attributes.
             try:
                 info = self._rep.client.info(self.uuid)
             except Exception as e:
-                raise IoError(f"An exception occurred while retrieving webdav file information: {e}", e.exception)
-            logging.debug(f"Webdav info record of file '{self.uuid}': {info}")
+                raise IoError(f"An exception occurred while retrieving WebDAV file information. {e}", e)
+            # Attempt to determine last modified date.
             try:
-                modified = info.get('modified', None)
-                if modified is not None:
-                    self._last_modified = datetime.strptime(modified, "%a, %d %b %Y %H:%M:%S %Z")
+                modified = info.get('modified')
+                last_modified = datetime.strptime(modified, "%a, %d %b %Y %H:%M:%S %Z")
+                self._last_modified = last_modified
             except (ValueError, TypeError):
-                logging.warn(f"Failed to convert last modified date string '{modified}' to datetime. Using current datetime instead.")
-                self._last_modified = datetime.now()
+                logging.warn(f"Failed to convert last modified date string '{modified}' to datetime.")
+                last_modified = self.last_modified
+            # Attempt to determine file creation date.
             try:
-                created = info.get('created', None)
-                if created is not None:
-                    self._creation_date = datetime.strptime(created, "%a, %d %b %Y %H:%M:%S %Z")
+                created = info.get('created')
+                creation_date = datetime.strptime(created, "%a, %d %b %Y %H:%M:%S %Z")
+                self._creation_date = creation_date
             except (ValueError, TypeError):
-                logging.warn(f"Failed to convert created date string '{created}' to datetime. Using current datetime instead.")
-                self._last_modified = datetime.now()
+                logging.warn(f"Failed to convert created date string '{created}' to datetime.")
 
         # Attempt to extract metadata from file content.
         if not self._in_index and extract_metadata:
@@ -85,9 +83,9 @@ class RepositoryFile(repository.RepositoryFile):
                 pass
 
     def _download(self):
-        """Download file from WebDav repository to local cache file.
+        """Download file from WebDAV repository to local cache file.
 
-        :raises: IoError
+        :raises: repository.IoError
         """
         if self._cache_file is None:
             # Create temporary file for local caching inside cache directory
@@ -101,7 +99,7 @@ class RepositoryFile(repository.RepositoryFile):
             try:
                 self._rep.client.download_from(self._cache_file, self._uuid)
             except Exception as e:
-                raise repository.IoError("An exception occurred while downloading file from webdav repository:", e)
+                raise repository.IoError(f"An exception occurred while downloading file '{self._uuid}' from WebDAV repository. {e}", e)
 
     def extract_metadata(self):
         """Extract metadata from file content."""
@@ -118,10 +116,10 @@ class RepositoryFile(repository.RepositoryFile):
 
     @property
     def source(self):
-        """Return the full path of the local cache file.
+        """Return full path of the local cache file.
 
-        : return: Full path of local cache file.
-        : rtype: str
+        :return: full path
+        :rtype: str
         """
         # Make sure to download file before returning path.
         self._download()

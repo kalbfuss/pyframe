@@ -4,7 +4,7 @@ import logging
 import repository
 import tempfile
 
-from repository import ConfigError, IoError, check_valid_required
+from repository import ConfigError, IoError, check_param, check_valid_required
 from webdav3.client import Client
 
 from .file import RepositoryFile
@@ -18,15 +18,15 @@ class Repository(repository.Repository):
     CONF_VALID_KEYS = {'root'} | CONF_REQ_KEYS
 
     def __init__(self, uuid, config, index=None):
-        """Initialize repository with WebDav file base.
+        """Initialize the repository.
 
-        :param uuid: UUID of the repository.
+        :param uuid: UUID of repository
         :type name: str
         :param index: Optional file metadata index. Default is None.
         :type index: repository.Index
         :param config: Dictionary with repository Configuration
         :type config: dict
-        :raises: UuidError
+        :raises: repository.UuidError, repository.ConfigError
         """
         # Call constructor of parent class.
         repository.Repository.__init__(self, uuid, config, index)
@@ -49,70 +49,75 @@ class Repository(repository.Repository):
         self._client = Client(options)
 
     def _check_config(self, config):
-        """Check the configuration for the repository from the configuration
-        file.
+        """Check the repository configuration.
 
         :param config:
         :type config: dict
-        :raises: ConfigError
+        :raises: repository.ConfigError
         """
-        # Raise exception if minimum required parameters have not been defined.
-        keys = set(config.keys())
         # Make sure all valid and required parameters have been specified.
         check_valid_required(config, self.CONF_VALID_KEYS, self.CONF_REQ_KEYS)
+        # Check parameter values.
+        check_param('url', config, is_str=True)
+        check_param('user', config, is_str=True)
+        check_param('password', config, is_str=True)
+        check_param('cache', config, is_str=True)
 
     @property
     def cache_dir(self):
-        """Return path to cache directory for temporary storage of files.
+        """Return path of cache directory for the temporary storage of files.
 
-        :return: Path to cache directory.
+        :return: path of cache directory
         :rtype: str
         """
         return self._cache_dir.name
 
     @property
     def client(self):
-        """Return WebDav client session of the repository.
+        """Return WebDAV client session of the repository.
 
-        :return: WebDav client session.
+        :return: WebDAV client session
         :rtype: webdav3.client.Client
         """
         return self._client
 
     @property
     def root(self):
-        """Return WebDav root directory of the repository.
+        """Return WebDAV root directory of the repository.
 
-        :return: WebDav root directory.
+        :return: WebDav root directory
         :rtype: str
         """
         return self._root
 
     def iterator(self, index_lookup=True, extract_metadata=True):
-        """Provide iterator which allows to traverse through all files in the repository.
+        """Provide iterator to traverse through files in the repository.
 
-        :param index_lookup: True if file metadata shall be looked up from index.
+        :param index_lookup: Flag indicating whether file metadata shall be
+            looked up from index. Default is True.
         :type index_lookup: bool
-        :param extract_metadata: True if file metadata shall be extracted from
-            file if not available from index.
-        :return: File iterator.
+        :param extract_metadata: Flag indicating whether file metadata shall be
+            extracted from file if not available from index. Default is True.
+        :type extract_metadata: bool
+        :return: file iterator
         :return type: repository.FileIterator
         """
         return FileIterator(self, index_lookup, extract_metadata)
 
     def file_by_uuid(self, uuid, index_lookup=True, extract_metadata=True):
-        """Return a file within the repository by its UUID.
+        """Return file within the repository by its UUID.
 
-        :param uuid: UUID of the file.
+        :param uuid: UUID of file
         :type uuid: str
-        :param index_lookup: True if file metadata shall be looked up from index.
+        :param index_lookup: Flag indicating whether file metadata shall be
+            looked up from index. Default is True.
         :type index_lookup: bool
-        :param extract_metadata: True if file metadata shall be extracted from
-            file if not available from index.
+        :param extract_metadata: Flag indicating whether file metadata shall be
+            extracted from file if not available from index. Default is True.
         :type extract_metadata: bool
-        :return: File with matching UUID.
+        :return: file with matching UUID
         :rtype: repository.RepositoryFile
-        :raises: UuidError
+        :raises: repository.UuidError, repository.IoError
         """
         return RepositoryFile(uuid, self, self._index, index_lookup, extract_metadata)
 
@@ -123,13 +128,15 @@ class FileIterator(repository.FileIterator):
     def __init__(self, rep, index_lookup=True, extract_metadata=True):
         """Initialize file iterator.
 
-        :param root: Webdav repository.
-        :type root: repository.webdav.repository
-        :param index_lookup: True if file metadata shall be looked up from index.
+        :param rep: WebDAV repository
+        :type rep: repository.webdav.repository
+        :param index_lookup: Flag indicating whether file metadata shall be
+            looked up from index. Default is True.
         :type index_lookup: bool
-        :param extract_metadata: True if file metadata shall be extracted from
-            file if not available from index.
+        :param extract_metadata: Flag indicating whether file metadata shall be
+            extracted from file if not available from index. Default is True.
         :type extract_metadata: bool
+        :raises: repository.IoError
         """
         # Basic initialization.
         self._rep = rep
@@ -141,40 +148,39 @@ class FileIterator(repository.FileIterator):
         try:
             self._file_list = rep.client.list(rep.root, get_info=True)
         except Exception as e:
-            raise IOError(f"An exception occurred while scanning the webdav directory: {e}", e)
+            raise IoError(f"An exception occurred while listing the root directory. {e}", e)
         self._iterator = iter(self._file_list)
 
     def __next__(self):
-        """Provide the next file.
+        """Provide next file in iteration.
 
-        :returns: Next file in the repository.
+        :returns: next file
         :rtype: repository.webdav.RepositoryFile
         :raises: StopIteration
         """
         try:
             # Retrieve the next directory entry.
             entry = self._iterator.__next__()
-            logging.debug(f"Current webdav directory entry: {entry}")
             # Continue to retrieve entries if not a file.
             while entry['isdir']:
                 # Save all sub-directories for later.
                 self._dir_list.append(entry['path'])
                 entry = self._iterator.__next__()
-                logging.debug(f"Current webdav directory entry: {entry}")
 
             # Construct relative path to root directory of the repository.
             uuid = entry['path']
             # Return the next file.
-            logging.debug(f"Creating next webdav repository file {uuid}.")
+            logging.debug(f"Creating webdav repository file '{uuid}'.")
             return self._rep.file_by_uuid(uuid, self._index_lookup, self._extract_metadata)
 
         except StopIteration:
             if len(self._dir_list) > 0:
                 # Start all over with last subdirectory in the list
                 try:
-                    self._file_list = self._rep.client.list(self._dir_list.pop(), get_info=True)
+                    dir = self._dir_list.pop()
+                    self._file_list = self._rep.client.list(dir, get_info=True)
                 except Exception as e:
-                    raise IOError(f"An exception occurred while scanning the webdav directory: {e}", e)
+                    raise IoError(f"An exception occurred while listing directiory '{dir}'. {e}", e)
                 self._iterator = iter(self._file_list)
                 return self.__next__()
             else:
