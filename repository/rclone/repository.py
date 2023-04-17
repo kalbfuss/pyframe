@@ -16,6 +16,9 @@ class Repository(repository.Repository):
     The rclone repository class currently does not provide any functionality
     to configure rclone remotes. Remotes must have been configured before in
     the rclone configuration file, e.g. by using the *rclone config* command.
+
+    The root directory needs to include the rclone remote (e.g.
+    "owncloud:<myroot>").
     """
 
     # Required and valid configuration parameters
@@ -77,27 +80,26 @@ class Repository(repository.Repository):
     def file_by_uuid(self, uuid, index_lookup=True, extract_metadata=True):
         """Return file within the repository by its UUID.
 
-        Raises a UuidError if the file with UUID does not exist.
+        Raises an IoError if the file with UUID does not exist/cannot be
+        accessed.
 
-        :param uuid: UUID of file
+        :param uuid: UUID of repository file
         :type uuid: str
-        :param index_lookup: True if file metadata shall be looked up from index.
+        :param index_lookup: Flag indicating whether file metadata shall be
+            looked up from index. Default is True.
         :type index_lookup: bool
-        :param extract_metadata: True if file metadata shall be extracted from
-            file if not available from index.
+        :param extract_metadata: Flag indicating whether file metadata shall be
+            extracted from file if not available from index. Default is True.
         :type extract_metadata: bool
         :return: file with matching UUID
         :rtype: repository.RepositoryFile
-        :raises: UuidError
+        :raises: repository.IoError
         """
         return RepositoryFile(uuid, self, self._index, index_lookup, extract_metadata)
 
     @property
     def root(self):
         """Return root directory of the repository.
-
-        The root directory needs to include the rclone remote (e.g.
-        "owncloud:<myroot>").
 
         :return: root directory
         :rtype: str
@@ -113,10 +115,11 @@ class FileIterator(repository.FileIterator):
 
         :param rep: rclone repository
         :type rep: repository.rclone.Repository
-        :param index_lookup: True if file metadata shall be looked up from index
+        :param index_lookup: Flag indicating whether file metadata shall be
+            looked up from index. Default is True.
         :type index_lookup: bool
-        :param extract_metadata: True if file metadata shall be extracted from
-            file if not available from index
+        :param extract_metadata: Flag indicating whether file metadata shall be
+            extracted from file if not available from index. Default is True.
         :type extract_metadata: bool
         :raises: repository.IoError
         """
