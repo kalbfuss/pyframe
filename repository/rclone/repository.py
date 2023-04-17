@@ -28,7 +28,7 @@ class Repository(repository.Repository):
     def __init__(self, uuid, config, index=None):
         """Initialize the repository.
 
-        :param uuid: UUID of the repository.
+        :param uuid: UUID of repository
         :type name: str
         :param config: dictionary with repository configuration
         :type config: dict
@@ -68,10 +68,12 @@ class Repository(repository.Repository):
     def iterator(self, index_lookup=True, extract_metadata=True):
         """Provide iterator to traverse through files in the repository.
 
-        :param index_lookup: True if file metadata shall be looked up from index
+        :param index_lookup: Flag indicating whether file metadata shall be
+            looked up from index. Default is True.
         :type index_lookup: bool
-        :param extract_metadata: True if file metadata shall be extracted from
-            file if not available from index
+        :param extract_metadata: Flag indicating whether file metadata shall be
+            extracted from file if not available from index. Default is True.
+        :type extract_metadata: bool
         :return: file iterator
         :return type: repository.FileIterator
         """
