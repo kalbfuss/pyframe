@@ -117,6 +117,8 @@ class LabeledContent(ContentBase):
         """Initialize the labeled content instance."""
         super().__init__(file, config)
 
+        self._events = list()
+
         # Create and add white (foreground) and black (shadow) labels.
         self._wlabel = Label(markup=True, halign="right", valign="bottom", color=(1, 1, 1, 1), font_blended=True)
         self._blabel = Label(markup=True, halign="right", valign="bottom", color=(0, 0, 0, 1))
@@ -157,7 +159,6 @@ class LabeledContent(ContentBase):
         self._blabel.size = (self.width - offset, self.height - offset)
         self._blabel.text_size = self._blabel.size
         # Schedule events to turn labels off and on.
-        self._events = list()
         mode = self.config.get('label_mode', "on")
         pause = self.config.get('pause')
         duration = self.config.get('label_duration', 24)
