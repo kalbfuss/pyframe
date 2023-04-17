@@ -124,7 +124,10 @@ class App(kivy.app.App, Controller):
         config = self._config
         index = self._index
         # Dictionary used to map type names to repository classes.
-        supported_types = { 'local': ("repository.local", "Repository"), 'webdav': ("repository.webdav", "Repository")}
+        supported_types = {
+            'local': ("repository.local", "Repository"),
+            'webdav': ("repository.webdav", "Repository"),
+            'rclone': ("repository.rclone", "Repository")}
 
         # Exit application if no repositories have been defined.
         if 'repositories' not in config or type(config['repositories']) is not dict:
