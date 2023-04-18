@@ -1,9 +1,7 @@
 """Module providing slideshow class."""
 
-import gc
-import psutil
-
-#gc.set_debug(gc.DEBUG_UNCOLLECTABLE)
+import tracemalloc
+tracemalloc.start()
 
 from repository import Index, RepositoryFile, IoError
 
@@ -45,6 +43,7 @@ class Slideshow(AnchorLayout):
         :raises ConfigError:
         """
         AnchorLayout.__init__(self, anchor_x='center', anchor_y='center')
+        # Basic intialization
         self._name = name
         self._index = index
         self._config = config
@@ -52,6 +51,8 @@ class Slideshow(AnchorLayout):
         self._next_event = None
         self._current_widget = None
         self._iterator = None
+
+        self.cur_snapshot = None
 
         # Check the configuration for valid and required parameters.
         check_valid_required(config, self.CONF_VALID_KEYS, self.CONF_REQ_KEYS)
@@ -242,7 +243,15 @@ class Slideshow(AnchorLayout):
         # Make widget from next file the current widget.
         self._current_widget = self._create_next_widget(previous)
         # Monitor memory usage.
-        Logger.debug(f"{psutil.virtual_memory()}")
+        self.prev_snapshot = self.cur_snapshot
+        self.cur_snapshot = tracemalloc.take_snapshot()
+        if self.prev_snapshot:
+            stats = self.cur_snapshot.compare_to(self.prev_snapshot, 'lineno')
+        else:
+            stats = self.cur_snapshot.statistics('lineno')
+        Logger.debug("Top 10 memory consumption:")
+        for stat in stats[:10]:
+            Logger.debug(f"\t{stat}")
         # Stop playing content in current widget if slideshow is paused.
         if self._play_state == PLAY_STATE.PAUSED:
             self._current_widget.stop()
