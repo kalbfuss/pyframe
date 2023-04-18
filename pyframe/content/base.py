@@ -133,12 +133,12 @@ class LabeledContent(ContentBase):
         # Call _adjust_label method after the widget's size has been set.
         self.bind(size=self.adjust_label)
 
-    def __del__(self):
-        """Delete the labeled content instance."""
-        # Cancel any clock events.
-        while self._events:
-            event = self._events.pop()
-            event.cancel()
+#    def __del__(self):
+#        """Delete the labeled content instance."""
+#        # Cancel any clock events.
+#        while self._events:
+#            event = self._events.pop()
+#            event.cancel()
 
     def adjust_label(self, *args):
         """Adjust label when the widget becomes visible and its size is set."""

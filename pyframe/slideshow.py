@@ -1,5 +1,10 @@
 """Module providing slideshow class."""
 
+import gc
+import psutil
+
+#gc.set_debug(gc.DEBUG_UNCOLLECTABLE)
+
 from repository import Index, RepositoryFile, IoError
 
 from kivy.app import App
@@ -165,7 +170,7 @@ class Slideshow(AnchorLayout):
                 continue
             # Log error if any other exception occurred and try again.
             except IoError as e:
-                Logger.error(f"Slideshow: An I/O error occurred while retrieving the next file: {e.exception}.")
+                Logger.error(f"Slideshow: An I/O error occurred while retrieving the next file. {e}.")
                 continue
             finally:
                 attempts = attempts + 1
@@ -236,6 +241,8 @@ class Slideshow(AnchorLayout):
             self.remove_widget(self._current_widget)
         # Make widget from next file the current widget.
         self._current_widget = self._create_next_widget(previous)
+        # Monitor memory usage.
+        Logger.debug(f"{psutil.virtual_memory()}")
         # Stop playing content in current widget if slideshow is paused.
         if self._play_state == PLAY_STATE.PAUSED:
             self._current_widget.stop()
