@@ -6,9 +6,13 @@ Pyframe has been designed to run slideshows from image and video repositories wi
 
 Files in slideshows can be dynamically arranged and filtered based on their metadata (EXIF and IPTC metadata supported). Slideshows can be run continuously or scheduled.
 
+Pyframe supports reverse geocoding based on GPS data in the EXIF tag, using the geopy library and Photon geocoder (essentially OpenStreetMap).
+
 Pyframe optionally integrates with [Home Assistant](https://www.home-assistant.io/) via [MQTT](https://mqtt.org). Integration allows the display to be motion activated after coupling of the Pyframe device with a motion sensor.
 
 Pyframe is being developed by [Bernd Kalbfuss (aka langweiler)](https://github.com/kalbfuss) and is published under the [General Public License version 3](LICENSE.md). The latest source code is available on [GitHub](https://github.com/kalbfuss/pyframe).
+
+Instructions for building your own digital photo frame can be found [here](FRAME.md).
 
 ## Dependencies ##
 
