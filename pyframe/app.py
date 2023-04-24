@@ -294,7 +294,7 @@ class App(kivy.app.App, Controller):
         'display_mode': "static",
         'display_state': "on",
         'display_timeout': 300,
-        'enable_exception_handler': True,
+        'enable_exception_handler': False,
         'enable_logging': True,
         'enable_scheduler': True,
         'enable_mqtt': True,
