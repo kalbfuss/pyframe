@@ -10,11 +10,11 @@ In essence, you only need the following components to build your own frame:
 * Flat (portable) screen
 * Linux-compatible single-board computer (SBC)
 * Power supply for the screen and SBC
-* Cables to connect everyting
+* Cables to connect everything
 
 While in principle any flat screen with the necessary ports can be used, you probably want a very flat, portable monitor to keep the entire frame as flat as possible. The disadvantage is that portable screens are (still) limited in size. An advantage is that they can usually be powered via a USB-C connection. In my case I decided for the 17.3" FHD monitor [A1 MAX](https://www.arzopa.com/products/portable-monitor-17-3-100-srgb-1080p-fhd-hdr-ips-laptop-computer-display) from Arzopa.
 
-The picture frame I bought from the local hardware store (500x4000 mm2) and had them cut a passepartout (photo mount) fitting the portable monitor.
+I bought my picture from the local hardware store (500x4000 mm2) and had them cut a passepartout (photo mount) fitting the portable monitor.
 
 <img src="docs/images/frame/frame%20-%20front.jpg" alt="home assistant - device" style="zoom:50%;" />
 
@@ -26,17 +26,17 @@ In the end, the result does not have to be pretty from the rear as long as the s
 
 <img src="docs/images/frame/frame%20-%20rear.jpg" alt="home assistant - device" style="zoom:50%;" />
 
-Regarding the SBC, there are many options available these days - most of them ARM-based and thus in principle Linux compatible. Most important for our purpose is that the SBC is sufficiently flat to fit under the photo frame. This usually excludes boards with RJ45 or stacked USB A ports. The board should further be fanless and not produce too much heat. Potentially, you will have to limit the CPU frequency.
+Regarding the SBC, there are many options available these days - most of them ARM-based and thus in principle Linux compatible. Most important for our purpose is that the SBC is sufficiently flat to fit under the photo frame. This usually excludes boards with RJ45 or stacked USB A ports. The board should further be fanless and not produce too much heat. Potentially, you will have to limit the CPU frequency to achieve the latter.
 
-For the local storage of files, the device should provide >32 GB of non-volatile memory in the form of an SD card or even better eMMC flash memory. If you plan to access remote repositories, the SBC evidently needs to be equipped with a Wifi chip for integration into your home network (recommended).
+For the local storage of files, the device should provide >16 GB of non-volatile memory in the form of an SD card or better eMMC flash memory. A USB memory stick will work as well if your SBC provides the necessary USB A port.  If you plan to access remote repositories, the SBC evidently needs to be equipped with a Wifi chip for integration into your home network (recommended).
 
-Most importantly, the SBC needs to be strong enough to process photos and videos on-the-fly. This requires sufficient RAM (>512 MB, but preferably >1 GB) since the texture of an unpacked photo with 4000x3000 pixels requires about 50MB of memory. For the fluent playback of videos the SBC should provide hardware accelerated decoding and resizing including the necessary **linux drivers**. Specifically the latter can be a challenge for ARM-based SBCs.
+Finally, the SBC needs to be strong enough to process photos and videos on-the-fly. This requires sufficient computing power, hardware accelerated graphics (OpenGL ES support) and sufficient RAM (≥512 MB, but preferably ≥1 GB) since the texture of an unpacked photo with 4000x3000 pixels requires about 50MB of memory. For the fluent playback of videos the SBC should further provide hardware accelerated decoding and resizing capabilities, including the necessary **linux drivers**. Specifically the latter can be a challenge for ARM-based SBCs.
 
-In my photo frame project, I finally decided to go with a [Radxa Zero](https://wiki.radxa.com/Zero) after initial failures with a Rasperry Pi Zero (insufficient memory) and Banana Pi Zero (missing/incomplete hardware acceleration). Further details are provided in the section below.
+In my photo frame project, I finally decided to go with a [Radxa Zero](https://wiki.radxa.com/Zero) after initial failures with a Rasperry Pi Zero (insufficient memory and computing power) and a Banana Pi Zero (missing/incomplete hardware acceleration/driver support).  Further details are provided in the section below. The Raspberry Pi Zero 2 and Raspberry Pi 4 could have been viable options, too, but were not available at the time of construction.
 
 <img src="docs/images/frame/radxa%20zero.jpg" alt="home assistant - device" style="zoom:25%;" />
 
-Every screen and computer require power. Overall, the problem is not too difficult to solve as long as you have a power outlet behind the frame (If yes, well planned!). Otherwise, you will have to live with a cable on the wall.
+Every screen and computer require power. Overall, the problem is not too difficult to solve as long as you have a power outlet behind the frame. Otherwise, you will have to live with a cable on the wall.
 
 If you have a power outlet behind the frame, the challenge is to remain as flat as possible. An elegant solution to the problem is the [sCharge 12W](https://www.smart-things.com/de/produkte/scharge-12w-usb-c-unterputz-stromversorgung/) power supply from Smart Things, which integrates into the wall. The power of 12W has proven sufficient to supply the A1 Max monitor and Radxa Zero SBC.
 
@@ -44,43 +44,45 @@ If you have a power outlet behind the frame, the challenge is to remain as flat 
 
 ## Radxa Zero ##
 
-While Pyframe in principle runs on any computer with Python 3 and the necessary libraries and packages installed, we typically want to run it on a single-board computer (SBC) that is strong enough to process photo files and play videos on-the-fly.
+While Pyframe in principle runs on any computer with *Python 3* and the necessary libraries and packages installed, we typically want to run it on a single-board computer (SBC) that is strong enough to process photo files and play videos on-the-fly.
 
 An ARM-based SBC, which is fit for the task, is the [Radxa Zero](https://wiki.radxa.com/Zero). It comes with a quad-core ARM Cortex-A53 CPU, 4 GB of RAM, and up to 128 GB eMMC. It further supports OpenGL ES 3.2 and is equipped with an onboard Wifi chip. Still, it is not bigger than a Raspberry Pi Zero and thus well suited for integration into a digital photo frame.
 
+In principle, the Radxa Zero also provides a video processing unit for hardware accelerated decoding. However, I was not able to make use of hardware acceleration due to missing/incomplete driver support (see [known limitations](#Known limitations)). Luckily, the CPU is strong enough to achieve software decoding and scaling with reasonable frame rates for full HD videos.
+
 ### Linux installation and basic configuration ###
 
-Install focal Armbian image with XFCE desktop to SD card
-Boot Radxa zero from SD card
-Set root password and create new user account
-Open shell and start Armbian configuration tool
+This section provides a rough overview of required steps to prepare the Radxa Zero for installation of Pyframe.
+
+Firstly, we install the latest supported version of Ubuntu-based Armbian, which can be downloaded from the supplier's [download page](https://github.com/radxa-build/radxa-zero/releases/tag/20220801-0213). This should be Armbian Focal (22.08) with the XFCE desktop environment pre-installed. 
+
+The installation procedure is described in the corresponding section of the supplier's [Wiki](https://wiki.radxa.com/Zero/install). In my case, directly flashing the eMMC memory failed, but I had to boot from an SD card first and transfer the image to internal eMMC storage using the "armbian-config" tool later (see below).
+
+After the first (and hopefully successful) boot, we change the root password and create a first user. We login with that user, open a shell and start the Armbian configuration tool:
 
 ```
-$ sudo armbian-configure
+$ sudo armbian-config
 ```
 
-Adjust the following configuration settings
+In the tool, we adjust the following configuration settings as required:
 
 * Language and locale
 * Keyboard layout
 * Host name
 * WLAN
+* SSH login
 * Auto-login
 
-Install Armbian to eMMC using respective function in the System sub-menu.
-Switch off, remove SD card and restart
+Finally, we install Armbian to eMMC using the respective function in the System sub-menu. Afterwards we switch the computer off, remove the SD card and power the computer on again. 
 
-Update all packages on the device
+We login with the previously created user and upgrade all pre-installed packages on the device:
 
 ```
 $ sudo apt-get update
 $ sudo apt-get upgrade
 ```
 
-Keep old configuration files if asked (default setting)
-Reboot the device
-
-Install ufw, allow SSH and enable ufw
+Keep old configuration files if asked (default setting). Afterwards you will likely have to reboot the device, again. After the next boot we install the uncomplicated firewall (optional, but recommended) and allow for SSH access:
 
 ```
 $ sudo apt install ufw
@@ -88,46 +90,37 @@ $ sudo ufw allow OpenSSH
 $ sudo ufw enable
 ```
 
-Install fail2ban
+To prevent brute force attacks via SSH, I further recommend to install *fail2ban*:
 
 ```
 $ sudo apt install fail2ban
 ```
 
-### Python configuration ###
+### Python installation ###
 
-Install python packages via debian package manager
+Now that the system has been prepared, we install *Python 3* and related packages via the system package manager:
 
 ```
 $ sudo apt install python3 python3-pip python3-kivy python3-sqlalchemy python3-yaml python3-exifread
 ```
 
-Install additional packages via pip
+In addition, we install the following Python packages via *pip*:
 
 ```
-$ pip3 install IPTCInfo3 webdavclient3 ffmpeg-python3
+$ pip3 install IPTCInfo3 webdavclient3 ffmpeg-python3 geopy rclone-python schedule
 ```
 
-To enable playing of videos we further need ffmpeg and the corresponding
-gstreamer plug-in.
+To enable the playing of videos we further need *ffmpeg* and the corresponding *gstreamer* plug-in:
 
 ```
 $ sudo apt install ffmpeg gstreamer1.0-libav
 ```
 
-#### ffpyplayer ####
-
-On certain SBC it may be preferable to decode and display videos using
-ffpyplayer instead of gstreamer.
-
-$ sudo apt install ffmpeg libavcodec-dev libavdevice-dev libavfilter-dev libavformat-dev libavutil-dev libswscale-dev libswresample-dev libpostproc-dev libsdl2-dev libsdl2-2.0-0
-libsdl2-mixer-2.0-0 libsdl2-mixer-dev python3-dev
-$ pip install ffpyplayer
+From here on you can follow the Pyframe installation instructions in the project [README](README.md).
 
 ### Known limitations
 
-Video processing unit
+- ***Outdated Armbian version*** – The latest available version from the supplier's [download page](https://github.com/radxa-build/radxa-zero/releases/tag/20220801-0213) is Armbian Focal (22.08). On the [Armbian web page](https://armbian.com) you will also find Armbian Jammy (23.02), however, the image does not boot. Armbian Focal offers the possibility of a release upgrade after installation, which may or may not work (I never tried). Use at your own risk (and if you do so, please, report the outcome).
 
-Missing DCC/CI support
-
-Outdated armbian distribution
+- ***Missing/incomplete video processing unit (VPU) support*** – The VPU of the Amlogic S905Y2 CPU is in principle supported by a Video4Linux driver. Unfortunately, ffmpeg produces a segmentation fault when forcing it to use the decoder. See the following [ticket](https://trac.ffmpeg.org/ticket/10290) for details.
+- ***Missing Display Data Channel/Command Interface (DCC/CI) support*** – The brightness (amongst other things) of external screens can usually be adjusted via the DCC/CI interface (an I<sup>2</sup>C-based interface). Unfortunately, the Designware HDMI driver used by the Radxa Zero does not seem to implement the necessary services. See the following [ticket](https://github.com/rockowitz/ddcutil/issues/307) for details. The brightness of the screen can thus not be adjusted via Software.

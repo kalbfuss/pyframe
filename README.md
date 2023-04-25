@@ -440,8 +440,8 @@ export DISPLAY=:0
 # Change to pyframe source directory
 cd $SRC
 # Start pyframe
-if [ $(whoami) = 'root' ]; then
-	runuser -u langweiler -- $PYTHON pyframe.py
+if [ $(/usr/bin/whoami) = 'root' ]; then
+	/usr/sbin/runuser -u langweiler -- $PYTHON pyframe.py
 else
 	$PYTHON  pyframe.py
 fi
@@ -478,7 +478,6 @@ After=graphical.target
 
 [Service]
 Type=simple
-ExecStartPre=/bin/sleep 10
 ExecStart=/usr/local/bin/start-pyframe
 ExecStop=/usr/local/bin/stop-pyframe
 User=root
@@ -489,7 +488,7 @@ Restart=always
 WantedBy=default.target
 ```
 
-The *Wants* and *After* statements make sure that we are in graphical mode and that the service is only started after the graphical system has been launched. To be really sure that the graphical system is ready, we additionally wait (sleep) 10 s via a *ExecStartPre* command before we start running *Pyframe*. The *ExecStop* script is optional as stated above. It is not required to stop the *Pyframe* service. The *Restart* statement ensures that *Pyframe* is restarted after unexpected exit. The *WantedBy* statement allows to start the service automatically at boot time.
+The *Wants* and *After* statements make sure that we are in graphical mode and that the service is only started after the graphical system has been launched. The *ExecStop* script is optional as stated above. It is not required to stop the *Pyframe* service. The *Restart* statement ensures that Pyframe is restarted after unexpected exit. The *WantedBy* statement allows to start the service automatically at boot time.
 
 Make sure the unit file belongs to *root.root*, is readable by the owner and group and writable by the owner only (mode 640). Afterwards you can start the service and verify the successful start via the following commands:
 
